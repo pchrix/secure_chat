@@ -1,0 +1,30 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Node.js related (Context7/MCP)
+node_modules/
+package-lock.json
+
+# Context7 MCP specific
+context7-config.json
+scripts/
+CONTEXT7_INTEGRATION.md
+
+# IDE specific
+.idea/
+.vscode/
+.cursor/
+*.iml
+dreamflow.iml
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
