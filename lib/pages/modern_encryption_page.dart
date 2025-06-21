@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import '../providers/app_state_provider.dart';
+
 import '../services/encryption_service.dart';
 import '../utils/security_utils.dart';
+
 import 'contacts_page.dart';
 import 'settings_page.dart';
 

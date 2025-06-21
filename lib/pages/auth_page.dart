@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
+import '../widgets/glass_container.dart';
+import '../widgets/numeric_keypad.dart';
+import '../theme.dart';
 import 'home_page.dart';
 
 class AuthPage extends StatefulWidget {
@@ -12,14 +15,15 @@ class AuthPage extends StatefulWidget {
 
 class _AuthPageState extends State<AuthPage>
     with SingleTickerProviderStateMixin {
-  final TextEditingController _passwordController = TextEditingController();
+  String _currentPin = '';
+  bool _isLoading = false;
+  String? _errorMessage;
+  bool _isError = false;
+  bool _isCheckingPassword = true;
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-
-  bool _isLoading = false;
-  String? _errorMessage;
-  bool _isCheckingPassword = true;
 
   @override
   void initState() {
@@ -44,7 +48,6 @@ class _AuthPageState extends State<AuthPage>
 
   @override
   void dispose() {
-    _passwordController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -76,39 +79,62 @@ class _AuthPageState extends State<AuthPage>
     );
   }
 
-  Future<void> _authenticate() async {
-    final password = _passwordController.text.trim();
-
-    if (password.isEmpty) {
+  void _onNumberPressed(String number) {
+    if (_currentPin.length < 6) {
       setState(() {
-        _errorMessage = 'Veuillez saisir votre mot de passe';
+        _currentPin += number;
+        _isError = false;
+        _errorMessage = null;
       });
-      return;
+
+      // Auto-authenticate when PIN reaches minimum length
+      if (_currentPin.length >= 4) {
+        _authenticatePin();
+      }
     }
+  }
+
+  void _onBackspacePressed() {
+    if (_currentPin.isNotEmpty) {
+      setState(() {
+        _currentPin = _currentPin.substring(0, _currentPin.length - 1);
+        _isError = false;
+        _errorMessage = null;
+      });
+    }
+  }
+
+  Future<void> _authenticatePin() async {
+    if (_currentPin.length < 4) return;
 
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _isError = false;
     });
 
     try {
-      final result = await AuthService.verifyPassword(password);
+      final result = await AuthService.verifyPassword(_currentPin);
 
       if (result.isSuccess) {
         _navigateToHome();
       } else {
         setState(() {
           _errorMessage = result.message;
-          _passwordController.clear();
+          _isError = true;
+          _currentPin = '';
         });
 
-        // Vibrate on error (if available)
-        HapticFeedback.mediumImpact();
+        // Vibrate on error
+        HapticFeedback.heavyImpact();
       }
     } catch (e) {
       setState(() {
         _errorMessage = 'Erreur lors de l\'authentification';
+        _isError = true;
+        _currentPin = '';
       });
+      HapticFeedback.heavyImpact();
     } finally {
       setState(() {
         _isLoading = false;
@@ -142,201 +168,146 @@ class _AuthPageState extends State<AuthPage>
   Widget build(BuildContext context) {
     if (_isCheckingPassword) {
       return Scaffold(
-        backgroundColor: const Color(0xFF1C1C1E),
+        backgroundColor: GlassColors.background,
         body: const Center(
           child: CircularProgressIndicator(
-            color: Color(0xFF9B59B6),
+            color: GlassColors.primary,
           ),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: GlassColors.background,
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: SlideTransition(
           position: _slideAnimation,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Spacer(),
+          child: _buildPinAuthenticationView(),
+        ),
+      ),
+    );
+  }
 
-                  // App logo/icon
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF9B59B6).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(
-                      Icons.lock_outline,
-                      color: Color(0xFF9B59B6),
-                      size: 40,
-                    ),
-                  ),
+  Widget _buildPinAuthenticationView() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(),
 
-                  const SizedBox(height: 32),
-
-                  // App title
-                  Text(
-                    'SecureChat',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.95),
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Text(
-                    'Saisissez votre mot de passe',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 16,
-                    ),
-                  ),
-
-                  const SizedBox(height: 48),
-
-                  // Password input
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: _errorMessage != null
-                            ? Colors.red.withValues(alpha: 0.5)
-                            : Colors.white.withValues(alpha: 0.1),
-                        width: 1,
-                      ),
-                    ),
-                    child: TextField(
-                      controller: _passwordController,
-                      obscureText: true,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(6),
-                      ],
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 18,
-                        letterSpacing: 8,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        hintText: '••••',
-                        hintStyle: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          fontSize: 18,
-                          letterSpacing: 8,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 20,
-                        ),
-                      ),
-                      onSubmitted: (_) => _authenticate(),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Error message
-                  if (_errorMessage != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.red.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            color: Colors.red.withValues(alpha: 0.8),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _errorMessage!,
-                              style: TextStyle(
-                                color: Colors.red.withValues(alpha: 0.9),
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                  const SizedBox(height: 32),
-
-                  // Login button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _authenticate,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF9B59B6),
-                        disabledBackgroundColor:
-                            const Color(0xFF9B59B6).withValues(alpha: 0.5),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Text(
-                              'Se connecter',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                    ),
-                  ),
-
-                  const Spacer(),
-
-                  // Footer
-                  Text(
-                    'Mot de passe de 4 à 6 chiffres',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.4),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+            // App logo/icon avec effet glassmorphism
+            GlassContainer(
+              width: 100,
+              height: 100,
+              borderRadius: BorderRadius.circular(25),
+              color: GlassColors.primary,
+              opacity: 0.2,
+              child: const Icon(
+                Icons.security,
+                color: GlassColors.primary,
+                size: 50,
               ),
             ),
-          ),
+
+            const SizedBox(height: 32),
+
+            // App title
+            Text(
+              'SecureChat',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.95),
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              'Saisissez votre code PIN',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 16,
+              ),
+            ),
+
+            const SizedBox(height: 48),
+
+            // PIN Indicators
+            PinIndicator(
+              pinLength: 6,
+              currentLength: _currentPin.length,
+              isError: _isError,
+            ),
+
+            const SizedBox(height: 16),
+
+            // Error message
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: GlassContainer(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  color: GlassColors.danger,
+                  opacity: 0.1,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: GlassColors.danger,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: GlassColors.danger,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 48),
+
+            // Numeric Keypad
+            if (!_isLoading)
+              NumericKeypad(
+                onNumberPressed: _onNumberPressed,
+                onBackspacePressed: _onBackspacePressed,
+                enableHapticFeedback: true,
+              )
+            else
+              const SizedBox(
+                height: 200,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: GlassColors.primary,
+                  ),
+                ),
+              ),
+
+            const Spacer(),
+
+            // Footer
+            Text(
+              'Code PIN de 4 à 6 chiffres',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.4),
+                fontSize: 12,
+              ),
+            ),
+          ],
         ),
       ),
     );

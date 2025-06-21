@@ -1,51 +1,60 @@
 # 🔐 SecureChat
 
-Une application de messagerie sécurisée avec chiffrement de bout en bout, développée avec Flutter.
+Une application de messagerie sécurisée moderne avec salons temporaires et chiffrement de bout en bout, développée avec Flutter.
+
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Flutter](https://img.shields.io/badge/Flutter-3.29.0-blue.svg)
+![Tests](https://img.shields.io/badge/tests-26%20passing-green.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ## 📱 Aperçu
 
-SecureChat est une application de chiffrement moderne qui offre :
+SecureChat est une application de messagerie sécurisée qui offre :
 - **Chiffrement AES-256** pour la sécurité maximale
-- **Interface moderne** avec thème sombre élégant
-- **Gestion des contacts** avec codes de partage sécurisés
-- **Clés temporaires** avec expiration automatique
+- **Interface moderne** style iMessage/WhatsApp avec effets glassmorphism
+- **Salons temporaires** 1-to-1 avec expiration automatique
+- **Authentification PIN** 4-6 chiffres sécurisée
+- **Backend Supabase** avec Row Level Security (RLS)
 - **PWA** pour un déploiement multi-plateforme
 
 ## ✨ Fonctionnalités
 
 ### Sécurité
 - 🔒 Chiffrement AES-256 de bout en bout
-- 🔑 Gestion des clés temporaires (expiration 6h)
-- 🛡️ Authentification par mot de passe numérique (4-6 chiffres)
+- 🏠 Salons temporaires avec expiration automatique
+- 🛡️ Authentification par code PIN (4-6 chiffres)
 - 🚨 Protection contre les tentatives multiples (verrouillage automatique)
 - 📱 Stockage sécurisé des données sensibles
 
 ### Interface Utilisateur
-- 🌙 Thème sombre moderne (#1C1C1E)
-- 🎨 Palette de couleurs cohérente (violet #9B59B6, bleu #2E86AB)
-- ⚡ Animations fluides et transitions
+- 🎨 Design moderne avec effets glassmorphism
+- 🌙 Interface style messagerie (iMessage/WhatsApp)
+- ⚡ Animations fluides et micro-interactions
 - 🇫🇷 Interface entièrement en français
 - 📱 Design responsive et adaptatif
 
 ### Fonctionnalités
-- 💬 Interface bidirectionnelle Entrée/Sortie
-- 👥 Gestion des contacts avec codes de partage
+- 🏠 Salons temporaires 1-to-1 sécurisés
+- 🔗 Partage d'invitations via ID unique
 - 📋 Copie automatique dans le presse-papiers
 - 🔄 Détection automatique du type de contenu (chiffré/clair)
-- ⏰ Expiration automatique des clés de chiffrement
+- ⏰ Expiration automatique des salons (1h à 24h)
+- 🎓 Tutoriel interactif intégré
+- 🔄 Migration automatique des données
 
 ## 🚀 Installation
 
 ### Prérequis
-- Flutter SDK >= 3.0
-- Dart SDK >= 3.0
+- Flutter SDK >= 3.24.0
+- Dart SDK >= 3.5.0
+- Chrome (pour le développement web)
 
 ### Étapes d'installation
 
 1. **Cloner le projet**
    ```bash
-   git clone https://github.com/votre-username/securechat-app.git
-   cd securechat-app
+   git clone https://github.com/pchrix/secure_chat.git
+   cd secure_chat
    ```
 
 2. **Installer les dépendances**
@@ -67,36 +76,50 @@ SecureChat est une application de chiffrement moderne qui offre :
 ### Structure du projet
 ```
 lib/
-├── main.dart                 # Point d'entrée de l'application
+├── main.dart                 # Point d'entrée avec initialisation Supabase
+├── animations/               # Transitions et micro-interactions
 ├── models/                   # Modèles de données
+│   ├── room.dart            # Modèle des salons
+│   ├── room_participant.dart
 │   ├── contact.dart
-│   ├── message.dart
-│   └── secret_access_config.dart
+│   └── message.dart
 ├── pages/                    # Pages de l'interface utilisateur
-│   ├── auth_page.dart
-│   ├── contacts_page.dart
-│   ├── home_page.dart
-│   ├── modern_encryption_page.dart
+│   ├── auth_page.dart       # Authentification PIN
+│   ├── home_page.dart       # Page d'accueil
+│   ├── tutorial_page.dart   # Tutoriel interactif
+│   ├── create_room_page.dart
+│   ├── join_room_page.dart
+│   ├── room_chat_page.dart  # Interface de chat
 │   └── settings_page.dart
 ├── providers/                # Gestion d'état avec Provider
-│   └── app_state_provider.dart
+│   ├── app_state_provider.dart
+│   └── room_provider.dart
 ├── services/                 # Services métier
-│   ├── auth_service.dart
-│   └── encryption_service.dart
+│   ├── auth_service.dart    # Authentification sécurisée
+│   ├── encryption_service.dart # Chiffrement AES-256
+│   ├── room_service.dart    # Gestion des salons
+│   ├── room_key_service.dart # Gestion des clés
+│   ├── supabase_service.dart # Backend Supabase
+│   └── migration_service.dart
 ├── utils/                    # Utilitaires
 │   └── security_utils.dart
-├── widgets/                  # Widgets réutilisables
+├── widgets/                  # Widgets glassmorphism réutilisables
+│   ├── glass_container.dart
+│   ├── numeric_keypad.dart
+│   ├── room_card.dart
 │   └── change_password_dialog.dart
-└── theme.dart               # Configuration du thème
+└── theme.dart               # Thème glassmorphism unifié
 ```
 
 ### Technologies utilisées
-- **Flutter** : Framework principal
-- **Provider** : Gestion d'état
+- **Flutter 3.29.0** : Framework principal
+- **Provider** : Gestion d'état réactive
+- **Supabase** : Backend avec RLS
 - **Material Design 3** : Système de design
 - **encrypt** : Chiffrement AES-256
 - **crypto** : Fonctions cryptographiques
-- **shared_preferences** : Stockage local
+- **shared_preferences** : Stockage local sécurisé
+- **uuid** : Génération d'identifiants uniques
 
 ## 🔧 Développement
 

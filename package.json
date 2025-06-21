@@ -1,0 +1,37 @@
+{
+  "name": "securechat",
+  "version": "1.0.0",
+  "description": "Application de messagerie sécurisée avec chiffrement de bout en bout",
+  "private": true,
+  "scripts": {
+    "context7": "npx -y @upstash/context7-mcp@latest",
+    "setup-mcp": "./scripts/setup-context7.sh",
+    "test-context7": "node scripts/test-context7.js",
+    "dev": "flutter run -d chrome --web-port=8080",
+    "build": "flutter build web --release",
+    "test": "flutter test",
+    "analyze": "flutter analyze",
+    "format": "dart format ."
+  },
+  "devDependencies": {
+    "@upstash/context7-mcp": "latest"
+  },
+  "keywords": [
+    "flutter",
+    "encryption",
+    "messaging",
+    "secure-chat",
+    "pwa",
+    "security",
+    "aes-256"
+  ],
+  "author": "SecureChat Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "."
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

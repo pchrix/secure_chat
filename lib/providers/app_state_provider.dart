@@ -2,16 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/contact.dart';
-import '../models/secret_access_config.dart';
 
 class AppStateProvider extends ChangeNotifier {
   List<Contact> _contacts = [];
   DateTime? _keyExpiryTime;
   String? _temporaryKey;
   final int _defaultKeyDurationHours = 6;
-
-  // Secret access configuration
-  SecretAccessConfig _secretAccessConfig = SecretAccessConfig.defaultConfig;
 
   List<Contact> get contacts => _contacts;
   bool get hasValidKey =>
@@ -20,12 +16,10 @@ class AppStateProvider extends ChangeNotifier {
       _keyExpiryTime!.isAfter(DateTime.now());
   String? get temporaryKey => _temporaryKey;
   DateTime? get keyExpiryTime => _keyExpiryTime;
-  SecretAccessConfig get secretAccessConfig => _secretAccessConfig;
 
   AppStateProvider() {
     _loadContacts();
     _loadKeyData();
-    _loadSecretAccessConfig();
   }
 
   void addContact(Contact contact) {
@@ -121,40 +115,5 @@ class AppStateProvider extends ChangeNotifier {
     } catch (e) {
       // Handle error silently
     }
-  }
-
-  // Secret access configuration management
-  void updateSecretAccessConfig(SecretAccessConfig config) {
-    _secretAccessConfig = config;
-    _saveSecretAccessConfig();
-    notifyListeners();
-  }
-
-  Future<void> _loadSecretAccessConfig() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final configJson = prefs.getString('secret_access_config');
-      if (configJson != null) {
-        _secretAccessConfig = SecretAccessConfig.fromJsonString(configJson);
-      }
-    } catch (e) {
-      // Handle error silently, use default config
-      _secretAccessConfig = SecretAccessConfig.defaultConfig;
-    }
-  }
-
-  Future<void> _saveSecretAccessConfig() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(
-          'secret_access_config', _secretAccessConfig.toJsonString());
-    } catch (e) {
-      // Handle error silently
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }

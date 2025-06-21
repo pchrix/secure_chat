@@ -10,10 +10,12 @@ class ChangePasswordDialog extends StatefulWidget {
 }
 
 class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
-  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
   bool _isLoading = false;
   String? _errorMessage;
   int _currentStep = 0; // 0: current password, 1: new password, 2: confirm
@@ -28,7 +30,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
 
   Future<void> _verifyCurrentPassword() async {
     final password = _currentPasswordController.text.trim();
-    
+
     if (password.isEmpty) {
       setState(() {
         _errorMessage = 'Veuillez saisir votre mot de passe actuel';
@@ -43,7 +45,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
 
     try {
       final result = await AuthService.verifyPassword(password);
-      
+
       if (result.isSuccess) {
         setState(() {
           _currentStep = 1;
@@ -66,7 +68,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
 
   void _nextStep() {
     final password = _newPasswordController.text.trim();
-    
+
     if (!AuthService.isValidPasswordFormat(password)) {
       setState(() {
         _errorMessage = 'Le mot de passe doit contenir entre 4 et 6 chiffres';
@@ -83,7 +85,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
   Future<void> _changePassword() async {
     final newPassword = _newPasswordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
-    
+
     if (newPassword != confirmPassword) {
       setState(() {
         _errorMessage = 'Les mots de passe ne correspondent pas';
@@ -98,15 +100,17 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
 
     try {
       final success = await AuthService.setPassword(newPassword);
-      
+
       if (success) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Mot de passe modifié avec succès'),
-            backgroundColor: Color(0xFF9B59B6),
-          ),
-        );
+        if (mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Mot de passe modifié avec succès'),
+              backgroundColor: Color(0xFF9B59B6),
+            ),
+          );
+        }
       } else {
         setState(() {
           _errorMessage = 'Erreur lors de la modification du mot de passe';
@@ -144,7 +148,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
     String subtitle = '';
     TextEditingController controller = _currentPasswordController;
     VoidCallback onSubmit = _verifyCurrentPassword;
-    
+
     switch (_currentStep) {
       case 0:
         title = 'Mot de passe actuel';
@@ -195,9 +199,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                       ),
                     ),
                   ),
-                
                 if (_currentStep > 0) const SizedBox(width: 12),
-                
                 Expanded(
                   child: Text(
                     title,
@@ -208,9 +210,10 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                     ),
                   ),
                 ),
-                
                 GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
+                  onTap: () {
+                    if (mounted) Navigator.of(context).pop();
+                  },
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -226,9 +229,9 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Subtitle
             Text(
               subtitle,
@@ -237,16 +240,16 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                 fontSize: 14,
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Password input
             Container(
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: _errorMessage != null 
+                  color: _errorMessage != null
                       ? Colors.red.withValues(alpha: 0.5)
                       : Colors.white.withValues(alpha: 0.1),
                   width: 1,
@@ -282,9 +285,9 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                 onSubmitted: (_) => onSubmit(),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Error message
             if (_errorMessage != null)
               Container(
@@ -320,9 +323,9 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                   ],
                 ),
               ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Action button
             SizedBox(
               width: double.infinity,
@@ -330,7 +333,8 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                 onPressed: _isLoading ? null : onSubmit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF9B59B6),
-                  disabledBackgroundColor: const Color(0xFF9B59B6).withValues(alpha: 0.5),
+                  disabledBackgroundColor:
+                      const Color(0xFF9B59B6).withValues(alpha: 0.5),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
