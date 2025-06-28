@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/app_state_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/change_password_dialog.dart';
+import '../widgets/glass_components.dart';
+import '../widgets/animated_background.dart';
+import '../animations/enhanced_micro_interactions.dart';
+import '../utils/responsive_utils.dart'; // ✅ AJOUTÉ pour responsive design
+import '../theme.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage>
+class _SettingsPageState extends ConsumerState<SettingsPage>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -38,290 +42,502 @@ class _SettingsPageState extends State<SettingsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Custom AppBar
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  children: [
-                    // Back button
-                    GestureDetector(
-                      onTap: () {
-                        _animationController.reverse().then((_) {
-                          Navigator.of(context).pop();
-                        });
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                    ),
+      resizeToAvoidBottomInset: true, // ✅ AJOUTÉ pour keyboard avoidance
+      body: AnimatedBackground(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SafeArea(
+            child: Column(
+              children: [
+                // Enhanced Glass AppBar
+                _buildGlassAppBar(),
 
-                    const Spacer(),
+                // Enhanced Settings Content avec LayoutBuilder responsive
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Utiliser ResponsiveUtils pour les espacements adaptatifs
+                      final contentPadding =
+                          ResponsiveUtils.getUltraAdaptivePadding(context);
+                      final sectionSpacing =
+                          ResponsiveUtils.getUltraAdaptiveSpacing(context);
+                      final topSpacing =
+                          ResponsiveUtils.getUltraAdaptiveSpacing(context,
+                              veryCompact: 12.0, compact: 16.0, normal: 20.0);
 
-                    // Title
-                    const Text(
-                      'Paramètres',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                      return Padding(
+                        padding: contentPadding,
+                        child: Consumer(
+                          builder: (context, ref, child) {
+                            return SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: topSpacing),
 
-                    const Spacer(),
+                                  // Enhanced Password Management Section
+                                  WaveSlideAnimation(
+                                    index: 0,
+                                    child: _buildEnhancedPasswordSection(),
+                                  ),
 
-                    // Home button (return to home)
-                    GestureDetector(
-                      onTap: () {
-                        _animationController.reverse().then((_) {
-                          Navigator.of(context).pop();
-                          Navigator.of(context)
-                              .pop(); // Pop twice to go back to home
-                        });
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.home,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                                  SizedBox(height: sectionSpacing),
 
-              // Settings content
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Consumer<AppStateProvider>(
-                    builder: (context, provider, child) {
-                      return SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 20),
+                                  // Enhanced App Info Section
+                                  WaveSlideAnimation(
+                                    index: 1,
+                                    child: _buildEnhancedAppInfoSection(),
+                                  ),
 
-                            // Password Management Section
-                            _buildPasswordManagementSection(),
+                                  SizedBox(height: sectionSpacing),
 
-                            const SizedBox(height: 32),
-
-                            // Version info
-                            _buildVersionInfo(),
-                          ],
+                                  // Enhanced Version Info
+                                  WaveSlideAnimation(
+                                    index: 2,
+                                    child: _buildEnhancedVersionInfo(),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       );
                     },
                   ),
                 ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlassAppBar() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final appBarPadding = ResponsiveUtils.getUltraAdaptivePadding(context);
+
+        return Padding(
+          padding: appBarPadding,
+          child: Row(
+            children: [
+              // Enhanced Back Button
+              EnhancedGlassButton(
+                width: 48,
+                height: 48,
+                padding: const EdgeInsets.all(12),
+                color: GlassColors.primary,
+                onTap: () {
+                  _animationController.reverse().then((_) {
+                    Navigator.of(context).pop();
+                  });
+                },
+                child: const Icon(
+                  Icons.arrow_back_ios,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+
+              const Spacer(),
+
+              // Enhanced Title with Gradient
+              ShaderMask(
+                shaderCallback: (bounds) =>
+                    GlassColors.primaryGradient.createShader(bounds),
+                child: const Text(
+                  'Paramètres',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+
+              const Spacer(),
+
+              // Enhanced Home Button
+              EnhancedGlassButton(
+                width: 48,
+                height: 48,
+                padding: const EdgeInsets.all(12),
+                color: GlassColors.secondary,
+                onTap: () {
+                  _animationController.reverse().then((_) {
+                    Navigator.of(context).pop();
+                  });
+                },
+                child: const Icon(
+                  Icons.home_outlined,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildPasswordManagementSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: [
-                Icon(
+  Widget _buildEnhancedPasswordSection() {
+    return EnhancedGlassContainer(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Enhanced Header
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: GlassColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: GlassColors.primary.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
                   Icons.security,
-                  color: const Color(0xFF9B59B6),
+                  color: Colors.white,
                   size: 24,
                 ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Sécurité',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Current configuration display
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF9B59B6).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0xFF9B59B6).withValues(alpha: 0.3),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Authentification actuelle:',
-                    style: TextStyle(
-                      color: Color(0xFF9B59B6),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Code PIN numérique (4-6 chiffres)',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Password configuration options
-            _buildPasswordConfigurationOptions(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPasswordConfigurationOptions() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Gestion du mot de passe:',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // Change password option
-        _buildPasswordOption(
-          'Modifier le mot de passe',
-          'Changer votre mot de passe actuel',
-          Icons.edit,
-          _showChangePasswordDialog,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPasswordOption(
-    String title,
-    String description,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.1),
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                color: const Color(0xFF2E86AB),
-                size: 24,
               ),
               const SizedBox(width: 16),
-              Expanded(
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
-                      style: const TextStyle(
+                      'Sécurité',
+                      style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 4),
                     Text(
-                      description,
+                      'Gestion de votre authentification',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: Colors.white70,
                         fontSize: 14,
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white.withValues(alpha: 0.5),
-                size: 16,
-              ),
             ],
           ),
-        ),
+
+          const SizedBox(height: 24),
+
+          // Current Auth Status
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  GlassColors.success.withValues(alpha: 0.15),
+                  GlassColors.primary.withValues(alpha: 0.1),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: GlassColors.success.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.verified_user,
+                      color: GlassColors.success,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Authentification active',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Code PIN numérique (4-6 chiffres)',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Action Button
+          _buildEnhancedPasswordOption(
+            'Modifier le mot de passe',
+            'Changer votre code PIN de sécurité',
+            Icons.edit_outlined,
+            _showChangePasswordDialog,
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildVersionInfo() {
-    return Center(
-      child: Text(
-        'Version 1.0.0',
-        style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.5),
-          fontSize: 14,
+  Widget _buildEnhancedPasswordOption(
+    String title,
+    String description,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    return EnhancedGlassButton(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      color: GlassColors.primary,
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.arrow_forward_ios,
+            color: Colors.white.withValues(alpha: 0.6),
+            size: 16,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnhancedAppInfoSection() {
+    return EnhancedGlassContainer(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: GlassColors.secondaryGradient,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: GlassColors.secondary.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.info_outline,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'À propos',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      'Informations sur l\'application',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // App Features
+          _buildFeatureItem(
+            Icons.lock,
+            'Chiffrement AES-256',
+            'Protection maximale de vos données',
+          ),
+          const SizedBox(height: 12),
+          _buildFeatureItem(
+            Icons.timer,
+            'Salons temporaires',
+            'Expiration automatique des conversations',
+          ),
+          const SizedBox(height: 12),
+          _buildFeatureItem(
+            Icons.phone_android,
+            'Progressive Web App',
+            'Disponible sur mobile et desktop',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureItem(IconData icon, String title, String description) {
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: Colors.white70,
+            size: 18,
+          ),
         ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                description,
+                style: const TextStyle(
+                  color: Colors.white60,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEnhancedVersionInfo() {
+    return EnhancedGlassContainer(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: GlassColors.primaryGradient,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: GlassColors.primary.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.chat_bubble_outline,
+              color: Colors.white,
+              size: 28,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ShaderMask(
+            shaderCallback: (bounds) =>
+                GlassColors.primaryGradient.createShader(bounds),
+            child: Text(
+              'SecureChat',
+              style: AppTextStyles.sectionTitle,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Version 1.0.0',
+            style: AppTextStyles.versionText,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Messagerie sécurisée avec chiffrement de bout en bout',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodySmall,
+          ),
+        ],
       ),
     );
   }

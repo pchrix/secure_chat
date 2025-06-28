@@ -9,36 +9,45 @@ enum RoomStatus {
 
 class Room {
   final String id;
+  final String name;
   final DateTime createdAt;
   final DateTime expiresAt;
   final RoomStatus status;
   final int participantCount;
+  final int maxParticipants;
   final String? creatorId;
   final Map<String, dynamic> metadata;
 
   Room({
     required this.id,
+    required this.name,
     required this.createdAt,
     required this.expiresAt,
     required this.status,
     required this.participantCount,
+    this.maxParticipants = 2,
     this.creatorId,
     this.metadata = const {},
   });
 
   /// Créer un nouveau salon avec ID unique
   factory Room.create({
+    String? name,
     String? creatorId,
     int durationHours = 6,
+    int maxParticipants = 2,
     Map<String, dynamic>? metadata,
   }) {
     final now = DateTime.now();
+    final roomId = _generateRoomId();
     return Room(
-      id: _generateRoomId(),
+      id: roomId,
+      name: name ?? 'Salon $roomId',
       createdAt: now,
       expiresAt: now.add(Duration(hours: durationHours)),
       status: RoomStatus.waiting,
       participantCount: 0,
+      maxParticipants: maxParticipants,
       creatorId: creatorId,
       metadata: metadata ?? {},
     );
@@ -59,10 +68,13 @@ class Room {
 
   /// Vérifier si le salon peut accepter un nouveau participant
   bool get canJoin =>
-      !isExpired && participantCount < 2 && status == RoomStatus.waiting;
+      !isExpired && participantCount < maxParticipants && status == RoomStatus.waiting;
 
   /// Vérifier si le salon est plein (2/2)
-  bool get isFull => participantCount >= 2;
+  bool get isFull => participantCount >= maxParticipants;
+  
+  /// Vérifier si le salon est actif
+  bool get isActive => status == RoomStatus.active && !isExpired;
 
   /// Obtenir le temps restant avant expiration
   Duration get timeRemaining {
@@ -97,19 +109,23 @@ class Room {
   /// Créer une copie avec des modifications
   Room copyWith({
     String? id,
+    String? name,
     DateTime? createdAt,
     DateTime? expiresAt,
     RoomStatus? status,
     int? participantCount,
+    int? maxParticipants,
     String? creatorId,
     Map<String, dynamic>? metadata,
   }) {
     return Room(
       id: id ?? this.id,
+      name: name ?? this.name,
       createdAt: createdAt ?? this.createdAt,
       expiresAt: expiresAt ?? this.expiresAt,
       status: status ?? this.status,
       participantCount: participantCount ?? this.participantCount,
+      maxParticipants: maxParticipants ?? this.maxParticipants,
       creatorId: creatorId ?? this.creatorId,
       metadata: metadata ?? this.metadata,
     );
@@ -123,7 +139,7 @@ class Room {
     return copyWith(
       participantCount: participantCount + 1,
       status:
-          participantCount + 1 >= 2 ? RoomStatus.active : RoomStatus.waiting,
+          participantCount + 1 >= maxParticipants ? RoomStatus.active : RoomStatus.waiting,
     );
   }
 
@@ -134,7 +150,7 @@ class Room {
     }
     return copyWith(
       participantCount: participantCount - 1,
-      status: participantCount - 1 < 2 ? RoomStatus.waiting : RoomStatus.active,
+      status: participantCount - 1 < maxParticipants ? RoomStatus.waiting : RoomStatus.active,
     );
   }
 
@@ -147,10 +163,12 @@ class Room {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'name': name,
       'createdAt': createdAt.millisecondsSinceEpoch,
       'expiresAt': expiresAt.millisecondsSinceEpoch,
       'status': status.index,
       'participantCount': participantCount,
+      'maxParticipants': maxParticipants,
       'creatorId': creatorId,
       'metadata': metadata,
     };
@@ -160,10 +178,12 @@ class Room {
   factory Room.fromJson(Map<String, dynamic> json) {
     return Room(
       id: json['id'],
+      name: json['name'] ?? 'Salon ${json['id']}',
       createdAt: DateTime.fromMillisecondsSinceEpoch(json['createdAt']),
       expiresAt: DateTime.fromMillisecondsSinceEpoch(json['expiresAt']),
       status: RoomStatus.values[json['status']],
       participantCount: json['participantCount'],
+      maxParticipants: json['maxParticipants'] ?? 2,
       creatorId: json['creatorId'],
       metadata: Map<String, dynamic>.from(json['metadata'] ?? {}),
     );
@@ -195,10 +215,12 @@ class Room {
 
       return Room(
         id: data['roomId'],
+        name: 'Salon ${data['roomId']}',
         createdAt: DateTime.fromMillisecondsSinceEpoch(data['createdAt']),
         expiresAt: DateTime.fromMillisecondsSinceEpoch(data['expiresAt']),
         status: RoomStatus.waiting,
         participantCount: 0,
+        maxParticipants: 2,
       );
     } catch (e) {
       return null;

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../widgets/glass_container.dart';
+import '../widgets/glass_components.dart';
+import '../utils/responsive_utils.dart'; // ✅ AJOUTÉ pour responsive design unifié
 import '../theme.dart';
-import 'auth_page.dart';
+import 'enhanced_auth_page.dart';
 
 class TutorialPage extends StatefulWidget {
   const TutorialPage({super.key});
@@ -16,7 +17,7 @@ class _TutorialPageState extends State<TutorialPage>
   late PageController _pageController;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  
+
   int _currentPage = 0;
   final int _totalPages = 5;
 
@@ -28,11 +29,11 @@ class _TutorialPageState extends State<TutorialPage>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-    
+
     _animationController.forward();
   }
 
@@ -69,7 +70,7 @@ class _TutorialPageState extends State<TutorialPage>
 
   void _completeTutorial() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const AuthPage()),
+      MaterialPageRoute(builder: (context) => const EnhancedAuthPage()),
     );
   }
 
@@ -77,69 +78,75 @@ class _TutorialPageState extends State<TutorialPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: GlassColors.background,
+      resizeToAvoidBottomInset: true, // ✅ AJOUTÉ pour keyboard avoidance
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: SafeArea(
-          child: Column(
-            children: [
-              // Header avec bouton Skip
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'SecureChat',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (_currentPage > 0)
-                      GestureDetector(
-                        onTap: _skipTutorial,
-                        child: Text(
-                          'Passer',
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                children: [
+                  // Header avec bouton Skip
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'SecureChat',
                           style: TextStyle(
-                            color: GlassColors.primary.withValues(alpha: 0.8),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                  ],
-                ),
-              ),
+                        if (_currentPage > 0)
+                          GestureDetector(
+                            onTap: _skipTutorial,
+                            child: Text(
+                              'Passer',
+                              style: TextStyle(
+                                color:
+                                    GlassColors.primary.withValues(alpha: 0.8),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
 
-              // Indicateurs de progression
-              _buildProgressIndicator(),
+                  // Indicateurs de progression
+                  _buildProgressIndicator(),
 
-              const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
-              // Contenu des pages
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                    HapticFeedback.lightImpact();
-                  },
-                  children: [
-                    _buildWelcomePage(),
-                    _buildSecurityPage(),
-                    _buildRoomsPage(),
-                    _buildEncryptionPage(),
-                    _buildReadyPage(),
-                  ],
-                ),
-              ),
+                  // Contenu des pages avec scroll
+                  Expanded(
+                    child: PageView(
+                      controller: _pageController,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                        HapticFeedback.lightImpact();
+                      },
+                      children: [
+                        _buildWelcomePage(constraints),
+                        _buildSecurityPage(constraints),
+                        _buildRoomsPage(constraints),
+                        _buildEncryptionPage(constraints),
+                        _buildReadyPage(constraints),
+                      ],
+                    ),
+                  ),
 
-              // Boutons de navigation
-              _buildNavigationButtons(),
-            ],
+                  // Boutons de navigation
+                  _buildNavigationButtons(),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -170,289 +177,297 @@ class _TutorialPageState extends State<TutorialPage>
     );
   }
 
-  Widget _buildWelcomePage() {
-    return Padding(
+  Widget _buildWelcomePage(BoxConstraints constraints) {
+    final isCompactLayout = ResponsiveUtils.isVeryCompact(context);
+
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GlassContainer(
-            width: 120,
-            height: 120,
-            borderRadius: BorderRadius.circular(30),
-            color: GlassColors.primary,
-            opacity: 0.2,
-            child: const Icon(
-              Icons.security,
-              size: 60,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight:
+              constraints.maxHeight - 200, // Espace pour header et boutons
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GlassContainer(
+              width: isCompactLayout ? 100 : 120,
+              height: isCompactLayout ? 100 : 120,
+              borderRadius: BorderRadius.circular(30),
               color: GlassColors.primary,
+              opacity: 0.2,
+              child: Icon(
+                Icons.security,
+                size: isCompactLayout ? 50 : 60,
+                color: GlassColors.primary,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          Text(
-            'Bienvenue dans SecureChat',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.95),
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            SizedBox(height: isCompactLayout ? 24 : 32),
+            Text(
+              'Bienvenue dans SecureChat',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.95),
+                fontSize: isCompactLayout ? 24 : 28,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          Text(
-            'Votre nouvelle application de messagerie sécurisée avec chiffrement de bout en bout.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 16,
-              height: 1.5,
+            SizedBox(height: isCompactLayout ? 12 : 16),
+            Text(
+              'Votre nouvelle application de messagerie sécurisée avec chiffrement de bout en bout.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: isCompactLayout ? 14 : 16,
+                height: 1.5,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSecurityPage() {
-    return Padding(
+  Widget _buildSecurityPage(BoxConstraints constraints) {
+    final isCompactLayout = ResponsiveUtils.isVeryCompact(context);
+
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GlassContainer(
-            width: 120,
-            height: 120,
-            borderRadius: BorderRadius.circular(30),
-            color: GlassColors.secondary,
-            opacity: 0.2,
-            child: const Icon(
-              Icons.lock_outline,
-              size: 60,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: constraints.maxHeight - 200,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GlassContainer(
+              width: isCompactLayout ? 100 : 120,
+              height: isCompactLayout ? 100 : 120,
+              borderRadius: BorderRadius.circular(30),
               color: GlassColors.secondary,
+              opacity: 0.2,
+              child: Icon(
+                Icons.lock_outline,
+                size: isCompactLayout ? 50 : 60,
+                color: GlassColors.secondary,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          Text(
-            'Sécurité Maximale',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.95),
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            SizedBox(height: isCompactLayout ? 24 : 32),
+            Text(
+              'Sécurité Maximale',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.95),
+                fontSize: isCompactLayout ? 24 : 28,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          Text(
-            'Vos conversations sont protégées par un chiffrement AES-256 de niveau militaire. Seuls vous et votre correspondant pouvez lire les messages.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 16,
-              height: 1.5,
+            SizedBox(height: isCompactLayout ? 12 : 16),
+            Text(
+              'Vos conversations sont protégées par un chiffrement AES-256 de niveau militaire. Seuls vous et votre correspondant pouvez lire les messages.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: isCompactLayout ? 14 : 16,
+                height: 1.5,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          _buildFeatureList([
-            'Chiffrement AES-256',
-            'Aucune donnée stockée sur nos serveurs',
-            'Authentification par code PIN',
-          ]),
-        ],
+            SizedBox(height: isCompactLayout ? 16 : 24),
+            _buildFeatureList([
+              'Chiffrement AES-256',
+              'Aucune donnée stockée sur nos serveurs',
+              'Authentification par code PIN',
+            ]),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildRoomsPage() {
-    return Padding(
+  Widget _buildRoomsPage(BoxConstraints constraints) {
+    final isCompactLayout = ResponsiveUtils.isVeryCompact(context);
+
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GlassContainer(
-            width: 120,
-            height: 120,
-            borderRadius: BorderRadius.circular(30),
-            color: GlassColors.accent,
-            opacity: 0.2,
-            child: const Icon(
-              Icons.chat_bubble_outline,
-              size: 60,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: constraints.maxHeight - 200,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GlassContainer(
+              width: isCompactLayout ? 100 : 120,
+              height: isCompactLayout ? 100 : 120,
+              borderRadius: BorderRadius.circular(30),
               color: GlassColors.accent,
+              opacity: 0.2,
+              child: Icon(
+                Icons.chat_bubble_outline,
+                size: isCompactLayout ? 50 : 60,
+                color: GlassColors.accent,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          Text(
-            'Salons Temporaires',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.95),
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            SizedBox(height: isCompactLayout ? 24 : 32),
+            Text(
+              'Salons Temporaires',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.95),
+                fontSize: isCompactLayout ? 24 : 28,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          Text(
-            'Créez des salons sécurisés temporaires pour vos conversations. Chaque salon expire automatiquement pour une sécurité maximale.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 16,
-              height: 1.5,
+            SizedBox(height: isCompactLayout ? 12 : 16),
+            Text(
+              'Créez des salons sécurisés temporaires pour vos conversations. Chaque salon expire automatiquement pour une sécurité maximale.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: isCompactLayout ? 14 : 16,
+                height: 1.5,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          _buildFeatureList([
-            'Salons 1-to-1 uniquement',
-            'Expiration automatique',
-            'Partage par ID unique',
-          ]),
-        ],
+            SizedBox(height: isCompactLayout ? 16 : 24),
+            _buildFeatureList([
+              'Salons 1-to-1 uniquement',
+              'Expiration automatique',
+              'Partage par ID unique',
+            ]),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildEncryptionPage() {
-    return Padding(
+  Widget _buildEncryptionPage(BoxConstraints constraints) {
+    final isCompactLayout = ResponsiveUtils.isVeryCompact(context);
+
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GlassContainer(
-            width: 120,
-            height: 120,
-            borderRadius: BorderRadius.circular(30),
-            color: GlassColors.warning,
-            opacity: 0.2,
-            child: const Icon(
-              Icons.vpn_key_outlined,
-              size: 60,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: constraints.maxHeight - 200,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GlassContainer(
+              width: isCompactLayout ? 100 : 120,
+              height: isCompactLayout ? 100 : 120,
+              borderRadius: BorderRadius.circular(30),
               color: GlassColors.warning,
+              opacity: 0.2,
+              child: Icon(
+                Icons.vpn_key_outlined,
+                size: isCompactLayout ? 50 : 60,
+                color: GlassColors.warning,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          Text(
-            'Comment ça marche',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.95),
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            SizedBox(height: isCompactLayout ? 24 : 32),
+            Text(
+              'Comment ça marche',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.95),
+                fontSize: isCompactLayout ? 24 : 28,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          Text(
-            'Tapez votre message, il sera chiffré automatiquement. Copiez le résultat et envoyez-le via n\'importe quelle application.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 16,
-              height: 1.5,
+            SizedBox(height: isCompactLayout ? 12 : 16),
+            Text(
+              'Tapez votre message, il sera chiffré automatiquement. Copiez le résultat et envoyez-le via n\'importe quelle application.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: isCompactLayout ? 14 : 16,
+                height: 1.5,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          _buildStepsList([
-            'Créez ou rejoignez un salon',
-            'Tapez votre message',
-            'Le message est chiffré automatiquement',
-            'Copiez et envoyez via WhatsApp, SMS...',
-          ]),
-        ],
+            SizedBox(height: isCompactLayout ? 16 : 24),
+            _buildStepsList([
+              'Créez ou rejoignez un salon',
+              'Tapez votre message',
+              'Le message est chiffré automatiquement',
+              'Copiez et envoyez via WhatsApp, SMS...',
+            ]),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildReadyPage() {
-    return Padding(
+  Widget _buildReadyPage(BoxConstraints constraints) {
+    final isCompactLayout = ResponsiveUtils.isVeryCompact(context);
+
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GlassContainer(
-            width: 120,
-            height: 120,
-            borderRadius: BorderRadius.circular(30),
-            color: GlassColors.secondary,
-            opacity: 0.2,
-            child: const Icon(
-              Icons.check_circle_outline,
-              size: 60,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: constraints.maxHeight - 200,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GlassContainer(
+              width: isCompactLayout ? 100 : 120,
+              height: isCompactLayout ? 100 : 120,
+              borderRadius: BorderRadius.circular(30),
               color: GlassColors.secondary,
+              opacity: 0.2,
+              child: Icon(
+                Icons.check_circle_outline,
+                size: isCompactLayout ? 50 : 60,
+                color: GlassColors.secondary,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          Text(
-            'Vous êtes prêt !',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.95),
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            SizedBox(height: isCompactLayout ? 24 : 32),
+            Text(
+              'Vous êtes prêt !',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.95),
+                fontSize: isCompactLayout ? 24 : 28,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          Text(
-            'Configurez maintenant votre code PIN pour sécuriser l\'accès à SecureChat.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 16,
-              height: 1.5,
+            SizedBox(height: isCompactLayout ? 12 : 16),
+            Text(
+              'Configurez maintenant votre code PIN pour sécuriser l\'accès à SecureChat.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: isCompactLayout ? 14 : 16,
+                height: 1.5,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          GlassContainer(
-            padding: const EdgeInsets.all(16),
-            color: GlassColors.primary,
-            opacity: 0.1,
-            child: Row(
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  color: GlassColors.primary,
-                  size: 24,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Votre code PIN sera votre seule façon d\'accéder à l\'application. Choisissez-le bien !',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 14,
+            SizedBox(height: isCompactLayout ? 24 : 32),
+            GlassContainer(
+              padding: EdgeInsets.all(isCompactLayout ? 12 : 16),
+              color: GlassColors.primary,
+              opacity: 0.1,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: GlassColors.primary,
+                    size: isCompactLayout ? 20 : 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Votre code PIN sera votre seule façon d\'accéder à l\'application. Choisissez-le bien !',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: isCompactLayout ? 12 : 14,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -491,7 +506,7 @@ class _TutorialPageState extends State<TutorialPage>
       children: steps.asMap().entries.map((entry) {
         int index = entry.key;
         String step = entry.value;
-        
+
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Row(
@@ -542,12 +557,11 @@ class _TutorialPageState extends State<TutorialPage>
       child: Row(
         children: [
           // Bouton Précédent
-          if (_currentPage > 0)
+          if (_currentPage > 0) ...[
             Expanded(
               child: GlassButton(
                 height: 48,
                 color: Colors.white,
-                opacity: 0.1,
                 onTap: _previousPage,
                 child: const Text(
                   'Précédent',
@@ -558,18 +572,17 @@ class _TutorialPageState extends State<TutorialPage>
                   ),
                 ),
               ),
-            )
-          else
+            ),
+            const SizedBox(width: 16),
+          ] else ...[
             const Expanded(child: SizedBox()),
-
-          const SizedBox(width: 16),
+          ],
 
           // Bouton Suivant/Commencer
           Expanded(
             child: GlassButton(
               height: 48,
               color: GlassColors.primary,
-              opacity: 0.2,
               onTap: _nextPage,
               child: Text(
                 _currentPage == _totalPages - 1 ? 'Commencer' : 'Suivant',

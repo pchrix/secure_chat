@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import '../providers/room_provider.dart';
-import '../widgets/glass_container.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/room_provider_riverpod.dart';
+import '../widgets/glass_components.dart';
+import '../widgets/animated_background.dart';
+import '../animations/enhanced_micro_interactions.dart';
 import '../animations/page_transitions.dart';
 import '../theme.dart';
 import 'room_chat_page.dart';
 
-class JoinRoomPage extends StatefulWidget {
+class JoinRoomPage extends ConsumerStatefulWidget {
   const JoinRoomPage({super.key});
 
   @override
-  State<JoinRoomPage> createState() => _JoinRoomPageState();
+  ConsumerState<JoinRoomPage> createState() => _JoinRoomPageState();
 }
 
-class _JoinRoomPageState extends State<JoinRoomPage>
+class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -48,259 +50,63 @@ class _JoinRoomPageState extends State<JoinRoomPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GlassColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white.withValues(alpha: 0.8),
-          ),
-        ),
-        title: Text(
-          'Rejoindre un salon',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.9),
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Icône et titre
-                Center(
-                  child: Column(
-                    children: [
-                      GlassContainer(
-                        width: 80,
-                        height: 80,
-                        borderRadius: BorderRadius.circular(20),
-                        color: GlassColors.secondary,
-                        opacity: 0.2,
-                        child: const Icon(
-                          Icons.login,
-                          size: 40,
-                          color: GlassColors.secondary,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Rejoindre un salon',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Saisissez l\'ID du salon partagé',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                // Champ ID du salon
-                Text(
-                  'ID du salon',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                GlassContainer(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  color: Colors.white,
-                  opacity: 0.05,
-                  child: TextField(
-                    controller: _roomIdController,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 16,
-                      letterSpacing: 1.2,
-                      fontWeight: FontWeight.w500,
+      resizeToAvoidBottomInset: true, // ✅ AJOUTÉ pour keyboard avoidance
+      body: AnimatedBackground(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+                return SingleChildScrollView(
+                  reverse: true, // ✅ AJOUTÉ pour keyboard avoidance
+                  padding: const EdgeInsets.all(24.0),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 48 - keyboardHeight,
                     ),
-                    decoration: InputDecoration(
-                      hintText: 'Ex: ABC123',
-                      hintStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.4),
-                        fontSize: 16,
-                        letterSpacing: 1.2,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    textCapitalization: TextCapitalization.characters,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
-                      LengthLimitingTextInputFormatter(10),
-                    ],
-                    onChanged: (value) {
-                      if (_errorMessage != null) {
-                        setState(() {
-                          _errorMessage = null;
-                        });
-                      }
-                    },
-                    onSubmitted: (_) => _joinRoom(),
-                  ),
-                ),
-
-                // Message d'erreur
-                if (_errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          color: GlassColors.danger,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            _errorMessage!,
-                            style: const TextStyle(
-                              color: GlassColors.danger,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                const SizedBox(height: 32),
-
-                // Instructions
-                GlassContainer(
-                  padding: const EdgeInsets.all(16),
-                  color: GlassColors.accent,
-                  opacity: 0.1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                    child: IntrinsicHeight(
+                      child: Column(
                         children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: GlassColors.accent,
-                            size: 20,
+                          // Enhanced Glass AppBar
+                          _buildGlassAppBar(),
+
+                          // Enhanced Hero Section
+                          MorphTransition(
+                            child: _buildHeroSection(),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Comment ça marche',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
+
+                          const SizedBox(height: 40),
+
+                          // Enhanced Input Section
+                          WaveSlideAnimation(
+                            index: 1,
+                            child: _buildInputSection(),
                           ),
+
+                          const SizedBox(height: 32),
+
+                          // Enhanced Instructions
+                          WaveSlideAnimation(
+                            index: 2,
+                            child: _buildInstructions(),
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // Enhanced Action Buttons
+                          WaveSlideAnimation(
+                            index: 3,
+                            child: _buildActionButtons(),
+                          ),
+
+                          const SizedBox(height: 24),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '1. Demandez l\'ID du salon à votre correspondant\n'
-                        '2. Saisissez l\'ID dans le champ ci-dessus\n'
-                        '3. Appuyez sur "Rejoindre" pour accéder au salon\n'
-                        '4. Commencez à échanger des messages chiffrés',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 14,
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-
-                const Spacer(),
-
-                // Boutons
-                Row(
-                  children: [
-                    // Bouton Coller depuis le presse-papiers
-                    Expanded(
-                      child: GlassButton(
-                        height: 48,
-                        color: Colors.white,
-                        opacity: 0.1,
-                        onTap: _pasteFromClipboard,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.content_paste,
-                              color: Colors.white.withValues(alpha: 0.8),
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Coller',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.8),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 16),
-
-                    // Bouton Rejoindre
-                    Expanded(
-                      flex: 2,
-                      child: GlassButton(
-                        height: 56,
-                        color: GlassColors.secondary,
-                        opacity: 0.2,
-                        onTap: _isJoining ? null : _joinRoom,
-                        child: _isJoining
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  color: GlassColors.secondary,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                'Rejoindre',
-                                style: TextStyle(
-                                  color: GlassColors.secondary,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                );
+              },
             ),
           ),
         ),
@@ -324,6 +130,443 @@ class _JoinRoomPageState extends State<JoinRoomPage>
     // Vérifier le format de l'ID (6 caractères alphanumériques)
     final regex = RegExp(r'^[A-Z0-9]{6}$');
     return regex.hasMatch(roomId.toUpperCase());
+  }
+
+  Widget _buildGlassAppBar() {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Row(
+        children: [
+          // Enhanced Back Button
+          EnhancedGlassButton(
+            width: 48,
+            height: 48,
+            padding: const EdgeInsets.all(12),
+            color: GlassColors.primary,
+            onTap: () => Navigator.of(context).pop(),
+            child: const Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+
+          const Spacer(),
+
+          // Enhanced Title with Gradient
+          ShaderMask(
+            shaderCallback: (bounds) =>
+                GlassColors.primaryGradient.createShader(bounds),
+            child: const Text(
+              'Rejoindre un salon',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+
+          const Spacer(),
+
+          // Placeholder for balance
+          const SizedBox(width: 48),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroSection() {
+    return Center(
+      child: Column(
+        children: [
+          // Enhanced Icon with Breathing Animation
+          BreathingPulseAnimation(
+            child: Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                gradient: GlassColors.secondaryGradient,
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: GlassColors.secondary.withValues(alpha: 0.4),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.meeting_room_outlined,
+                size: 50,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Enhanced Title
+          ShaderMask(
+            shaderCallback: (bounds) =>
+                GlassColors.secondaryGradient.createShader(bounds),
+            child: const Text(
+              'Rejoindre une conversation',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Enhanced Subtitle
+          const Text(
+            'Saisissez l\'ID du salon partagé\npar votre correspondant',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 16,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputSection() {
+    return EnhancedGlassContainer(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: GlassColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: GlassColors.primary.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.key,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ID du salon',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      'Code à 6 caractères (ex: ABC123)',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // Enhanced Input Field
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withValues(alpha: 0.1),
+                  Colors.white.withValues(alpha: 0.05),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _errorMessage != null
+                    ? GlassColors.danger.withValues(alpha: 0.5)
+                    : Colors.white.withValues(alpha: 0.2),
+                width: 1.5,
+              ),
+            ),
+            child: TextField(
+              controller: _roomIdController,
+              scrollPadding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 100,
+              ), // ✅ AJOUTÉ pour keyboard avoidance
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 2,
+              ),
+              textAlign: TextAlign.center,
+              textCapitalization: TextCapitalization.characters,
+              maxLength: 6,
+              decoration: InputDecoration(
+                hintText: 'XXXXXX',
+                hintStyle: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 2,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.all(20),
+                counterText: '',
+                suffixIcon: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: EnhancedGlassButton(
+                    width: 40,
+                    height: 40,
+                    padding: const EdgeInsets.all(8),
+                    color: GlassColors.secondary,
+                    onTap: _pasteFromClipboard,
+                    child: const Icon(
+                      Icons.paste,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ),
+              onChanged: (value) {
+                if (_errorMessage != null) {
+                  setState(() {
+                    _errorMessage = null;
+                  });
+                }
+              },
+            ),
+          ),
+
+          // Error message
+          if (_errorMessage != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: GlassColors.danger.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: GlassColors.danger.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: GlassColors.danger,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: TextStyle(
+                        color: GlassColors.danger,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInstructions() {
+    return EnhancedGlassContainer(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  gradient: GlassColors.secondaryGradient,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.info_outline,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Comment rejoindre ?',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildInstructionStep(
+              '1', 'Demandez l\'ID du salon à votre correspondant'),
+          const SizedBox(height: 12),
+          _buildInstructionStep(
+              '2', 'Saisissez le code de 6 caractères ci-dessus'),
+          const SizedBox(height: 12),
+          _buildInstructionStep(
+              '3', 'Appuyez sur "Rejoindre" pour accéder au salon'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInstructionStep(String number, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: GlassColors.secondary.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: GlassColors.secondary.withValues(alpha: 0.4),
+              width: 1,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              number,
+              style: TextStyle(
+                color: GlassColors.secondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+              height: 1.3,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Column(
+      children: [
+        // Join Button
+        SizedBox(
+          width: double.infinity,
+          child: EnhancedGlassButton(
+            height: 60,
+            color: GlassColors.secondary,
+            onTap: _isJoining ? null : _joinRoom,
+            child: _isJoining
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.meeting_room_outlined,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        'Rejoindre le salon',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // Alternative action
+        SizedBox(
+          width: double.infinity,
+          child: EnhancedGlassButton(
+            height: 50,
+            color: Colors.white,
+            onTap: () => Navigator.of(context).pop(),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.add_circle_outline,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Créer un nouveau salon',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Future<void> _joinRoom() async {
@@ -351,8 +594,8 @@ class _JoinRoomPageState extends State<JoinRoomPage>
     });
 
     try {
-      final roomProvider = Provider.of<RoomProvider>(context, listen: false);
-      final room = await roomProvider.joinAndSetCurrentRoom(roomId);
+      final room =
+          await ref.read(roomProvider.notifier).joinAndSetCurrentRoom(roomId);
 
       if (room != null && mounted) {
         // Naviguer vers la page de chat avec le salon rejoint
@@ -361,7 +604,7 @@ class _JoinRoomPageState extends State<JoinRoomPage>
         );
       } else if (mounted) {
         setState(() {
-          _errorMessage = roomProvider.error ?? 'Erreur inconnue';
+          _errorMessage = ref.read(roomProvider).error ?? 'Erreur inconnue';
         });
       }
     } catch (e) {

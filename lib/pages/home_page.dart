@@ -1,26 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/room.dart';
-import '../providers/room_provider.dart';
-import '../widgets/glass_container.dart';
-import '../widgets/room_card.dart';
+import '../providers/room_provider_riverpod.dart';
+import '../widgets/glass_components.dart';
+import '../widgets/enhanced_room_card.dart';
 import '../widgets/animated_background.dart';
 import '../animations/page_transitions.dart';
 import '../animations/micro_interactions.dart';
+import '../animations/button_animations.dart';
 import '../theme.dart';
+import '../utils/ui_helpers.dart';
+import '../utils/responsive_utils.dart';
+import '../utils/accessibility_utils.dart';
 import 'settings_page.dart';
 import 'create_room_page.dart';
 import 'join_room_page.dart';
 import 'room_chat_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
+class _HomePageState extends ConsumerState<HomePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -45,6 +49,11 @@ class _HomePageState extends State<HomePage>
         parent: _animationController, curve: Curves.easeOutCubic));
 
     _animationController.forward();
+
+    // MVP: Afficher message de bienvenue
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      UIHelpers.showWelcomeMessage(context);
+    });
   }
 
   @override
@@ -55,253 +64,343 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<RoomProvider>(
-      builder: (context, roomProvider, child) {
-        final rooms = roomProvider.rooms;
-        final isLoading = roomProvider.isLoading;
-        final error = roomProvider.error;
+    final roomState = ref.watch(roomProvider);
+    final rooms = roomState.rooms;
+    final isLoading = roomState.isLoading;
+    final error = roomState.error;
 
-        return Scaffold(
-          body: AnimatedBackground(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: SafeArea(
-                  child: Column(
-                    children: [
-                      // Header
-                      Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Row(
-                          children: [
-                            ShaderMask(
-                              shaderCallback: (bounds) => GlassColors
-                                  .primaryGradient
-                                  .createShader(bounds),
-                              child: const Text(
-                                'SecureChat',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              onPressed: () {
-                                Navigator.of(context).pushSlideFromRight(
-                                  const SettingsPage(),
-                                );
-                              },
-                              icon: Icon(
-                                Icons.settings_outlined,
-                                color: Colors.white.withValues(alpha: 0.7),
-                                size: 24,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Subtitle
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Vos salons sécurisés',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.6),
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Message d'erreur
-                      if (error != null)
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: GlassContainer(
-                            padding: const EdgeInsets.all(12),
-                            color: GlassColors.danger,
-                            opacity: 0.1,
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: GlassColors.danger,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    error,
-                                    style: const TextStyle(
-                                      color: GlassColors.danger,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () => roomProvider.clearError(),
-                                  child: const Icon(
-                                    Icons.close,
-                                    color: GlassColors.danger,
-                                    size: 18,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                      const SizedBox(height: 24),
-
-                      // Liste des salons ou état de chargement
-                      Expanded(
-                        child: isLoading
-                            ? const Center(
-                                child: CircularProgressIndicator(
-                                  color: GlassColors.primary,
-                                ),
-                              )
-                            : rooms.isEmpty
-                                ? _buildEmptyState()
-                                : ListView.builder(
-                                    itemCount: rooms.length,
-                                    itemBuilder: (context, index) {
-                                      final room = rooms[index];
-                                      return SlideInAnimation(
-                                        delay:
-                                            Duration(milliseconds: index * 100),
-                                        child: RoomCard(
-                                          room: room,
-                                          onTap: () => _navigateToRoom(room),
-                                          onDelete: () =>
-                                              _deleteRoom(room, roomProvider),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                      ),
-
-                      // Boutons d'action
-                      Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          children: [
-                            // Bouton Créer un salon
-                            BounceAnimation(
-                              onTap: () => _navigateToCreateRoom(),
-                              child: Container(
-                                width: double.infinity,
-                                height: 56,
-                                decoration: BoxDecoration(
-                                  gradient: GlassColors.primaryGradient,
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: GlassColors.primary
-                                          .withValues(alpha: 0.3),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 8),
-                                    ),
-                                  ],
-                                ),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    onTap: () => _navigateToCreateRoom(),
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.add_circle_outline,
-                                          color: Colors.white,
-                                          size: 24,
-                                        ),
-                                        SizedBox(width: 12),
-                                        Text(
-                                          'Créer un salon',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Bouton Rejoindre un salon
-                            BounceAnimation(
-                              onTap: () => _navigateToJoinRoom(),
-                              child: Container(
-                                width: double.infinity,
-                                height: 56,
-                                decoration: BoxDecoration(
-                                  gradient: GlassColors.secondaryGradient,
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: GlassColors.secondary
-                                          .withValues(alpha: 0.3),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 8),
-                                    ),
-                                  ],
-                                ),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    onTap: () => _navigateToJoinRoom(),
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.login,
-                                          color: Colors.white,
-                                          size: 24,
-                                        ),
-                                        SizedBox(width: 12),
-                                        Text(
-                                          'Rejoindre un salon',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+    return Scaffold(
+      resizeToAvoidBottomInset: true, // ✅ AJOUTÉ pour keyboard avoidance
+      body: AnimatedBackground(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: SafeArea(
+              child: ResponsiveBuilder(
+                builder: (context, deviceType) {
+                  return _buildResponsiveLayout(
+                      context, deviceType, rooms, isLoading, error);
+                },
               ),
             ),
           ),
-        );
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResponsiveLayout(
+    BuildContext context,
+    DeviceType deviceType,
+    List<Room> rooms,
+    bool isLoading,
+    String? error,
+  ) {
+    final padding = ResponsiveUtils.getResponsivePadding(context);
+    final isDesktop = deviceType == DeviceType.desktop;
+
+    if (isDesktop) {
+      return _buildDesktopLayout(context, rooms, isLoading, error, padding);
+    } else {
+      return _buildMobileLayout(context, rooms, isLoading, error, padding);
+    }
+  }
+
+  Widget _buildMobileLayout(
+    BuildContext context,
+    List<Room> rooms,
+    bool isLoading,
+    String? error,
+    EdgeInsets padding,
+  ) {
+    return Column(
+      children: [
+        // Header
+        _buildHeader(context, padding),
+
+        // Subtitle
+        _buildSubtitle(context, padding),
+
+        // Message d'erreur
+        if (error != null) _buildErrorMessage(context, error),
+
+        const SizedBox(height: 24),
+
+        // Liste des salons ou état de chargement
+        Expanded(
+          child: isLoading
+              ? AccessibilityUtils.accessibleLoadingIndicator(
+                  label: 'Chargement des salons',
+                )
+              : rooms.isEmpty
+                  ? _buildEmptyState()
+                  : _buildRoomsList(rooms),
+        ),
+
+        // Boutons d'action
+        _buildActionButtons(context, padding),
+      ],
+    );
+  }
+
+  Widget _buildDesktopLayout(
+    BuildContext context,
+    List<Room> rooms,
+    bool isLoading,
+    String? error,
+    EdgeInsets padding,
+  ) {
+    return Row(
+      children: [
+        // Sidebar avec navigation
+        Container(
+          width: 300,
+          padding: padding,
+          child: Column(
+            children: [
+              _buildHeader(context, EdgeInsets.zero),
+              const SizedBox(height: 32),
+              _buildActionButtons(context, EdgeInsets.zero),
+              const Spacer(),
+              if (error != null) _buildErrorMessage(context, error),
+            ],
+          ),
+        ),
+
+        // Contenu principal
+        Expanded(
+          child: Padding(
+            padding: padding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSubtitle(context, EdgeInsets.zero),
+                const SizedBox(height: 24),
+                Expanded(
+                  child: isLoading
+                      ? AccessibilityUtils.accessibleLoadingIndicator(
+                          label: 'Chargement des salons',
+                        )
+                      : rooms.isEmpty
+                          ? _buildEmptyState()
+                          : _buildRoomsList(rooms),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, EdgeInsets padding) {
+    return Padding(
+      padding: padding,
+      child: Row(
+        children: [
+          AccessibilityUtils.accessibleHeader(
+            label: 'SecureChat - Application de chat sécurisé',
+            child: ShaderMask(
+              shaderCallback: (bounds) =>
+                  GlassColors.primaryGradient.createShader(bounds),
+              child: Text(
+                'SecureChat',
+                style: ResponsiveUtils.isMobile(context)
+                    ? AppTextStyles.appTitle
+                    : AppTextStyles.appTitle.copyWith(
+                        fontSize: ResponsiveUtils.getResponsiveFontSize(
+                          context,
+                          mobile: 28,
+                          tablet: 32,
+                          desktop: 36,
+                        ),
+                      ),
+              ),
+            ),
+          ),
+          const Spacer(),
+          AccessibilityUtils.accessibleButton(
+            onPressed: () => UIHelpers.showInstructions(context),
+            semanticLabel: 'Afficher les instructions',
+            tooltip: 'Instructions d\'utilisation',
+            child: Icon(
+              Icons.help_outline,
+              color: Colors.white.withValues(alpha: 0.7),
+              size: ResponsiveUtils.isMobile(context) ? 24 : 28,
+            ),
+          ),
+          const SizedBox(width: 8),
+          AccessibilityUtils.accessibleButton(
+            onPressed: () {
+              Navigator.of(context).pushSlideFromRight(
+                const SettingsPage(),
+              );
+            },
+            semanticLabel: 'Ouvrir les paramètres',
+            tooltip: 'Paramètres de l\'application',
+            child: Icon(
+              Icons.settings_outlined,
+              color: Colors.white.withValues(alpha: 0.7),
+              size: ResponsiveUtils.isMobile(context) ? 24 : 28,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubtitle(BuildContext context, EdgeInsets padding) {
+    return Padding(
+      padding: padding,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          'Vos salons sécurisés',
+          style: AppTextStyles.bodyLarge.copyWith(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: ResponsiveUtils.getResponsiveFontSize(
+              context,
+              mobile: 16,
+              tablet: 18,
+              desktop: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorMessage(BuildContext context, String error) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: AccessibilityUtils.accessibleErrorMessage(
+        message: error,
+        onRetry: () => ref.read(roomProvider.notifier).clearError(),
+      ),
+    );
+  }
+
+  Widget _buildRoomsList(List<Room> rooms) {
+    return ResponsiveBuilder(
+      builder: (context, deviceType) {
+        if (deviceType == DeviceType.desktop) {
+          // Grille pour desktop
+          final gridConfig = ResponsiveUtils.getOrientationAwareGrid(context);
+          return GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: gridConfig.columns,
+              childAspectRatio: gridConfig.aspectRatio,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemCount: rooms.length,
+            itemBuilder: (context, index) {
+              final room = rooms[index];
+              return SlideInAnimation(
+                delay: Duration(milliseconds: index * 100),
+                child: EnhancedRoomCard(
+                  room: room,
+                  onTap: () => _navigateToRoom(room),
+                  onDelete: () => _deleteRoom(room),
+                ),
+              );
+            },
+          );
+        } else {
+          // Liste pour mobile/tablet
+          return ListView.builder(
+            itemCount: rooms.length,
+            itemBuilder: (context, index) {
+              final room = rooms[index];
+              return SlideInAnimation(
+                delay: Duration(milliseconds: index * 100),
+                child: EnhancedRoomCard(
+                  room: room,
+                  onTap: () => _navigateToRoom(room),
+                  onDelete: () => _deleteRoom(room),
+                ),
+              );
+            },
+          );
+        }
       },
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context, EdgeInsets padding) {
+    return Padding(
+      padding: padding,
+      child: ResponsiveBuilder(
+        builder: (context, deviceType) {
+          final isDesktop = deviceType == DeviceType.desktop;
+
+          return Column(
+            children: [
+              // Bouton Créer un salon avec animations
+              ButtonPressAnimation(
+                onTap: () => _navigateToCreateRoom(),
+                child: ButtonHoverAnimation(
+                  child: UnifiedGlassButton(
+                    onTap: () => _navigateToCreateRoom(),
+                    width: isDesktop ? 250 : double.infinity,
+                    height: 56,
+                    semanticLabel: 'Créer un nouveau salon sécurisé',
+                    tooltip: 'Créer un salon',
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.add_circle_outline,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Créer un salon',
+                          style: AppTextStyles.buttonLarge,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Bouton Rejoindre un salon avec animations
+              ButtonPressAnimation(
+                onTap: () => _navigateToJoinRoom(),
+                child: ButtonHoverAnimation(
+                  child: UnifiedGlassButton(
+                    onTap: () => _navigateToJoinRoom(),
+                    width: isDesktop ? 250 : double.infinity,
+                    height: 56,
+                    semanticLabel: 'Rejoindre un salon existant',
+                    tooltip: 'Rejoindre un salon',
+                    color: GlassColors.secondary,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.login,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Rejoindre un salon',
+                          style: AppTextStyles.buttonLarge,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -325,20 +424,13 @@ class _HomePageState extends State<HomePage>
           const SizedBox(height: 24),
           Text(
             'Aucun salon actif',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyles.sectionTitle,
           ),
           const SizedBox(height: 8),
           Text(
             'Créez votre premier salon sécurisé\npour commencer à échanger',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
+            style: AppTextStyles.hintText,
           ),
         ],
       ),
@@ -351,8 +443,8 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  void _deleteRoom(Room room, RoomProvider roomProvider) {
-    roomProvider.deleteRoom(room.id);
+  void _deleteRoom(Room room) {
+    ref.read(roomProvider.notifier).deleteRoom(room.id);
   }
 
   void _navigateToCreateRoom() {

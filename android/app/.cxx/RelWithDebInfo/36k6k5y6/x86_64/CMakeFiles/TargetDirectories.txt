@@ -1,0 +1,2 @@
+/Users/craxxou/Documents/application_de_chiffrement_cachée/android/app/.cxx/RelWithDebInfo/36k6k5y6/x86_64/CMakeFiles/edit_cache.dir
+/Users/craxxou/Documents/application_de_chiffrement_cachée/android/app/.cxx/RelWithDebInfo/36k6k5y6/x86_64/CMakeFiles/rebuild_cache.dir

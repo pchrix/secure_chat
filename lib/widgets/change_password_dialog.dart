@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
+import '../theme.dart';
 
 class ChangePasswordDialog extends StatefulWidget {
   const ChangePasswordDialog({super.key});
@@ -171,7 +172,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
     }
 
     return Dialog(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: GlassColors.authBackground,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
@@ -189,7 +190,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: GlassColors.whiteAlpha10,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
@@ -259,6 +260,9 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                 controller: controller,
                 obscureText: true,
                 keyboardType: TextInputType.number,
+                scrollPadding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 100,
+                ), // ✅ AJOUTÉ pour keyboard avoidance
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(6),
@@ -332,9 +336,8 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : onSubmit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF9B59B6),
-                  disabledBackgroundColor:
-                      const Color(0xFF9B59B6).withValues(alpha: 0.5),
+                  backgroundColor: GlassColors.setupPurple,
+                  disabledBackgroundColor: GlassColors.setupPurpleAlpha50,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

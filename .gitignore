@@ -26,5 +26,28 @@ dreamflow.iml
 .DS_Store
 Thumbs.db
 
-# Environment variables
+# Environment variables and secrets
 .env
+.env.local
+.env.production
+.env.staging
+secrets.json
+firebase_options.dart
+google-services.json
+GoogleService-Info.plist
+
+# Security sensitive files
+supabase/config.toml
+private_keys/
+certificates/
+
+# Logs
+*.log
+logs/
+
+# Flutter specific additions
+/android/app/debug
+/android/app/profile
+/android/app/release
+*.tmp
+*.temp

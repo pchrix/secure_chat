@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'theme.dart';
-import 'providers/app_state_provider.dart';
-import 'providers/room_provider.dart';
 import 'services/supabase_service.dart';
 import 'services/migration_service.dart';
-import 'pages/auth_page.dart';
+import 'animations/animation_manager.dart';
+import 'pages/enhanced_auth_page.dart';
 import 'pages/tutorial_page.dart';
+
+// Hot reload trigger
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,11 +21,18 @@ void main() async {
   // Exécuter les migrations
   await MigrationService.runMigrations();
 
+  // Initialiser le gestionnaire d'animations
+  AnimationManager.initialize();
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  runApp(const MyApp());
+
+  runApp(const ProviderScope(child: MyApp()));
+
+  // Activer automatiquement l'accessibilité pour Flutter Web
+  SemanticsBinding.instance.ensureSemantics();
 }
 
 class MyApp extends StatelessWidget {
@@ -31,19 +40,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => AppStateProvider()),
-        ChangeNotifierProvider(create: (context) => RoomProvider()),
-      ],
-      child: MaterialApp(
-        title: 'SecureChat',
-        debugShowCheckedModeBanner: false,
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        themeMode: ThemeMode.system,
-        home: const StartupPage(),
-      ),
+    return MaterialApp(
+      title: 'SecureChat',
+      debugShowCheckedModeBanner: false,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.system,
+      home: const StartupPage(),
     );
   }
 }
@@ -66,6 +69,9 @@ class _StartupPageState extends State<StartupPage> {
     final prefs = await SharedPreferences.getInstance();
     final isFirstTime = prefs.getBool('first_time') ?? true;
 
+    // Force l'affichage du tutoriel pour les tests (décommentez la ligne suivante)
+    // await prefs.setBool('first_time', true);
+
     if (mounted) {
       if (isFirstTime) {
         // Marquer comme pas première fois
@@ -78,7 +84,7 @@ class _StartupPageState extends State<StartupPage> {
       } else {
         if (mounted) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const AuthPage()),
+            MaterialPageRoute(builder: (context) => const EnhancedAuthPage()),
           );
         }
       }

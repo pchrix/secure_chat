@@ -86,6 +86,7 @@ void main() {
     test('should correctly identify expired rooms', () {
       final expiredRoom = Room(
         id: 'TEST1234',
+        name: 'Test Room',
         createdAt: DateTime.now().subtract(const Duration(hours: 2)),
         expiresAt: DateTime.now().subtract(const Duration(hours: 1)),
         status: RoomStatus.waiting,
