@@ -302,9 +302,9 @@ class _EnhancedAuthPageState extends State<EnhancedAuthPage>
                         ),
                       ),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          // Espacement en haut
+                          // Espacement en haut flexible
                           SizedBox(height: topSpacing),
 
                           // Logo et titre avec animation
@@ -312,32 +312,34 @@ class _EnhancedAuthPageState extends State<EnhancedAuthPage>
                               isVeryCompact: isVeryCompact,
                               isCompact: isCompact),
 
-                          // Espacement au centre
+                          // Espacement au centre flexible
                           SizedBox(height: centerSpacing),
 
-                          // Interface PIN avec gestion d'erreur
-                          EnhancedShakeAnimation(
-                            controller: _shakeController,
-                            child: EnhancedGlassContainer(
-                              padding: pinContainerPadding,
-                              child: PinEntryWidget(
-                                pinLength: 4,
-                                onPinComplete: _onPinComplete,
-                                onPinChanged: _onPinChanged,
-                                errorMessage: _errorMessage,
-                                isLoading: _isLoading,
-                                enableBiometric: true,
+                          // Interface PIN avec gestion d'erreur - FLEXIBLE
+                          Expanded(
+                            child: EnhancedShakeAnimation(
+                              controller: _shakeController,
+                              child: EnhancedGlassContainer(
+                                padding: pinContainerPadding,
+                                child: PinEntryWidget(
+                                  pinLength: 4,
+                                  onPinComplete: _onPinComplete,
+                                  onPinChanged: _onPinChanged,
+                                  errorMessage: _errorMessage,
+                                  isLoading: _isLoading,
+                                  enableBiometric: true,
+                                ),
                               ),
                             ),
                           ),
 
-                          // Espacement en bas
-                          SizedBox(height: bottomSpacing),
-
-                          // Footer avec informations
+                          // Footer avec informations - TOUJOURS VISIBLE
                           _buildFooter(
                               isVeryCompact: isVeryCompact,
                               isCompact: isCompact),
+
+                          // Espacement en bas minimal
+                          SizedBox(height: isVeryCompact ? 8 : bottomSpacing),
 
                           // Espacement de sécurité en bas
                           SizedBox(height: safetySpacing),

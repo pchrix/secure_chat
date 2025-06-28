@@ -22,6 +22,7 @@ dependencies:
   http: ^1.2.0
   uuid: ^4.3.3
   supabase_flutter: ^2.9.1
+  flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
   flutter_test:

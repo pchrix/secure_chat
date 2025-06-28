@@ -63,7 +63,7 @@ Cette première version stable de SecureChat offre une solution complète de mes
 - **Message** : Structure des messages chiffrés
 
 #### Gestion d'État
-- **Provider Pattern** : Gestion d'état réactive avec ChangeNotifier
+- **Riverpod** : Gestion d'état moderne avec StateNotifier
 - **AppStateProvider** : État global de l'application
 - **RoomProvider** : État des salons et messagerie
 

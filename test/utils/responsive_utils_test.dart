@@ -209,19 +209,22 @@ void main() {
         tester.view.physicalSize = const Size(375, 667);
         await tester.pumpWidget(testApp);
         var context = tester.element(find.byType(Container));
-        expect(ResponsiveUtils.getKeyboardHeight(context), equals(160.0));
+        expect(
+            ResponsiveUtils.getOptimizedKeyboardHeight(context), equals(160.0));
 
         // iPhone Standard (896px > 800px = normal)
         tester.view.physicalSize = const Size(414, 896);
         await tester.pumpWidget(testApp);
         context = tester.element(find.byType(Container));
-        expect(ResponsiveUtils.getKeyboardHeight(context), equals(240.0));
+        expect(
+            ResponsiveUtils.getOptimizedKeyboardHeight(context), equals(240.0));
 
         // iPad
         tester.view.physicalSize = const Size(768, 1024);
         await tester.pumpWidget(testApp);
         context = tester.element(find.byType(Container));
-        expect(ResponsiveUtils.getKeyboardHeight(context), equals(240.0));
+        expect(
+            ResponsiveUtils.getOptimizedKeyboardHeight(context), equals(240.0));
       });
     });
 

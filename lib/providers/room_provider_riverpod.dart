@@ -131,11 +131,15 @@ class RoomNotifier extends StateNotifier<RoomState> {
           room = await SupabaseRoomService.createRoom(
             durationHours: durationHours,
           );
-          debugPrint('Salon créé avec Supabase RLS: ${room.id}');
+          debugPrint('✅ Salon créé avec Supabase RLS: ${room.id}');
         } catch (e) {
-          debugPrint('Erreur création Supabase: $e');
+          debugPrint('❌ Erreur création Supabase: $e');
+          state = state.copyWith(error: 'Erreur Supabase: $e');
           // Fallback vers le service local
         }
+      } else {
+        debugPrint(
+            '⚠️ Supabase non disponible - utilisateur non connecté ou service désactivé');
       }
 
       // Fallback vers le service local si Supabase échoue
@@ -196,11 +200,36 @@ class RoomNotifier extends StateNotifier<RoomState> {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      final room = await _roomService.createAndJoinRoom(
+      Room? room;
+
+      // Essayer d'abord avec Supabase si l'utilisateur est connecté
+      if (state.isSupabaseEnabled && SupabaseAuthService.isAuthenticated) {
+        try {
+          room = await SupabaseRoomService.createRoom(
+            durationHours: durationHours,
+          );
+          debugPrint('✅ Salon créé et rejoint avec Supabase RLS: ${room.id}');
+          // Définir comme salon actuel
+          await _roomService.setCurrentRoom(room.id);
+        } catch (e) {
+          debugPrint('❌ Erreur création Supabase: $e');
+          state = state.copyWith(error: 'Erreur Supabase: $e');
+          // Fallback vers le service local
+        }
+      } else {
+        debugPrint('⚠️ Supabase non disponible - utilisation du service local');
+      }
+
+      // Fallback vers le service local si Supabase échoue ou n'est pas disponible
+      room ??= await _roomService.createAndJoinRoom(
         durationHours: durationHours,
       );
+
+      debugPrint('✅ Salon créé et rejoint avec succès: ${room.id}');
+
       return room;
     } catch (e) {
+      debugPrint('❌ Erreur lors de la création du salon: $e');
       state = state.copyWith(error: 'Erreur lors de la création du salon: $e');
       return null;
     } finally {
@@ -308,7 +337,8 @@ class RoomNotifier extends StateNotifier<RoomState> {
         await _loadLocalRooms();
       } else {
         if (kDebugMode) {
-          print('📱 Données existantes trouvées: ${existingRooms.length} salon(s)');
+          print(
+              '📱 Données existantes trouvées: ${existingRooms.length} salon(s)');
         }
         // S'assurer que l'état est mis à jour avec les données existantes
         state = state.copyWith(rooms: existingRooms);
@@ -328,7 +358,8 @@ class RoomNotifier extends StateNotifier<RoomState> {
       final localRooms = await LocalStorageService.getRooms();
       state = state.copyWith(rooms: localRooms, clearError: true);
       if (kDebugMode) {
-        print('✅ ${localRooms.length} salon(s) chargé(s) depuis le stockage local');
+        print(
+            '✅ ${localRooms.length} salon(s) chargé(s) depuis le stockage local');
       }
     } catch (e) {
       if (kDebugMode) {

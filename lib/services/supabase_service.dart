@@ -104,9 +104,19 @@ class SupabaseService {
     }
 
     try {
+      // Utiliser les credentials directs pour MVP
+      final url = AppConfig.supabaseUrl;
+      final anonKey = AppConfig.supabaseAnonKey;
+
+      if (kDebugMode) {
+        print('🔄 Initialisation Supabase...');
+        print('📍 URL: $url');
+        print('🔑 Key: ${anonKey.substring(0, 20)}...');
+      }
+
       await Supabase.initialize(
-        url: AppConfig.getSupabaseUrl(),
-        anonKey: AppConfig.getSupabaseAnonKey(),
+        url: url,
+        anonKey: anonKey,
         authOptions: const FlutterAuthClientOptions(
           authFlowType: AuthFlowType.pkce,
         ),

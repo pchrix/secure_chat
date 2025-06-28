@@ -97,38 +97,37 @@ class _EnhancedNumericKeypadState extends State<EnhancedNumericKeypad>
           final isVeryCompact = ResponsiveUtils.isVeryCompact(context);
           final isCompact = ResponsiveUtils.isCompact(context);
 
-          // Hauteur des touches adaptative ultra-compacte
+          // ✅ CORRECTION CRITIQUE : Touch targets conformes accessibilité
+          // Minimum 44px selon guidelines iOS/Android
           double keyHeight;
           if (isVeryCompact) {
-            keyHeight =
-                35.0; // ✅ CORRECTION : Réduit encore plus pour éviter débordement
+            keyHeight = 44.0; // ✅ CONFORME : Minimum 44px même sur iPhone SE
           } else if (isCompact) {
-            keyHeight = 45.0; // ✅ CORRECTION : Réduit encore plus
+            keyHeight = 48.0; // ✅ CONFORME : Confortable sur iPhone standard
           } else {
-            keyHeight = 55.0; // ✅ CORRECTION : Réduit encore plus
+            keyHeight = 56.0; // ✅ CONFORME : Optimal sur écrans plus grands
           }
 
-          // Espacement adaptatif ultra-réduit
+          // ✅ CORRECTION : Espacement adaptatif optimisé
           double spacing;
           if (isVeryCompact) {
-            spacing =
-                3.0; // ✅ CORRECTION : Réduit encore plus pour éviter débordement
+            spacing = 4.0; // ✅ OPTIMISÉ : Minimal mais suffisant pour iPhone SE
           } else if (isCompact) {
-            spacing = 5.0; // ✅ CORRECTION : Réduit encore plus
+            spacing = 6.0; // ✅ OPTIMISÉ : Équilibré pour iPhone standard
           } else {
-            spacing = 8.0; // ✅ CORRECTION : Réduit encore plus
+            spacing = 8.0; // ✅ OPTIMISÉ : Confortable pour écrans plus grands
           }
 
           // Padding adaptatif ultra-réduit
           EdgeInsets adaptivePadding;
           if (isVeryCompact) {
             adaptivePadding = const EdgeInsets.symmetric(
-                horizontal: 12, vertical: 4); // Réduit encore plus
+                horizontal: 8, vertical: 2); // ✅ ULTRA-COMPACT : Minimal
           } else if (isCompact) {
             adaptivePadding = const EdgeInsets.symmetric(
-                horizontal: 16, vertical: 8); // Réduit
+                horizontal: 12, vertical: 4); // ✅ COMPACT : Réduit
           } else {
-            adaptivePadding = const EdgeInsets.all(18); // Réduit de 24 à 18
+            adaptivePadding = const EdgeInsets.all(16); // ✅ NORMAL : Standard
           }
 
           return SingleChildScrollView(
@@ -650,120 +649,107 @@ class _PinEntryWidgetState extends State<PinEntryWidget> {
           pinSpacing = 8.0; // Réduit de 16 à 8
         }
 
-        // Hauteur du clavier adaptatif ultra-agressif pour iPhone SE
-        double keypadHeight;
-        if (isVeryCompact) {
-          keypadHeight =
-              140.0; // ✅ CORRECTION : Réduit encore plus pour éviter débordement
-        } else if (isCompact) {
-          keypadHeight =
-              170.0; // ✅ CORRECTION : Réduit encore plus pour éviter débordement
-        } else {
-          keypadHeight = 200.0; // ✅ CORRECTION : Réduit encore plus
-        }
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Titre
-            Text(
-              'Saisir le code PIN',
-              style: AppTextStyles.pageTitle.copyWith(
-                fontSize: isVeryCompact ? 20 : (isCompact ? 22 : 24),
+        return Flexible(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Titre
+              Text(
+                'Saisir le code PIN',
+                style: AppTextStyles.pageTitle.copyWith(
+                  fontSize: isVeryCompact ? 18 : (isCompact ? 20 : 24),
+                ),
               ),
-            ),
 
-            SizedBox(height: titleSpacing),
+              SizedBox(height: titleSpacing),
 
-            // Sous-titre
-            Text(
-              'Entrez votre code à 4 chiffres',
-              style: AppTextStyles.bodyLarge.copyWith(
-                color: Colors.white.withValues(alpha: 0.6),
-                fontSize: isVeryCompact ? 14 : (isCompact ? 15 : 16),
+              // Sous-titre
+              Text(
+                'Entrez votre code à 4 chiffres',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: isVeryCompact ? 13 : (isCompact ? 14 : 16),
+                ),
               ),
-            ),
 
-            SizedBox(height: sectionSpacing),
+              SizedBox(height: sectionSpacing),
 
-            // Indicateur PIN
-            PinIndicator(
-              length: widget.pinLength,
-              filledCount: _currentPin.length,
-              showError: _showError,
-              dotSize: isVeryCompact ? 14.0 : 16.0,
-              spacing: isVeryCompact ? 12.0 : 16.0,
-            ),
+              // Indicateur PIN
+              PinIndicator(
+                length: widget.pinLength,
+                filledCount: _currentPin.length,
+                showError: _showError,
+                dotSize: isVeryCompact ? 12.0 : 16.0,
+                spacing: isVeryCompact ? 10.0 : 16.0,
+              ),
 
-            SizedBox(height: pinSpacing),
+              SizedBox(height: pinSpacing),
 
-            // Message d'erreur
-            SizedBox(
-              height: isVeryCompact ? 20 : 24,
-              child: widget.errorMessage != null && _showError
-                  ? Text(
-                      widget.errorMessage!,
-                      style: AppTextStyles.errorText.copyWith(
-                        fontSize: isVeryCompact ? 12 : 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    )
-                  : Container(),
-            ),
-
-            SizedBox(height: sectionSpacing),
-
-            // Indicateur de chargement ou clavier
-            if (widget.isLoading)
+              // Message d'erreur
               SizedBox(
-                height: keypadHeight,
-                child: const Center(
+                height: isVeryCompact ? 16 : 20,
+                child: widget.errorMessage != null && _showError
+                    ? Text(
+                        widget.errorMessage!,
+                        style: AppTextStyles.errorText.copyWith(
+                          fontSize: isVeryCompact ? 11 : 14,
+                        ),
+                        textAlign: TextAlign.center,
+                      )
+                    : Container(),
+              ),
+
+              SizedBox(height: sectionSpacing),
+
+              // Indicateur de chargement ou clavier
+              if (widget.isLoading)
+                const Padding(
+                  padding: EdgeInsets.all(40.0),
                   child: CircularProgressIndicator(
                     color: GlassColors.primary,
                   ),
+                )
+              else
+                // ✅ CLAVIER FLEXIBLE SANS CONTRAINTE DE HAUTEUR
+                Flexible(
+                  child: EnhancedNumericKeypad(
+                    onNumberPressed: _onNumberPressed,
+                    onBackspacePressed: _onBackspacePressed,
+                    onBackspaceLongPress: _onBackspaceLongPress,
+                    keySpacing: isVeryCompact ? 6.0 : (isCompact ? 10.0 : 16.0),
+                    padding: EdgeInsets.all(
+                        isVeryCompact ? 8 : (isCompact ? 12 : 20)),
+                  ),
                 ),
-              )
-            else
-              // ✅ CORRECTION : Suppression de la contrainte de hauteur fixe
-              EnhancedNumericKeypad(
-                onNumberPressed: _onNumberPressed,
-                onBackspacePressed: _onBackspacePressed,
-                onBackspaceLongPress: _onBackspaceLongPress,
-                keySpacing: isVeryCompact ? 8.0 : (isCompact ? 12.0 : 16.0),
-                padding:
-                    EdgeInsets.all(isVeryCompact ? 12 : (isCompact ? 16 : 20)),
-              ),
 
-            // Option biométrique
-            if (widget.enableBiometric) ...[
-              SizedBox(
-                  height: isVeryCompact
-                      ? 6
-                      : (isCompact ? 8 : 12)), // Réduit l'espacement
-              EnhancedGlassButton(
-                onTap: () {
-                  // TODO: Implémenter l'authentification biométrique
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.fingerprint,
-                      color: Colors.white,
-                      size: isVeryCompact ? 20 : 24,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Utiliser l\'empreinte',
-                      style: AppTextStyles.buttonMedium.copyWith(
-                        fontSize: isVeryCompact ? 14 : 16,
+              // Option biométrique
+              if (widget.enableBiometric) ...[
+                SizedBox(height: isVeryCompact ? 4 : (isCompact ? 6 : 12)),
+                EnhancedGlassButton(
+                  onTap: () {
+                    // TODO: Implémenter l'authentification biométrique
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.fingerprint,
+                        color: Colors.white,
+                        size: isVeryCompact ? 18 : 24,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Text(
+                        'Utiliser l\'empreinte',
+                        style: AppTextStyles.buttonMedium.copyWith(
+                          fontSize: isVeryCompact ? 13 : 16,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         );
       },
     );

@@ -127,7 +127,7 @@ class _HomePageState extends ConsumerState<HomePage>
 
         const SizedBox(height: 24),
 
-        // Liste des salons ou état de chargement
+        // Liste des salons ou état de chargement - Contrainte pour laisser place aux boutons
         Expanded(
           child: isLoading
               ? AccessibilityUtils.accessibleLoadingIndicator(
@@ -138,8 +138,19 @@ class _HomePageState extends ConsumerState<HomePage>
                   : _buildRoomsList(rooms),
         ),
 
-        // Boutons d'action
-        _buildActionButtons(context, padding),
+        // Boutons d'action - Toujours visibles avec SafeArea
+        SafeArea(
+          top: false,
+          child: Container(
+            padding: EdgeInsets.only(
+              left: padding.left,
+              right: padding.right,
+              bottom: padding.bottom,
+              top: 16,
+            ),
+            child: _buildActionButtons(context, EdgeInsets.zero),
+          ),
+        ),
       ],
     );
   }
@@ -153,9 +164,9 @@ class _HomePageState extends ConsumerState<HomePage>
   ) {
     return Row(
       children: [
-        // Sidebar avec navigation
+        // Sidebar avec navigation - Largeur augmentée pour éviter l'overflow
         Container(
-          width: 300,
+          width: 350, // Augmenté de 300 à 350 pour plus d'espace
           padding: padding,
           child: Column(
             children: [
@@ -199,38 +210,43 @@ class _HomePageState extends ConsumerState<HomePage>
       padding: padding,
       child: Row(
         children: [
-          AccessibilityUtils.accessibleHeader(
-            label: 'SecureChat - Application de chat sécurisé',
-            child: ShaderMask(
-              shaderCallback: (bounds) =>
-                  GlassColors.primaryGradient.createShader(bounds),
-              child: Text(
-                'SecureChat',
-                style: ResponsiveUtils.isMobile(context)
-                    ? AppTextStyles.appTitle
-                    : AppTextStyles.appTitle.copyWith(
-                        fontSize: ResponsiveUtils.getResponsiveFontSize(
-                          context,
-                          mobile: 28,
-                          tablet: 32,
-                          desktop: 36,
+          Expanded(
+            child: AccessibilityUtils.accessibleHeader(
+              label: 'SecureChat - Application de chat sécurisé',
+              child: ShaderMask(
+                shaderCallback: (bounds) =>
+                    GlassColors.primaryGradient.createShader(bounds),
+                child: Text(
+                  'SecureChat',
+                  style: ResponsiveUtils.isMobile(context)
+                      ? AppTextStyles.appTitle
+                      : AppTextStyles.appTitle.copyWith(
+                          fontSize: ResponsiveUtils.getResponsiveFontSize(
+                            context,
+                            mobile: 28,
+                            tablet: 32,
+                            desktop: 36,
+                          ),
                         ),
-                      ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           ),
-          const Spacer(),
-          AccessibilityUtils.accessibleButton(
-            onPressed: () => UIHelpers.showInstructions(context),
-            semanticLabel: 'Afficher les instructions',
-            tooltip: 'Instructions d\'utilisation',
-            child: Icon(
-              Icons.help_outline,
-              color: Colors.white.withValues(alpha: 0.7),
-              size: ResponsiveUtils.isMobile(context) ? 24 : 28,
+          if (!ResponsiveUtils.isMobile(context) ||
+              MediaQuery.of(context).size.width > 300) ...[
+            AccessibilityUtils.accessibleButton(
+              onPressed: () => UIHelpers.showInstructions(context),
+              semanticLabel: 'Afficher les instructions',
+              tooltip: 'Instructions d\'utilisation',
+              child: Icon(
+                Icons.help_outline,
+                color: Colors.white.withValues(alpha: 0.7),
+                size: ResponsiveUtils.isMobile(context) ? 20 : 24,
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
+            const SizedBox(width: 8),
+          ],
           AccessibilityUtils.accessibleButton(
             onPressed: () {
               Navigator.of(context).pushSlideFromRight(
@@ -242,7 +258,7 @@ class _HomePageState extends ConsumerState<HomePage>
             child: Icon(
               Icons.settings_outlined,
               color: Colors.white.withValues(alpha: 0.7),
-              size: ResponsiveUtils.isMobile(context) ? 24 : 28,
+              size: ResponsiveUtils.isMobile(context) ? 20 : 24,
             ),
           ),
         ],

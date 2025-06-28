@@ -34,8 +34,9 @@ void main() {
         // Vérifier que BackdropFilter est présent avec blur optimisé
         expect(find.byType(BackdropFilter), findsOneWidget);
 
-        // Vérifier que RepaintBoundary est utilisé pour la performance
-        expect(find.byType(RepaintBoundary), findsOneWidget);
+        // Vérifier que RepaintBoundary est utilisé pour la performance (avec clé spécifique)
+        expect(find.byKey(const Key('glass_performance_boundary')),
+            findsOneWidget);
       });
 
       testWidgets('should use full effects on iPad',
@@ -61,7 +62,8 @@ void main() {
 
         expect(find.byType(UnifiedGlassContainer), findsOneWidget);
         expect(find.byType(BackdropFilter), findsOneWidget);
-        expect(find.byType(Stack), findsOneWidget); // Effets avancés activés
+        expect(find.byKey(const Key('glass_effects_stack')),
+            findsOneWidget); // ✅ CONTEXT7: Clé spécifique
       });
 
       testWidgets('simple constructor should work',
@@ -196,7 +198,8 @@ void main() {
         );
 
         expect(find.byType(UnifiedGlassCard), findsOneWidget);
-        expect(find.byType(MouseRegion), findsOneWidget); // Hover effect
+        expect(find.byKey(const Key('glass_card_hover_region')),
+            findsOneWidget); // ✅ CONTEXT7: Clé spécifique
       });
 
       testWidgets('simple constructor should work',
@@ -290,7 +293,8 @@ void main() {
           ),
         );
 
-        expect(find.byType(RepaintBoundary), findsOneWidget);
+        expect(find.byKey(const Key('glass_performance_boundary')),
+            findsOneWidget);
       });
 
       testWidgets('should optimize shadows based on screen size',

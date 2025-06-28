@@ -173,7 +173,8 @@ class LocalStorageService {
 
     // CORRECTION CRITIQUE : Toujours vérifier et générer la clé
     final roomKeyService = RoomKeyService.instance;
-    if (!roomKeyService.hasKeyForRoom('demo-room')) {
+    final hasKey = await roomKeyService.hasKeyForRoom('demo-room');
+    if (!hasKey) {
       final generatedKey = await roomKeyService.generateKeyForRoom('demo-room');
       debugPrint(
           '🔑 Clé de chiffrement générée pour salon démo: ${generatedKey.substring(0, 8)}...');

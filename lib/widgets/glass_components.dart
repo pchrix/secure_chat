@@ -5,17 +5,45 @@ import '../theme.dart';
 import '../utils/responsive_utils.dart';
 import '../utils/accessibility_utils.dart';
 
-/// Cache pour les filtres ImageFilter afin d'éviter les recréations coûteuses
+/// ✅ CORRECTION CRITIQUE : Cache limité pour éviter les fuites mémoire
+import 'dart:collection';
+
 class _FilterCache {
-  static final Map<String, ImageFilter> _cache = {};
+  static const int _maxCacheSize = 50; // Limite à 50 éléments
+  static final LinkedHashMap<String, ImageFilter> _cache = LinkedHashMap();
 
   static ImageFilter getBlurFilter(double sigmaX, double sigmaY) {
     final key = '${sigmaX}_$sigmaY';
-    return _cache.putIfAbsent(
-      key,
-      () => ImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY),
-    );
+
+    // Vérifier si déjà en cache
+    if (_cache.containsKey(key)) {
+      // Déplacer en fin pour LRU (Least Recently Used)
+      final filter = _cache.remove(key)!;
+      _cache[key] = filter;
+      return filter;
+    }
+
+    // Créer nouveau filtre
+    final filter = ImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY);
+
+    // ✅ CORRECTION : Cleanup automatique si cache plein
+    if (_cache.length >= _maxCacheSize) {
+      // Supprimer le plus ancien (LRU)
+      final oldestKey = _cache.keys.first;
+      _cache.remove(oldestKey);
+    }
+
+    _cache[key] = filter;
+    return filter;
   }
+
+  /// Nettoie le cache manuellement si nécessaire
+  static void clearCache() {
+    _cache.clear();
+  }
+
+  /// Retourne la taille actuelle du cache
+  static int get cacheSize => _cache.length;
 }
 
 /// Widget unifié pour créer des effets glassmorphism modernes et performants

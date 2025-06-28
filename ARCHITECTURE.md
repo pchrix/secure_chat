@@ -203,7 +203,7 @@ SharedPreferences:
 ```yaml
 SDK: Flutter 3.29.0, Dart 3.5.0
 Packages principaux:
-- provider: ^6.1.2 (gestion d'état)
+- flutter_riverpod: ^2.4.9 (gestion d'état)
 - encrypt: ^5.0.3 (chiffrement AES-256)
 - crypto: ^3.0.6 (fonctions hash)
 - shared_preferences: ^2.3.2 (stockage local)

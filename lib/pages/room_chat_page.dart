@@ -56,22 +56,24 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
     super.dispose();
   }
 
-  void _initializeKey() {
+  void _initializeKey() async {
     // Vérifier si une clé existe pour ce salon et la générer si nécessaire
     final keyService = RoomKeyService.instance;
-    if (!keyService.hasKeyForRoom(widget.roomId)) {
-      // Générer automatiquement une clé pour le salon
-      keyService.generateKeyForRoom(widget.roomId).then((_) {
+    final hasKey = await keyService.hasKeyForRoom(widget.roomId);
+    if (!hasKey) {
+      try {
+        // Générer automatiquement une clé pour le salon
+        await keyService.generateKeyForRoom(widget.roomId);
         if (mounted) {
           setState(() {
             // Trigger un rebuild pour afficher la clé disponible
           });
         }
-      }).catchError((e) {
+      } catch (e) {
         if (mounted) {
           _showSnackBar('Erreur lors de la génération de la clé: $e');
         }
-      });
+      }
     }
   }
 
@@ -94,8 +96,8 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
     }
 
     // Utiliser directement le service de clés du salon
-    final encryptedText =
-        RoomKeyService.instance.encryptMessageForRoom(widget.roomId, text);
+    final encryptedText = await RoomKeyService.instance
+        .encryptMessageForRoom(widget.roomId, text);
 
     if (encryptedText == null) {
       _showSnackBar(
@@ -118,8 +120,8 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
     }
 
     // Utiliser directement le service de clés du salon
-    final decryptedText =
-        RoomKeyService.instance.decryptMessageForRoom(widget.roomId, text);
+    final decryptedText = await RoomKeyService.instance
+        .decryptMessageForRoom(widget.roomId, text);
 
     if (decryptedText == null) {
       _showSnackBar(

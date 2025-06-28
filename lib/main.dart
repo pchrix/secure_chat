@@ -9,6 +9,7 @@ import 'services/migration_service.dart';
 import 'animations/animation_manager.dart';
 import 'pages/enhanced_auth_page.dart';
 import 'pages/tutorial_page.dart';
+import 'utils/debug_helper.dart';
 
 // Hot reload trigger
 
@@ -17,6 +18,9 @@ void main() async {
 
   // Initialiser Supabase
   await SupabaseService.initialize();
+
+  // Diagnostic complet pour identifier les problèmes
+  await DebugHelper.printFullDiagnosis();
 
   // Exécuter les migrations
   await MigrationService.runMigrations();
