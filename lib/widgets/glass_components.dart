@@ -193,15 +193,13 @@ class UnifiedGlassContainer extends StatelessWidget {
       child: Stack(
         children: [
           // Effet de profondeur arrière
-          if (enableDepthEffect)
-            RepaintBoundary(child: _buildDepthEffect(radius)),
+          if (enableDepthEffect) _buildDepthEffect(radius),
 
           // Contenu principal
           child,
 
           // Highlight supérieur
-          if (enableInnerShadow)
-            RepaintBoundary(child: _buildInnerHighlight(radius)),
+          if (enableInnerShadow) _buildInnerHighlight(radius),
         ],
       ),
     );
@@ -472,9 +470,9 @@ class _UnifiedGlassButtonState extends State<UnifiedGlassButton>
     if (widget.adaptiveSize) {
       effectiveWidth = ResponsiveUtils.getResponsiveWidth(
         context,
-        mobile: widget.mobileWidth,
-        tablet: widget.tabletWidth,
-        desktop: widget.desktopWidth,
+        mobile: widget.mobileWidth ?? widget.width ?? 200.0,
+        tablet: widget.tabletWidth ?? widget.width ?? 250.0,
+        desktop: widget.desktopWidth ?? widget.width ?? 300.0,
       );
     }
 

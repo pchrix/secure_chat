@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/contact.dart';
+import '../services/secure_storage_service.dart';
 
 // État de l'application
 class AppState {
@@ -108,8 +108,8 @@ class AppStateNotifier extends StateNotifier<AppState> {
 
   Future<void> _loadContacts() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final contactsJson = prefs.getStringList('contacts') ?? [];
+      final contactsJson =
+          await SecureStorageService.getStringList('contacts') ?? [];
       final contacts =
           contactsJson.map((json) => Contact.fromJson(json)).toList();
       state = state.copyWith(contacts: contacts);
@@ -121,10 +121,9 @@ class AppStateNotifier extends StateNotifier<AppState> {
 
   Future<void> _saveContacts() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
       final contactsJson =
           state.contacts.map((contact) => contact.toJson()).toList();
-      await prefs.setStringList('contacts', contactsJson);
+      await SecureStorageService.setStringList('contacts', contactsJson);
     } catch (e) {
       // Handle error silently
     }
@@ -132,8 +131,7 @@ class AppStateNotifier extends StateNotifier<AppState> {
 
   Future<void> _loadKeyData() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final expiryMillis = prefs.getInt('key_expiry');
+      final expiryMillis = await SecureStorageService.getInt('key_expiry');
       if (expiryMillis != null) {
         final keyExpiryTime = DateTime.fromMillisecondsSinceEpoch(expiryMillis);
         if (!keyExpiryTime.isAfter(DateTime.now())) {
@@ -153,12 +151,11 @@ class AppStateNotifier extends StateNotifier<AppState> {
 
   Future<void> _saveKeyData() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
       if (state.keyExpiryTime != null) {
-        await prefs.setInt(
+        await SecureStorageService.setInt(
             'key_expiry', state.keyExpiryTime!.millisecondsSinceEpoch);
       } else {
-        await prefs.remove('key_expiry');
+        await SecureStorageService.remove('key_expiry');
       }
     } catch (e) {
       // Handle error silently

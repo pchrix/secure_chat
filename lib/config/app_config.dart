@@ -1,28 +1,73 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../services/secure_storage_service.dart';
 
 /// Configuration sécurisée de l'application
 /// Conforme aux meilleures pratiques Context7 Supabase + flutter_secure_storage
+///
+/// Hiérarchie de configuration (par ordre de priorité) :
+/// 1. Variables d'environnement (--dart-define) - PRODUCTION
+/// 2. Fichier .env (flutter_dotenv) - DÉVELOPPEMENT
+/// 3. Stockage sécurisé (flutter_secure_storage) - RUNTIME
 class AppConfig {
-  // Variables d'environnement pour sécuriser les credentials
-  static String get supabaseUrl {
-    const String url = String.fromEnvironment(
-      'SUPABASE_URL',
-      defaultValue:
-          'https://wfcnymkoufwtsalnbgvb.supabase.co', // Fallback pour MVP
-    );
+  static bool _isInitialized = false;
 
-    return url;
+  /// Initialise la configuration en chargeant le fichier .env si disponible
+  static Future<void> initialize() async {
+    if (_isInitialized) return;
+
+    try {
+      // Charger le fichier .env pour le développement
+      await dotenv.load(fileName: '.env');
+      if (kDebugMode) {
+        print('✅ Configuration .env chargée pour le développement');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(
+            'ℹ️ Fichier .env non trouvé - utilisation des variables d\'environnement uniquement');
+      }
+    }
+
+    _isInitialized = true;
   }
 
-  static String get supabaseAnonKey {
-    const String key = String.fromEnvironment(
-      'SUPABASE_ANON_KEY',
-      defaultValue:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmY255bWtvdWZ3dHNhbG5iZ3ZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NjgxMDMsImV4cCI6MjA2NjA0NDEwM30.0pbagW0K-nAkO_PZuH2ZXzs9kiCTAU2NLSmSIgZbxH0', // Fallback pour MVP
-    );
+  /// Obtient l'URL Supabase selon la hiérarchie de configuration
+  static String get supabaseUrl {
+    // 1. Priorité : Variables d'environnement (--dart-define)
+    const String envUrl = String.fromEnvironment('SUPABASE_URL');
+    if (envUrl.isNotEmpty) {
+      return envUrl;
+    }
 
-    return key;
+    // 2. Fallback : Fichier .env (développement)
+    final String dotenvUrl = dotenv.env['SUPABASE_URL'] ?? '';
+    if (dotenvUrl.isNotEmpty) {
+      return dotenvUrl;
+    }
+
+    // 3. Erreur : Aucune configuration trouvée
+    throw Exception('SUPABASE_URL non configurée. '
+        'Utilisez --dart-define=SUPABASE_URL=... ou configurez le fichier .env');
+  }
+
+  /// Obtient la clé anonyme Supabase selon la hiérarchie de configuration
+  static String get supabaseAnonKey {
+    // 1. Priorité : Variables d'environnement (--dart-define)
+    const String envKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+    if (envKey.isNotEmpty) {
+      return envKey;
+    }
+
+    // 2. Fallback : Fichier .env (développement)
+    final String dotenvKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+    if (dotenvKey.isNotEmpty) {
+      return dotenvKey;
+    }
+
+    // 3. Erreur : Aucune configuration trouvée
+    throw Exception('SUPABASE_ANON_KEY non configurée. '
+        'Utilisez --dart-define=SUPABASE_ANON_KEY=... ou configurez le fichier .env');
   }
 
   // Mode offline pour MVP - pas de credentials hardcodés pour la sécurité
@@ -75,24 +120,125 @@ class AppConfig {
     }
   }
 
+  /// Obtient l'environnement actuel (development, staging, production)
+  static String get environment {
+    const String env = String.fromEnvironment('ENVIRONMENT');
+    if (env.isNotEmpty) return env;
+
+    final String dotenvEnv = dotenv.env['ENVIRONMENT'] ?? 'development';
+    return dotenvEnv;
+  }
+
+  /// Vérifie si les logs de debug sont activés
+  static bool get enableDebugLogs {
+    const String env = String.fromEnvironment('ENABLE_DEBUG_LOGS');
+    if (env.isNotEmpty) return env.toLowerCase() == 'true';
+
+    final String dotenvValue = dotenv.env['ENABLE_DEBUG_LOGS'] ?? 'false';
+    return dotenvValue.toLowerCase() == 'true';
+  }
+
   // Configuration de l'application
-  static const String appName = 'SecureChat';
-  static const String appVersion = '1.0.0';
+  static String get appName {
+    const String env = String.fromEnvironment('APP_NAME');
+    if (env.isNotEmpty) return env;
+
+    return dotenv.env['APP_NAME'] ?? 'SecureChat';
+  }
+
+  static String get appVersion {
+    const String env = String.fromEnvironment('APP_VERSION');
+    if (env.isNotEmpty) return env;
+
+    return dotenv.env['APP_VERSION'] ?? '1.0.0';
+  }
 
   // Durées par défaut
-  static const Duration roomDefaultDuration = Duration(hours: 24);
-  static const Duration connectionTimeout = Duration(seconds: 30);
-  static const Duration messageTimeout = Duration(seconds: 10);
+  static Duration get roomDefaultDuration {
+    const String env = String.fromEnvironment('ROOM_DEFAULT_DURATION');
+    if (env.isNotEmpty) {
+      final int seconds = int.tryParse(env) ?? 86400;
+      return Duration(seconds: seconds);
+    }
+
+    final String dotenvValue = dotenv.env['ROOM_DEFAULT_DURATION'] ?? '86400';
+    final int seconds = int.tryParse(dotenvValue) ?? 86400;
+    return Duration(seconds: seconds);
+  }
+
+  static Duration get connectionTimeout {
+    const String env = String.fromEnvironment('CONNECTION_TIMEOUT');
+    if (env.isNotEmpty) {
+      final int seconds = int.tryParse(env) ?? 30;
+      return Duration(seconds: seconds);
+    }
+
+    final String dotenvValue = dotenv.env['CONNECTION_TIMEOUT'] ?? '30';
+    final int seconds = int.tryParse(dotenvValue) ?? 30;
+    return Duration(seconds: seconds);
+  }
+
+  static Duration get messageTimeout {
+    const String env = String.fromEnvironment('MESSAGE_TIMEOUT');
+    if (env.isNotEmpty) {
+      final int seconds = int.tryParse(env) ?? 10;
+      return Duration(seconds: seconds);
+    }
+
+    final String dotenvValue = dotenv.env['MESSAGE_TIMEOUT'] ?? '10';
+    final int seconds = int.tryParse(dotenvValue) ?? 10;
+    return Duration(seconds: seconds);
+  }
 
   // Limites de sécurité
-  static const int maxRoomParticipants = 10;
-  static const int maxMessageLength = 1000;
-  static const int maxRoomNameLength = 50;
-  static const int pinLength = 4;
+  static int get maxRoomParticipants {
+    const String env = String.fromEnvironment('MAX_ROOM_PARTICIPANTS');
+    if (env.isNotEmpty) return int.tryParse(env) ?? 10;
+
+    final String dotenvValue = dotenv.env['MAX_ROOM_PARTICIPANTS'] ?? '10';
+    return int.tryParse(dotenvValue) ?? 10;
+  }
+
+  static int get maxMessageLength {
+    const String env = String.fromEnvironment('MAX_MESSAGE_LENGTH');
+    if (env.isNotEmpty) return int.tryParse(env) ?? 1000;
+
+    final String dotenvValue = dotenv.env['MAX_MESSAGE_LENGTH'] ?? '1000';
+    return int.tryParse(dotenvValue) ?? 1000;
+  }
+
+  static int get maxRoomNameLength {
+    const String env = String.fromEnvironment('MAX_ROOM_NAME_LENGTH');
+    if (env.isNotEmpty) return int.tryParse(env) ?? 50;
+
+    final String dotenvValue = dotenv.env['MAX_ROOM_NAME_LENGTH'] ?? '50';
+    return int.tryParse(dotenvValue) ?? 50;
+  }
+
+  static int get pinLength {
+    const String env = String.fromEnvironment('PIN_LENGTH');
+    if (env.isNotEmpty) return int.tryParse(env) ?? 4;
+
+    final String dotenvValue = dotenv.env['PIN_LENGTH'] ?? '4';
+    return int.tryParse(dotenvValue) ?? 4;
+  }
 
   // Configuration chiffrement
-  static const int keyLength = 32; // 256 bits
-  static const int ivLength = 16; // 128 bits
+  static int get keyLength {
+    const String env = String.fromEnvironment('KEY_LENGTH');
+    if (env.isNotEmpty) return int.tryParse(env) ?? 32;
+
+    final String dotenvValue = dotenv.env['KEY_LENGTH'] ?? '32';
+    return int.tryParse(dotenvValue) ?? 32;
+  }
+
+  static int get ivLength {
+    const String env = String.fromEnvironment('IV_LENGTH');
+    if (env.isNotEmpty) return int.tryParse(env) ?? 16;
+
+    final String dotenvValue = dotenv.env['IV_LENGTH'] ?? '16';
+    return int.tryParse(dotenvValue) ?? 16;
+  }
 
   // === MÉTHODES SÉCURISÉES CONTEXT7 ===
 

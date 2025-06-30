@@ -276,4 +276,135 @@ class SecureStorageService {
       // Ignorer les erreurs de suppression
     }
   }
+
+  // === MÉTHODES POUR REMPLACER SHAREDPREFERENCES ===
+
+  /// Stocke une liste de chaînes de manière sécurisée
+  static Future<void> setStringList(String key, List<String> values) async {
+    try {
+      final jsonString = jsonEncode(values);
+      await _storage.write(key: key, value: jsonString);
+    } catch (e) {
+      throw Exception('Erreur lors du stockage de la liste: $e');
+    }
+  }
+
+  /// Récupère une liste de chaînes stockée de manière sécurisée
+  static Future<List<String>?> getStringList(String key) async {
+    try {
+      final jsonString = await _storage.read(key: key);
+      if (jsonString == null) return null;
+
+      final List<dynamic> decoded = jsonDecode(jsonString);
+      return decoded.cast<String>();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Stocke un entier de manière sécurisée
+  static Future<void> setInt(String key, int value) async {
+    try {
+      await _storage.write(key: key, value: value.toString());
+    } catch (e) {
+      throw Exception('Erreur lors du stockage de l\'entier: $e');
+    }
+  }
+
+  /// Récupère un entier stocké de manière sécurisée
+  static Future<int?> getInt(String key) async {
+    try {
+      final stringValue = await _storage.read(key: key);
+      if (stringValue == null) return null;
+      return int.tryParse(stringValue);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Stocke un booléen de manière sécurisée
+  static Future<void> setBool(String key, bool value) async {
+    try {
+      await _storage.write(key: key, value: value.toString());
+    } catch (e) {
+      throw Exception('Erreur lors du stockage du booléen: $e');
+    }
+  }
+
+  /// Récupère un booléen stocké de manière sécurisée
+  static Future<bool?> getBool(String key) async {
+    try {
+      final stringValue = await _storage.read(key: key);
+      if (stringValue == null) return null;
+      return stringValue.toLowerCase() == 'true';
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Stocke une chaîne de manière sécurisée
+  static Future<void> setString(String key, String value) async {
+    try {
+      await _storage.write(key: key, value: value);
+    } catch (e) {
+      throw Exception('Erreur lors du stockage de la chaîne: $e');
+    }
+  }
+
+  /// Récupère une chaîne stockée de manière sécurisée
+  static Future<String?> getString(String key) async {
+    try {
+      return await _storage.read(key: key);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Stocke un double de manière sécurisée
+  static Future<void> setDouble(String key, double value) async {
+    try {
+      await _storage.write(key: key, value: value.toString());
+    } catch (e) {
+      throw Exception('Erreur lors du stockage du double: $e');
+    }
+  }
+
+  /// Récupère un double stocké de manière sécurisée
+  static Future<double?> getDouble(String key) async {
+    try {
+      final stringValue = await _storage.read(key: key);
+      if (stringValue == null) return null;
+      return double.tryParse(stringValue);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Supprime une clé spécifique
+  static Future<void> remove(String key) async {
+    try {
+      await _storage.delete(key: key);
+    } catch (e) {
+      // Ignorer les erreurs de suppression
+    }
+  }
+
+  /// Vérifie si une clé existe
+  static Future<bool> containsKey(String key) async {
+    try {
+      return await _storage.containsKey(key: key);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Récupère toutes les clés stockées
+  static Future<Set<String>> getKeys() async {
+    try {
+      final allValues = await _storage.readAll();
+      return allValues.keys.toSet();
+    } catch (e) {
+      return <String>{};
+    }
+  }
 }

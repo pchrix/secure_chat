@@ -1,34 +1,104 @@
+/// 📨 Modèle Message avec Freezed pour SecureChat
+///
+/// Modèle immutable pour les messages de chat avec chiffrement AES-256.
+/// Conforme aux meilleures pratiques Context7 + Exa pour Freezed.
+
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+part 'message.freezed.dart';
+part 'message.g.dart';
+
+/// Types de messages supportés dans SecureChat
 enum MessageType {
+  /// Message texte standard
   text,
+
+  /// Image partagée
   image,
+
+  /// Fichier partagé
   file,
+
+  /// Message système (notifications)
   system,
 }
 
-class Message {
-  final String id;
-  final String roomId;
-  final String content; // Contenu chiffré
-  final String senderId;
-  final DateTime timestamp;
-  final MessageType type;
+/// Extension pour MessageType avec labels et icônes
+extension MessageTypeExtension on MessageType {
+  /// Label lisible du type de message
+  String get label {
+    switch (this) {
+      case MessageType.text:
+        return 'Texte';
+      case MessageType.image:
+        return 'Image';
+      case MessageType.file:
+        return 'Fichier';
+      case MessageType.system:
+        return 'Système';
+    }
+  }
 
-  Message({
-    required this.id,
-    required this.roomId,
-    required this.content,
-    required this.senderId,
-    required this.timestamp,
-    this.type = MessageType.text,
-  });
+  /// Icône associée au type de message
+  String get icon {
+    switch (this) {
+      case MessageType.text:
+        return '💬';
+      case MessageType.image:
+        return '🖼️';
+      case MessageType.file:
+        return '📎';
+      case MessageType.system:
+        return '⚙️';
+    }
+  }
+}
 
+/// Modèle immutable Message avec Freezed
+@freezed
+abstract class Message with _$Message {
+  /// Constructeur privé pour méthodes personnalisées
+  const Message._();
+
+  /// Factory constructor principal
+  const factory Message({
+    /// ID unique du message
+    required String id,
+
+    /// ID du salon
+    required String roomId,
+
+    /// Contenu du message (chiffré)
+    required String content,
+
+    /// ID de l'expéditeur
+    required String senderId,
+
+    /// Horodatage du message
+    required DateTime timestamp,
+
+    /// Type de message
+    @Default(MessageType.text) MessageType type,
+
+    /// Indique si le message est chiffré
+    @Default(true) bool isEncrypted,
+
+    /// Statut de lecture
+    @Default(false) bool isRead,
+
+    /// Métadonnées additionnelles
+    @Default({}) Map<String, dynamic> metadata,
+  }) = _Message;
+
+  /// Factory constructor pour créer un nouveau message
   factory Message.create({
     required String roomId,
     required String content,
     required String senderId,
     MessageType type = MessageType.text,
+    bool isEncrypted = true,
+    Map<String, dynamic>? metadata,
   }) {
     return Message(
       id: const Uuid().v4(),
@@ -37,51 +107,62 @@ class Message {
       senderId: senderId,
       timestamp: DateTime.now(),
       type: type,
+      isEncrypted: isEncrypted,
+      metadata: metadata ?? {},
     );
   }
 
-  // Factory pour créer depuis JSON
-  factory Message.fromJson(Map<String, dynamic> json) {
-    return Message(
-      id: json['id'],
-      roomId: json['room_id'] ?? json['roomId'],
-      content: json['content'],
-      senderId: json['sender_id'] ?? json['senderId'],
-      timestamp: DateTime.parse(json['timestamp']),
-      type: MessageType.values.firstWhere(
-        (type) => type.name == (json['message_type'] ?? json['type']),
-        orElse: () => MessageType.text,
-      ),
-    );
+  /// Factory pour créer depuis JSON avec mapping personnalisé
+  factory Message.fromJson(Map<String, dynamic> json) =>
+      _$MessageFromJson(json);
+
+  /// Méthodes métier personnalisées
+
+  /// Âge du message en minutes
+  int get ageInMinutes {
+    return DateTime.now().difference(timestamp).inMinutes;
   }
 
-  // Convertir en JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'room_id': roomId,
-      'content': content,
-      'sender_id': senderId,
-      'timestamp': timestamp.toIso8601String(),
-      'message_type': type.name,
-    };
+  /// Indique si le message est récent (moins de 5 minutes)
+  bool get isRecent {
+    return ageInMinutes < 5;
   }
 
-  // Copy with method for creating modified copies
-  Message copyWith({
-    String? roomId,
-    String? content,
-    String? senderId,
-    DateTime? timestamp,
-    MessageType? type,
-  }) {
-    return Message(
-      id: id,
-      roomId: roomId ?? this.roomId,
-      content: content ?? this.content,
-      senderId: senderId ?? this.senderId,
-      timestamp: timestamp ?? this.timestamp,
-      type: type ?? this.type,
-    );
+  /// Indique si le message est ancien (plus de 24h)
+  bool get isOld {
+    return DateTime.now().difference(timestamp).inHours > 24;
+  }
+
+  /// Contenu affiché (tronqué si trop long)
+  String get displayContent {
+    if (content.length <= 100) return content;
+    return '${content.substring(0, 97)}...';
+  }
+
+  /// Indique si le message peut être supprimé
+  bool get canBeDeleted {
+    return ageInMinutes < 60; // Suppression possible dans l'heure
+  }
+
+  /// Marquer le message comme lu
+  Message markAsRead() {
+    return copyWith(isRead: true);
+  }
+
+  /// Marquer le message comme chiffré
+  Message markAsEncrypted() {
+    return copyWith(isEncrypted: true);
+  }
+
+  /// Marquer le message comme déchiffré
+  Message markAsDecrypted() {
+    return copyWith(isEncrypted: false);
+  }
+
+  /// Ajouter des métadonnées
+  Message addMetadata(String key, dynamic value) {
+    final newMetadata = Map<String, dynamic>.from(metadata);
+    newMetadata[key] = value;
+    return copyWith(metadata: newMetadata);
   }
 }

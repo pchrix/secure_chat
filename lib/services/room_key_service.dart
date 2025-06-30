@@ -26,7 +26,7 @@ class RoomKeyService {
 
   /// Génère une nouvelle clé pour un salon
   Future<String> generateKeyForRoom(String roomId) async {
-    final key = EncryptionService.generateRandomKey();
+    final key = await EncryptionService.generateRandomKey();
     _roomKeys[roomId] = key;
     await SecureStorageService.storeRoomKey(roomId, key);
     return key;
@@ -97,7 +97,7 @@ class RoomKeyService {
     if (key == null) return null;
 
     try {
-      return EncryptionService.encryptMessage(message, key);
+      return await EncryptionService.encryptMessage(message, key);
     } catch (e) {
       return null;
     }
@@ -110,7 +110,7 @@ class RoomKeyService {
     if (key == null) return null;
 
     try {
-      return EncryptionService.decryptMessage(encryptedMessage, key);
+      return await EncryptionService.decryptMessage(encryptedMessage, key);
     } catch (e) {
       return null;
     }
@@ -130,7 +130,7 @@ class RoomKeyService {
     try {
       final keysJson = json.encode(_roomKeys);
       final encryptionKey = EncryptionService.passphraseToKey(password);
-      return EncryptionService.encryptMessage(keysJson, encryptionKey);
+      return await EncryptionService.encryptMessage(keysJson, encryptionKey);
     } catch (e) {
       return null;
     }
@@ -141,7 +141,7 @@ class RoomKeyService {
     try {
       final encryptionKey = EncryptionService.passphraseToKey(password);
       final keysJson =
-          EncryptionService.decryptMessage(encryptedKeys, encryptionKey);
+          await EncryptionService.decryptMessage(encryptedKeys, encryptionKey);
       final Map<String, dynamic> importedKeys = json.decode(keysJson);
 
       // Valider que toutes les clés sont des strings

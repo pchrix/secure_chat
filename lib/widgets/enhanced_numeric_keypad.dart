@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../widgets/glass_components.dart';
 import '../utils/responsive_utils.dart'; // ✅ AJOUTÉ pour unifier les breakpoints
+import '../utils/responsive_builder.dart'; // ✅ AJOUTÉ pour ResponsiveBuilder
 import '../theme.dart';
 
 /// Clavier numérique moderne avec effets visuels et animations
@@ -321,12 +322,17 @@ class _NumericKeyState extends State<_NumericKey>
               child: Stack(
                 children: [
                   // Container principal glassmorphism
+                  // ✅ CORRECTION : Désactiver les effets avancés pour éviter RepaintBoundary/Positioned conflicts
                   EnhancedGlassContainer(
                     width: double.infinity,
                     height: double.infinity,
                     color:
                         isBackspace ? Colors.red.withValues(alpha: 0.1) : null,
                     opacity: _isPressed ? 0.25 : 0.15,
+                    enableDepthEffect:
+                        false, // ✅ Désactiver pour éviter Positioned conflicts
+                    enableInnerShadow:
+                        false, // ✅ Désactiver pour éviter Positioned conflicts
                     child: Center(
                       child: isBackspace
                           ? Icon(
@@ -649,107 +655,105 @@ class _PinEntryWidgetState extends State<PinEntryWidget> {
           pinSpacing = 8.0; // Réduit de 16 à 8
         }
 
-        return Flexible(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Titre
-              Text(
-                'Saisir le code PIN',
-                style: AppTextStyles.pageTitle.copyWith(
-                  fontSize: isVeryCompact ? 18 : (isCompact ? 20 : 24),
-                ),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Titre
+            Text(
+              'Saisir le code PIN',
+              style: AppTextStyles.pageTitle.copyWith(
+                fontSize: isVeryCompact ? 18 : (isCompact ? 20 : 24),
               ),
+            ),
 
-              SizedBox(height: titleSpacing),
+            SizedBox(height: titleSpacing),
 
-              // Sous-titre
-              Text(
-                'Entrez votre code à 4 chiffres',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: isVeryCompact ? 13 : (isCompact ? 14 : 16),
-                ),
+            // Sous-titre
+            Text(
+              'Entrez votre code à 4 chiffres',
+              style: AppTextStyles.bodyLarge.copyWith(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: isVeryCompact ? 13 : (isCompact ? 14 : 16),
               ),
+            ),
 
-              SizedBox(height: sectionSpacing),
+            SizedBox(height: sectionSpacing),
 
-              // Indicateur PIN
-              PinIndicator(
-                length: widget.pinLength,
-                filledCount: _currentPin.length,
-                showError: _showError,
-                dotSize: isVeryCompact ? 12.0 : 16.0,
-                spacing: isVeryCompact ? 10.0 : 16.0,
-              ),
+            // Indicateur PIN
+            PinIndicator(
+              length: widget.pinLength,
+              filledCount: _currentPin.length,
+              showError: _showError,
+              dotSize: isVeryCompact ? 12.0 : 16.0,
+              spacing: isVeryCompact ? 10.0 : 16.0,
+            ),
 
-              SizedBox(height: pinSpacing),
+            SizedBox(height: pinSpacing),
 
-              // Message d'erreur
-              SizedBox(
-                height: isVeryCompact ? 16 : 20,
-                child: widget.errorMessage != null && _showError
-                    ? Text(
-                        widget.errorMessage!,
-                        style: AppTextStyles.errorText.copyWith(
-                          fontSize: isVeryCompact ? 11 : 14,
-                        ),
-                        textAlign: TextAlign.center,
-                      )
-                    : Container(),
-              ),
-
-              SizedBox(height: sectionSpacing),
-
-              // Indicateur de chargement ou clavier
-              if (widget.isLoading)
-                const Padding(
-                  padding: EdgeInsets.all(40.0),
-                  child: CircularProgressIndicator(
-                    color: GlassColors.primary,
-                  ),
-                )
-              else
-                // ✅ CLAVIER FLEXIBLE SANS CONTRAINTE DE HAUTEUR
-                Flexible(
-                  child: EnhancedNumericKeypad(
-                    onNumberPressed: _onNumberPressed,
-                    onBackspacePressed: _onBackspacePressed,
-                    onBackspaceLongPress: _onBackspaceLongPress,
-                    keySpacing: isVeryCompact ? 6.0 : (isCompact ? 10.0 : 16.0),
-                    padding: EdgeInsets.all(
-                        isVeryCompact ? 8 : (isCompact ? 12 : 20)),
-                  ),
-                ),
-
-              // Option biométrique
-              if (widget.enableBiometric) ...[
-                SizedBox(height: isVeryCompact ? 4 : (isCompact ? 6 : 12)),
-                EnhancedGlassButton(
-                  onTap: () {
-                    // TODO: Implémenter l'authentification biométrique
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.fingerprint,
-                        color: Colors.white,
-                        size: isVeryCompact ? 18 : 24,
+            // Message d'erreur
+            SizedBox(
+              height: isVeryCompact ? 16 : 20,
+              child: widget.errorMessage != null && _showError
+                  ? Text(
+                      widget.errorMessage!,
+                      style: AppTextStyles.errorText.copyWith(
+                        fontSize: isVeryCompact ? 11 : 14,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Utiliser l\'empreinte',
-                        style: AppTextStyles.buttonMedium.copyWith(
-                          fontSize: isVeryCompact ? 13 : 16,
-                        ),
-                      ),
-                    ],
-                  ),
+                      textAlign: TextAlign.center,
+                    )
+                  : Container(),
+            ),
+
+            SizedBox(height: sectionSpacing),
+
+            // Indicateur de chargement ou clavier
+            if (widget.isLoading)
+              const Padding(
+                padding: EdgeInsets.all(40.0),
+                child: CircularProgressIndicator(
+                  color: GlassColors.primary,
                 ),
-              ],
+              )
+            else
+              // ✅ CLAVIER FLEXIBLE SANS CONTRAINTE DE HAUTEUR
+              Flexible(
+                child: EnhancedNumericKeypad(
+                  onNumberPressed: _onNumberPressed,
+                  onBackspacePressed: _onBackspacePressed,
+                  onBackspaceLongPress: _onBackspaceLongPress,
+                  keySpacing: isVeryCompact ? 6.0 : (isCompact ? 10.0 : 16.0),
+                  padding:
+                      EdgeInsets.all(isVeryCompact ? 8 : (isCompact ? 12 : 20)),
+                ),
+              ),
+
+            // Option biométrique
+            if (widget.enableBiometric) ...[
+              SizedBox(height: isVeryCompact ? 4 : (isCompact ? 6 : 12)),
+              EnhancedGlassButton(
+                onTap: () {
+                  // TODO: Implémenter l'authentification biométrique
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.fingerprint,
+                      color: Colors.white,
+                      size: isVeryCompact ? 18 : 24,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Utiliser l\'empreinte',
+                      style: AppTextStyles.buttonMedium.copyWith(
+                        fontSize: isVeryCompact ? 13 : 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
-          ),
+          ],
         );
       },
     );

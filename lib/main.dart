@@ -4,8 +4,11 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'theme.dart';
+import 'config/app_config.dart';
 import 'services/supabase_service.dart';
 import 'services/migration_service.dart';
+import 'services/secure_storage_service.dart';
+import 'utils/storage_migration.dart';
 import 'animations/animation_manager.dart';
 import 'pages/enhanced_auth_page.dart';
 import 'pages/tutorial_page.dart';
@@ -16,8 +19,28 @@ import 'utils/debug_helper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialiser la configuration (variables d'environnement)
+  await AppConfig.initialize();
+
+  // Initialiser le stockage sécurisé
+  await SecureStorageService.initialize();
+
+  // Exécuter la migration des données si nécessaire
+  final migrationResult =
+      await StorageMigrationService.executeMigrationIfNeeded();
+  if (migrationResult.success && migrationResult.migratedKeys.isNotEmpty) {
+    // Nettoyer les anciennes données après migration réussie
+    await StorageMigrationService.cleanupOldData();
+  }
+
   // Initialiser Supabase
   await SupabaseService.initialize();
+
+  // Créer un container Riverpod pour l'initialisation des services
+  final container = ProviderContainer();
+  
+  // Initialiser DebugHelper avec le container
+  DebugHelper.initialize(container);
 
   // Diagnostic complet pour identifier les problèmes
   await DebugHelper.printFullDiagnosis();
@@ -33,7 +56,7 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(ProviderScope(child: const MyApp(), overrides: []));
 
   // Activer automatiquement l'accessibilité pour Flutter Web
   SemanticsBinding.instance.ensureSemantics();
@@ -74,7 +97,7 @@ class _StartupPageState extends State<StartupPage> {
     final isFirstTime = prefs.getBool('first_time') ?? true;
 
     // Force l'affichage du tutoriel pour les tests (décommentez la ligne suivante)
-    // await prefs.setBool('first_time', true);
+    await prefs.setBool('first_time', true);
 
     if (mounted) {
       if (isFirstTime) {
