@@ -732,7 +732,7 @@ class _PinEntryWidgetState extends State<PinEntryWidget> {
               SizedBox(height: isVeryCompact ? 4 : (isCompact ? 6 : 12)),
               EnhancedGlassButton(
                 onTap: () {
-                  // TODO: Implémenter l'authentification biométrique
+                  // Authentification biométrique non implémentée dans le MVP
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

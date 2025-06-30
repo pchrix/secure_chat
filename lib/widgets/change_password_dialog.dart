@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../services/auth_service.dart';
+import '../services/unified_auth_service.dart';
 import '../theme.dart';
 
 class ChangePasswordDialog extends StatefulWidget {
@@ -45,7 +45,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
     });
 
     try {
-      final result = await AuthService.verifyPassword(password);
+      final result = await UnifiedAuthService.verifyPassword(password);
 
       if (result.isSuccess) {
         setState(() {
@@ -70,7 +70,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
   void _nextStep() {
     final password = _newPasswordController.text.trim();
 
-    if (!AuthService.isValidPasswordFormat(password)) {
+    if (!UnifiedAuthService.isValidPasswordFormat(password)) {
       setState(() {
         _errorMessage = 'Le mot de passe doit contenir entre 4 et 6 chiffres';
       });
@@ -100,7 +100,8 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
     });
 
     try {
-      final success = await AuthService.setPassword(newPassword);
+      final result = await UnifiedAuthService.setPassword(newPassword);
+      final success = result.isSuccess;
 
       if (success) {
         if (mounted) {
