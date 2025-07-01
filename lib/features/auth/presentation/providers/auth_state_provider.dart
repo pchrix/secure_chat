@@ -34,23 +34,58 @@ final networkInfoProvider = Provider<NetworkInfo>((ref) {
   return NetworkInfoImpl();
 });
 
-/// Provider pour l'état d'authentification actuel
+/// Provider pour l'état d'authentification actuel - OPTIMISÉ
 final authStateProvider =
-    StateNotifierProvider<AuthStateNotifier, AsyncValue<domain.AuthState>>(
+    StateNotifierProvider.autoDispose<AuthStateNotifier, AsyncValue<domain.AuthState>>(
         (ref) {
   final repository = ref.watch(authRepositoryProvider);
-  return AuthStateNotifier(repository);
+  final notifier = AuthStateNotifier(repository);
+
+  // Garder en vie si l'utilisateur est authentifié
+  ref.listen(authStateProvider.select((state) => state.hasValue && state.value?.isAuthenticated == true),
+    (previous, next) {
+      if (next) {
+        ref.keepAlive();
+      }
+    });
+
+  return notifier;
 });
 
-/// Provider pour l'utilisateur actuel
-final currentUserProvider = Provider<domain.User?>((ref) {
-  final authState = ref.watch(authStateProvider);
+/// Provider pour l'utilisateur actuel - OPTIMISÉ avec select()
+final currentUserProvider = Provider.autoDispose<domain.User?>((ref) {
+  return ref.watch(authStateProvider.select((asyncState) {
+    return asyncState.when(
+      data: (state) => state.user,
+      loading: () => null,
+      error: (_, __) => null,
+    );
+  }));
+});
 
-  return authState.when(
-    data: (state) => state.user,
-    loading: () => null,
-    error: (_, __) => null,
-  );
+/// Providers dérivés OPTIMISÉS pour des propriétés spécifiques
+final isAuthenticatedProvider = Provider.autoDispose<bool>((ref) {
+  return ref.watch(authStateProvider.select((asyncState) {
+    return asyncState.when(
+      data: (state) => state.isAuthenticated,
+      loading: () => false,
+      error: (_, __) => false,
+    );
+  }));
+});
+
+final authLoadingProvider = Provider.autoDispose<bool>((ref) {
+  return ref.watch(authStateProvider.select((asyncState) => asyncState.isLoading));
+});
+
+final authErrorProvider = Provider.autoDispose<String?>((ref) {
+  return ref.watch(authStateProvider.select((asyncState) {
+    return asyncState.when(
+      data: (_) => null,
+      loading: () => null,
+      error: (error, _) => error.toString(),
+    );
+  }));
 });
 
 /// Provider pour vérifier si l'utilisateur est authentifié

@@ -235,16 +235,56 @@ final pinStateProvider =
   return PinStateNotifier(authService);
 });
 
-/// Provider pour vérifier si un PIN est configuré
-final hasPinConfiguredProvider = FutureProvider<bool>((ref) async {
+/// Provider pour vérifier si un PIN est configuré - OPTIMISÉ
+final hasPinConfiguredProvider = FutureProvider.autoDispose<bool>((ref) async {
   final authService = ref.watch(unifiedAuthServiceProvider);
   await authService.initialize();
-  return await authService.hasPasswordSet();
+  final hasPin = await authService.hasPasswordSet();
+
+  // Garder en cache si un PIN est configuré pour éviter les re-vérifications
+  if (hasPin) {
+    ref.keepAlive();
+  }
+
+  return hasPin;
 });
 
-/// Provider pour l'état d'authentification
-final authStatusProvider = FutureProvider<AuthState>((ref) async {
+/// Provider pour l'état d'authentification - OPTIMISÉ
+final authStatusProvider = FutureProvider.autoDispose<AuthState>((ref) async {
   final authService = ref.watch(unifiedAuthServiceProvider);
   await authService.initialize();
-  return await authService.checkAuthState();
+  final authState = await authService.checkAuthState();
+
+  // Garder en cache si authentifié
+  if (authState == AuthState.authenticated) {
+    ref.keepAlive();
+  }
+
+  return authState;
+});
+
+/// Providers dérivés OPTIMISÉS pour des cas d'usage spécifiques
+final isPinRequiredProvider = Provider.autoDispose<bool>((ref) {
+  final hasPinAsync = ref.watch(hasPinConfiguredProvider);
+  final authStatusAsync = ref.watch(authStatusProvider);
+
+  return hasPinAsync.when(
+    data: (hasPin) => authStatusAsync.when(
+      data: (status) => hasPin && status != AuthState.authenticated,
+      loading: () => false,
+      error: (_, __) => false,
+    ),
+    loading: () => false,
+    error: (_, __) => false,
+  );
+});
+
+final canAccessAppProvider = Provider.autoDispose<bool>((ref) {
+  return ref.watch(authStatusProvider.select((asyncState) {
+    return asyncState.when(
+      data: (status) => status == AuthState.authenticated,
+      loading: () => false,
+      error: (_, __) => false,
+    );
+  }));
 });
