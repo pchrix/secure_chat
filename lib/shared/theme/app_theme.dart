@@ -324,7 +324,7 @@ class AppTheme {
   static const TextTheme _textTheme = TextTheme(
     // Titres
     displayLarge: TextStyle(
-      fontSize: 32,
+      fontSize: AppTypography.fontSize4xl,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.5,
     ),
@@ -334,7 +334,7 @@ class AppTheme {
       letterSpacing: -0.25,
     ),
     displaySmall: TextStyle(
-      fontSize: 24,
+      fontSize: AppTypography.fontSize3xl,
       fontWeight: FontWeight.w600,
     ),
 
@@ -344,56 +344,56 @@ class AppTheme {
       fontWeight: FontWeight.w600,
     ),
     headlineMedium: TextStyle(
-      fontSize: 20,
+      fontSize: AppTypography.fontSize2xl,
       fontWeight: FontWeight.w600,
     ),
     headlineSmall: TextStyle(
-      fontSize: 18,
+      fontSize: AppTypography.fontSizeXl,
       fontWeight: FontWeight.w600,
     ),
 
     // Titres de section
     titleLarge: TextStyle(
-      fontSize: 16,
+      fontSize: AppTypography.fontSizeLg,
       fontWeight: FontWeight.w600,
     ),
     titleMedium: TextStyle(
-      fontSize: 14,
+      fontSize: AppTypography.fontSizeMd,
       fontWeight: FontWeight.w600,
     ),
     titleSmall: TextStyle(
-      fontSize: 12,
+      fontSize: AppTypography.fontSizeSm,
       fontWeight: FontWeight.w600,
     ),
 
     // Corps de texte
     bodyLarge: TextStyle(
-      fontSize: 16,
+      fontSize: AppTypography.fontSizeLg,
       fontWeight: FontWeight.w400,
       height: 1.5,
     ),
     bodyMedium: TextStyle(
-      fontSize: 14,
+      fontSize: AppTypography.fontSizeMd,
       fontWeight: FontWeight.w400,
       height: 1.4,
     ),
     bodySmall: TextStyle(
-      fontSize: 12,
+      fontSize: AppTypography.fontSizeSm,
       fontWeight: FontWeight.w400,
       height: 1.3,
     ),
 
     // Labels
     labelLarge: TextStyle(
-      fontSize: 14,
+      fontSize: AppTypography.fontSizeMd,
       fontWeight: FontWeight.w500,
     ),
     labelMedium: TextStyle(
-      fontSize: 12,
+      fontSize: AppTypography.fontSizeSm,
       fontWeight: FontWeight.w500,
     ),
     labelSmall: TextStyle(
-      fontSize: 10,
+      fontSize: AppTypography.fontSizeXs,
       fontWeight: FontWeight.w500,
     ),
   );

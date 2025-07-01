@@ -4,6 +4,9 @@
 /// Conforme aux meilleures pratiques Context7 et Clean Architecture
 
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/auth/presentation/pages/pin_page.dart';
@@ -57,7 +60,7 @@ class _EnhancedAuthPageState extends ConsumerState<EnhancedAuthPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircularProgressIndicator(),
-              SizedBox(height: 16),
+              AppSpacing.vGapMd,
               Text(
                 'Initialisation...',
                 style: TextStyle(color: Colors.white),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/room_provider_riverpod.dart';
@@ -76,7 +79,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
                                   const EdgeInsets.symmetric(horizontal: 16.0),
                               child: Column(
                                 children: [
-                                  const SizedBox(height: 16),
+                                  const AppSpacing.vGapMd,
 
                                   // Enhanced Hero Section (compacte)
                                   MorphTransition(
@@ -108,7 +111,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
 
                           // Bouton fixe en bas - SOLUTION CRITIQUE
                           Container(
-                            padding: const EdgeInsets.all(16.0),
+                            padding: const EdgeInsets.all(AppSpacing.md),
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.1),
                               border: Border(
@@ -146,10 +149,10 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
         children: [
           // Enhanced Back Button
           EnhancedGlassButton(
-            width: 48,
-            height: 48,
-            padding: const EdgeInsets.all(12),
-            color: GlassColors.primary,
+            width: AppSizes.iconXxl,
+            height: AppSizes.buttonHeightMd,
+            padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
+            color: AppColors.primary,
             onTap: () => Navigator.of(context).pop(),
             child: const Icon(
               Icons.arrow_back_ios,
@@ -163,12 +166,12 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
           // Enhanced Title with Gradient
           ShaderMask(
             shaderCallback: (bounds) =>
-                GlassColors.primaryGradient.createShader(bounds),
+                AppColors.primaryGradient.createShader(bounds),
             child: const Text(
               'Créer un salon',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: AppTypography.fontSize3xl,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
               ),
@@ -178,7 +181,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
           const Spacer(),
 
           // Placeholder for balance
-          const SizedBox(width: 48),
+          const SizedBox(width: AppSizes.iconXxl),
         ],
       ),
     );
@@ -192,13 +195,13 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
           BreathingPulseAnimation(
             child: Container(
               width: 80,
-              height: 80,
+              height: AppSizes.buttonHeightXl + AppSizes.buttonHeightSm,
               decoration: BoxDecoration(
-                gradient: GlassColors.primaryGradient,
-                borderRadius: BorderRadius.circular(20),
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                 boxShadow: [
                   BoxShadow(
-                    color: GlassColors.primary.withValues(alpha: 0.4),
+                    color: AppColors.primary.withValues(alpha: 0.4),
                     blurRadius: 15,
                     offset: const Offset(0, 6),
                   ),
@@ -211,23 +214,23 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const AppSpacing.vGapMd,
 
           // Enhanced Title (plus petit)
           ShaderMask(
             shaderCallback: (bounds) =>
-                GlassColors.primaryGradient.createShader(bounds),
+                AppColors.primaryGradient.createShader(bounds),
             child: const Text(
               'Nouveau salon sécurisé',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: AppTypography.fontSize3xl,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          const AppSpacing.vGapSm,
 
           // Enhanced Subtitle (plus compact)
           const Text(
@@ -235,7 +238,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white70,
-              fontSize: 14,
+              fontSize: AppTypography.fontSizeMd,
               height: 1.3,
             ),
           ),
@@ -252,16 +255,16 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
           'Durée d\'expiration',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 20,
+            fontSize: AppTypography.fontSize2xl,
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 8),
+        const AppSpacing.vGapSm,
         const Text(
           'Le salon sera automatiquement supprimé',
           style: TextStyle(
             color: Colors.white60,
-            fontSize: 14,
+            fontSize: AppTypography.fontSizeMd,
           ),
         ),
         const SizedBox(height: 20),
@@ -273,7 +276,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
   Widget _buildCompactSecurityInfo() {
     return EnhancedGlassContainer(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -284,11 +287,11 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  gradient: GlassColors.secondaryGradient,
-                  borderRadius: BorderRadius.circular(10),
+                  gradient: AppColors.secondaryGradient,
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   boxShadow: [
                     BoxShadow(
-                      color: GlassColors.secondary.withValues(alpha: 0.3),
+                      color: AppColors.secondary.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -309,7 +312,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
                       'Sécurité maximale',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: AppTypography.fontSizeLg,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -317,7 +320,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
                       'Protection garantie',
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: 12,
+                        fontSize: AppTypography.fontSizeSm,
                       ),
                     ),
                   ],
@@ -330,11 +333,11 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
 
           // Security Features compactes
           _buildCompactSecurityFeature(Icons.people_outline, 'Salon 1-to-1'),
-          const SizedBox(height: 8),
+          const AppSpacing.vGapSm,
           _buildCompactSecurityFeature(Icons.timer_outlined, 'Auto-expiration'),
-          const SizedBox(height: 8),
+          const AppSpacing.vGapSm,
           _buildCompactSecurityFeature(Icons.lock_outline, 'AES-256'),
-          const SizedBox(height: 8),
+          const AppSpacing.vGapSm,
           _buildCompactSecurityFeature(
               Icons.cloud_off_outlined, 'Zéro stockage'),
         ],
@@ -346,11 +349,11 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
     return Row(
       children: [
         Container(
-          width: 24,
+          width: AppSizes.iconMd,
           height: 24,
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(AppSizes.radiusXs),
           ),
           child: Icon(
             icon,
@@ -376,11 +379,11 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
       width: double.infinity,
       child: EnhancedGlassButton(
         height: 60,
-        color: GlassColors.primary,
+        color: AppColors.primary,
         onTap: _isCreating ? null : _createRoom,
         child: _isCreating
             ? const SizedBox(
-                width: 24,
+                width: AppSizes.iconMd,
                 height: 24,
                 child: CircularProgressIndicator(
                   color: Colors.white,
@@ -400,7 +403,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
                     'Créer le salon',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: AppTypography.fontSizeXl,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -435,8 +438,8 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
             delay: Duration(milliseconds: 50),
             child: EnhancedGlassButton(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              color: isSelected ? GlassColors.primary : Colors.white,
+              padding: const EdgeInsets.all(AppSpacing.lg - AppSpacing.xs),
+              color: isSelected ? AppColors.primary : Colors.white,
               onTap: () {
                 setState(() {
                   _selectedDuration = hours;
@@ -447,7 +450,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
                 children: [
                   // Enhanced Radio Button
                   Container(
-                    width: 24,
+                    width: AppSizes.iconMd,
                     height: 24,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -463,12 +466,12 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
                         ? Icon(
                             Icons.check,
                             size: 14,
-                            color: GlassColors.primary,
+                            color: AppColors.primary,
                           )
                         : null,
                   ),
 
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSizes.iconXs),
 
                   // Icon
                   Container(
@@ -478,7 +481,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
                       color: isSelected
                           ? Colors.white.withValues(alpha: 0.15)
                           : Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: Icon(
                       icon,
@@ -487,7 +490,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
                     ),
                   ),
 
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSizes.iconXs),
 
                   // Label
                   Expanded(
@@ -497,7 +500,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
                         color: isSelected
                             ? Colors.white
                             : Colors.white.withValues(alpha: 0.8),
-                        fontSize: 16,
+                        fontSize: AppTypography.fontSizeLg,
                         fontWeight:
                             isSelected ? FontWeight.w600 : FontWeight.w500,
                       ),
@@ -507,11 +510,11 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
                   // Selection Indicator
                   if (isSelected)
                     Container(
-                      width: 32,
-                      height: 32,
+                      width: AppSizes.iconLg,
+                      height: AppSizes.buttonHeightXs,
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                       ),
                       child: const Icon(
                         Icons.access_time,
@@ -551,7 +554,7 @@ class _CreateRoomPageState extends ConsumerState<CreateRoomPage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de la création: $e'),
-            backgroundColor: GlassColors.danger,
+            backgroundColor: AppColors.error,
           ),
         );
       }

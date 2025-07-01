@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_sizes.dart';
 import '../theme.dart';
 import '../animations/enhanced_micro_interactions.dart';
 
@@ -100,7 +103,7 @@ class _EnhancedLoadingOverlayState extends State<EnhancedLoadingOverlay>
   }
 
   Widget _buildLoadingIndicator() {
-    final loadingColor = widget.loadingColor ?? GlassColors.primary;
+    final loadingColor = widget.loadingColor ?? AppColors.primary;
 
     return AnimatedBuilder(
       animation: _pulseAnimation,
@@ -108,7 +111,7 @@ class _EnhancedLoadingOverlayState extends State<EnhancedLoadingOverlay>
         return Transform.scale(
           scale: _pulseAnimation.value,
           child: Container(
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(AppSpacing.xl),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -118,7 +121,7 @@ class _EnhancedLoadingOverlayState extends State<EnhancedLoadingOverlay>
                   Colors.white.withValues(alpha: 0.05),
                 ],
               ),
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(AppSizes.radiusXl),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.2),
                 width: 1,
@@ -146,7 +149,7 @@ class _EnhancedLoadingOverlayState extends State<EnhancedLoadingOverlay>
                           loadingColor.withValues(alpha: 0.7),
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                       boxShadow: [
                         BoxShadow(
                           color: loadingColor.withValues(alpha: 0.3),
@@ -163,7 +166,7 @@ class _EnhancedLoadingOverlayState extends State<EnhancedLoadingOverlay>
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const AppSpacing.vGapLg,
 
                 // Loading Text
                 if (widget.loadingText != null)
@@ -171,13 +174,13 @@ class _EnhancedLoadingOverlayState extends State<EnhancedLoadingOverlay>
                     widget.loadingText!,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
+                      fontSize: AppTypography.fontSizeLg,
                       fontWeight: FontWeight.w600,
                     ),
                     textAlign: TextAlign.center,
                   ),
 
-                const SizedBox(height: 16),
+                const AppSpacing.vGapMd,
 
                 // Progress Dots
                 _buildProgressDots(loadingColor),

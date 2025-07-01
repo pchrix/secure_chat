@@ -4,6 +4,9 @@
 /// Conforme aux meilleures pratiques Context7 et Flutter
 
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_sizes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -82,7 +85,7 @@ class PinEntryWidget extends ConsumerWidget {
                 ),
                 decoration: BoxDecoration(
                   color: Colors.red.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   border: Border.all(
                     color: Colors.red.withValues(alpha: 0.3),
                     width: 1,

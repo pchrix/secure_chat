@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
 import '../widgets/glass_components.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
+import '../core/theme/app_typography.dart';
+import '../core/theme/app_breakpoints.dart';
 import '../theme.dart';
 import 'enhanced_auth_page.dart';
 
@@ -77,7 +82,7 @@ class _TutorialPageState extends State<TutorialPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GlassColors.background,
+      backgroundColor: AppColors.background,
       resizeToAvoidBottomInset: true, // ✅ AJOUTÉ pour keyboard avoidance
       body: FadeTransition(
         opacity: _fadeAnimation,
@@ -89,9 +94,8 @@ class _TutorialPageState extends State<TutorialPage>
                   // Header avec bouton Skip - Responsive
                   Builder(
                     builder: (context) {
-                      final screenHeight = MediaQuery.of(context).size.height;
-                      final isVeryCompact = screenHeight < 700; // iPhone SE
-                      final isCompact = screenHeight < 800; // iPhone Standard
+                      final isVeryCompact = AppBreakpoints.isVeryCompactHeight(context);
+                      final isCompact = AppBreakpoints.isCompactHeight(context);
 
                       final headerPadding =
                           isVeryCompact ? 12.0 : (isCompact ? 16.0 : 24.0);
@@ -122,7 +126,7 @@ class _TutorialPageState extends State<TutorialPage>
                                 child: Text(
                                   'Passer',
                                   style: TextStyle(
-                                    color: GlassColors.primary
+                                    color: AppColors.primary
                                         .withValues(alpha: 0.8),
                                     fontSize: skipFontSize,
                                     fontWeight: FontWeight.w500,
@@ -138,7 +142,7 @@ class _TutorialPageState extends State<TutorialPage>
                   // Indicateurs de progression
                   _buildProgressIndicator(),
 
-                  const SizedBox(height: 16),
+                  const AppSpacing.vGapMd,
 
                   // Contenu des pages avec scroll
                   Expanded(
@@ -184,9 +188,9 @@ class _TutorialPageState extends State<TutorialPage>
               ),
               decoration: BoxDecoration(
                 color: index <= _currentPage
-                    ? GlassColors.primary
+                    ? AppColors.primary
                     : Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(AppSizes.radiusXs),
               ),
             ),
           );
@@ -231,12 +235,12 @@ class _TutorialPageState extends State<TutorialPage>
               width: iconSize.toDouble(),
               height: iconSize.toDouble(),
               borderRadius: BorderRadius.circular(isVeryCompact ? 20 : 30),
-              color: GlassColors.primary,
+              color: AppColors.primary,
               opacity: 0.2,
               child: Icon(
                 Icons.security,
                 size: iconInnerSize.toDouble(),
-                color: GlassColors.primary,
+                color: AppColors.primary,
               ),
             ),
             SizedBox(height: titleSpacing),
@@ -303,12 +307,12 @@ class _TutorialPageState extends State<TutorialPage>
               width: iconSize.toDouble(),
               height: iconSize.toDouble(),
               borderRadius: BorderRadius.circular(isVeryCompact ? 20 : 30),
-              color: GlassColors.secondary,
+              color: AppColors.secondary,
               opacity: 0.2,
               child: Icon(
                 Icons.lock_outline,
                 size: iconInnerSize.toDouble(),
-                color: GlassColors.secondary,
+                color: AppColors.secondary,
               ),
             ),
             SizedBox(height: titleSpacing),
@@ -380,12 +384,12 @@ class _TutorialPageState extends State<TutorialPage>
               width: iconSize.toDouble(),
               height: iconSize.toDouble(),
               borderRadius: BorderRadius.circular(isVeryCompact ? 20 : 30),
-              color: GlassColors.accent,
+              color: AppColors.accent,
               opacity: 0.2,
               child: Icon(
                 Icons.chat_bubble_outline,
                 size: iconInnerSize.toDouble(),
-                color: GlassColors.accent,
+                color: AppColors.accent,
               ),
             ),
             SizedBox(height: titleSpacing),
@@ -457,12 +461,12 @@ class _TutorialPageState extends State<TutorialPage>
               width: iconSize.toDouble(),
               height: iconSize.toDouble(),
               borderRadius: BorderRadius.circular(isVeryCompact ? 20 : 30),
-              color: GlassColors.warning,
+              color: AppColors.warning,
               opacity: 0.2,
               child: Icon(
                 Icons.vpn_key_outlined,
                 size: iconInnerSize.toDouble(),
-                color: GlassColors.warning,
+                color: AppColors.warning,
               ),
             ),
             SizedBox(height: titleSpacing),
@@ -539,12 +543,12 @@ class _TutorialPageState extends State<TutorialPage>
               width: iconSize.toDouble(),
               height: iconSize.toDouble(),
               borderRadius: BorderRadius.circular(isVeryCompact ? 20 : 30),
-              color: GlassColors.secondary,
+              color: AppColors.secondary,
               opacity: 0.2,
               child: Icon(
                 Icons.check_circle_outline,
                 size: iconInnerSize.toDouble(),
-                color: GlassColors.secondary,
+                color: AppColors.secondary,
               ),
             ),
             SizedBox(height: titleSpacing),
@@ -572,13 +576,13 @@ class _TutorialPageState extends State<TutorialPage>
             GlassContainer(
               padding:
                   EdgeInsets.all(isVeryCompact ? 10 : (isCompact ? 12 : 16)),
-              color: GlassColors.primary,
+              color: AppColors.primary,
               opacity: 0.1,
               child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: GlassColors.primary,
+                    color: AppColors.primary,
                     size: infoIconSize,
                   ),
                   SizedBox(width: isVeryCompact ? 8 : 12),
@@ -621,7 +625,7 @@ class _TutorialPageState extends State<TutorialPage>
             children: [
               Icon(
                 Icons.check_circle,
-                color: GlassColors.secondary,
+                color: AppColors.secondary,
                 size: iconSize,
               ),
               SizedBox(width: horizontalSpacing),
@@ -670,10 +674,10 @@ class _TutorialPageState extends State<TutorialPage>
                 width: circleSize,
                 height: circleSize,
                 decoration: BoxDecoration(
-                  color: GlassColors.primary.withValues(alpha: 0.2),
+                  color: AppColors.primary.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: GlassColors.primary,
+                    color: AppColors.primary,
                     width: borderWidth,
                   ),
                 ),
@@ -681,7 +685,7 @@ class _TutorialPageState extends State<TutorialPage>
                   child: Text(
                     '${index + 1}',
                     style: TextStyle(
-                      color: GlassColors.primary,
+                      color: AppColors.primary,
                       fontSize: numberFontSize,
                       fontWeight: FontWeight.bold,
                     ),
@@ -754,12 +758,12 @@ class _TutorialPageState extends State<TutorialPage>
           Expanded(
             child: GlassButton(
               height: buttonHeight,
-              color: GlassColors.primary,
+              color: AppColors.primary,
               onTap: _nextPage,
               child: Text(
                 _currentPage == _totalPages - 1 ? 'Commencer' : 'Suivant',
                 style: TextStyle(
-                  color: GlassColors.primary,
+                  color: AppColors.primary,
                   fontSize: fontSize,
                   fontWeight: FontWeight.w600,
                 ),

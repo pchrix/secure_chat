@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_sizes.dart';
 import '../../../../utils/responsive_builder.dart';
 
 /// Bouton personnalisé pour l'authentification
@@ -19,7 +22,7 @@ class AuthButton extends StatefulWidget {
     this.isLoading = false,
     this.isEnabled = true,
     this.width,
-    this.height = 56.0,
+    this.height = AppSizes.buttonHeightMd,
     this.style = AuthButtonStyle.primary,
     this.icon,
     this.loadingText,
@@ -40,7 +43,7 @@ class AuthButton extends StatefulWidget {
   /// Largeur du bouton
   final double? width;
 
-  /// Hauteur du bouton
+  /// Hauteur du bouton (utilise AppSizes.buttonHeightMd par défaut)
   final double height;
 
   /// Style du bouton
@@ -109,12 +112,12 @@ class _AuthButtonState extends State<AuthButton>
     double? effectiveWidth = widget.width;
     if (effectiveWidth == null) {
       effectiveWidth = responsive.isDesktop
-          ? math.min(400, responsive.availableWidth * 0.8)
+          ? math.min(AppSizes.cardMaxWidth, responsive.availableWidth * 0.8)
           : responsive.availableWidth;
     }
 
-    // Calculer la hauteur responsive
-    double effectiveHeight = responsive.buttonHeight;
+    // Calculer la hauteur responsive basée sur les design tokens
+    double effectiveHeight = widget.height;
 
     return GestureDetector(
       onTapDown: _canPress ? (_) => _onTapDown() : null,
@@ -142,7 +145,7 @@ class _AuthButtonState extends State<AuthButton>
           colors.secondary,
         ],
       ),
-      borderRadius: BorderRadius.circular(16.0),
+      borderRadius: BorderRadius.circular(AppSizes.radiusLg),
       boxShadow: _canPress
           ? [
               BoxShadow(
@@ -169,7 +172,7 @@ class _AuthButtonState extends State<AuthButton>
   Widget _buildContent() {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.2),
           width: 1.0,
@@ -187,7 +190,7 @@ class _AuthButtonState extends State<AuthButton>
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: 20,
+          width: AppSizes.iconSm,
           height: 20,
           child: CircularProgressIndicator(
             strokeWidth: 2.0,

@@ -4,6 +4,9 @@
 /// Optimisé pour les formulaires d'authentification.
 
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_sizes.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -138,7 +141,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 8),
+          const AppSpacing.vGapSm,
         ],
 
         // Champ de texte avec glassmorphism
@@ -201,7 +204,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
 
         // Message d'erreur
         if (_errorText != null) ...[
-          const SizedBox(height: 8),
+          const AppSpacing.vGapSm,
           Row(
             children: [
               Icon(

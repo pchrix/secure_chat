@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_sizes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_state_provider.dart';
 import '../models/contact.dart';
@@ -104,7 +107,7 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
         ),
       ),
     );
@@ -173,10 +176,10 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                         });
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                         ),
                         child: const Icon(
                           Icons.arrow_back,
@@ -193,7 +196,7 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                       'Contacts',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 20,
+                        fontSize: AppTypography.fontSize2xl,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -204,10 +207,10 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                     GestureDetector(
                       onTap: _showGenerateCodeDialog,
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                         ),
                         child: const Icon(
                           Icons.qr_code,
@@ -223,7 +226,7 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
               // Main content area
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -231,11 +234,11 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                         'Vos Contacts Sécurisés',
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 18,
+                          fontSize: AppTypography.fontSizeXl,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const AppSpacing.vGapMd,
 
                       // Contact list or empty state
                       Expanded(
@@ -251,7 +254,7 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
               // Add contact button
               if (!_isAddingContact && !_isGeneratingCode)
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppSpacing.md),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -261,7 +264,7 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                         'Ajouter un Contact',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: AppTypography.fontSizeLg,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -269,7 +272,7 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                         backgroundColor: const Color(0xFF9B59B6),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                         ),
                       ),
                     ),
@@ -292,10 +295,10 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(AppSizes.radiusLg),
             ),
             child: Icon(
               Icons.people_outline,
@@ -303,22 +306,22 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
               color: Colors.white.withValues(alpha: 0.3),
             ),
           ),
-          const SizedBox(height: 24),
+          const AppSpacing.vGapLg,
           Text(
             'Aucun contact',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.8),
-              fontSize: 20,
+              fontSize: AppTypography.fontSize2xl,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 8),
+          const AppSpacing.vGapSm,
           Text(
             'Ajoutez des contacts pour partager\ndes messages chiffrés en toute sécurité',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
+              fontSize: AppTypography.fontSizeLg,
             ),
           ),
         ],
@@ -335,20 +338,20 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSizes.radiusLg),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.1),
               width: 1,
             ),
           ),
           child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
+            contentPadding: const EdgeInsets.all(AppSpacing.md),
             leading: Container(
-              width: 48,
-              height: 48,
+              width: AppSizes.iconXxl,
+              height: AppSizes.buttonHeightMd,
               decoration: BoxDecoration(
                 color: const Color(0xFF9B59B6).withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
               ),
               child: Icon(
                 Icons.person,
@@ -360,7 +363,7 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
               contact.name,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.9),
-                fontSize: 16,
+                fontSize: AppTypography.fontSizeLg,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -368,7 +371,7 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
               'Ajouté le ${_formatDate(contact.createdAt)}',
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.5),
-                fontSize: 14,
+                fontSize: AppTypography.fontSizeMd,
               ),
             ),
             trailing: IconButton(
@@ -395,11 +398,11 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
         color: Colors.black.withValues(alpha: 0.7),
         child: Center(
           child: Container(
-            margin: const EdgeInsets.all(24),
-            padding: const EdgeInsets.all(24),
+            margin: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
               color: const Color(0xFF2C2C2E),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(AppSizes.radiusLg),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -408,11 +411,11 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                   'Ajouter un Contact',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 20,
+                    fontSize: AppTypography.fontSize2xl,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const AppSpacing.vGapLg,
                 TextField(
                   controller: _codeController,
                   style: TextStyle(color: Colors.white.withValues(alpha: 0.9)),
@@ -423,13 +426,13 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                     filled: true,
                     fillColor: Colors.white.withValues(alpha: 0.05),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                       borderSide: BorderSide.none,
                     ),
                   ),
                   maxLines: 3,
                 ),
-                const SizedBox(height: 24),
+                const AppSpacing.vGapLg,
                 Row(
                   children: [
                     Expanded(
@@ -443,14 +446,14 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: AppSizes.iconXs),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: _addContact,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF9B59B6),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                           ),
                         ),
                         child: const Text(
@@ -475,11 +478,11 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
         color: Colors.black.withValues(alpha: 0.7),
         child: Center(
           child: Container(
-            margin: const EdgeInsets.all(24),
-            padding: const EdgeInsets.all(24),
+            margin: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
               color: const Color(0xFF2C2C2E),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(AppSizes.radiusLg),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -488,11 +491,11 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                   'Générer un Code de Contact',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 20,
+                    fontSize: AppTypography.fontSize2xl,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const AppSpacing.vGapLg,
                 if (_myContactCode == null) ...[
                   TextField(
                     controller: _nameController,
@@ -505,12 +508,12 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                       filled: true,
                       fillColor: Colors.white.withValues(alpha: 0.05),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                         borderSide: BorderSide.none,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const AppSpacing.vGapLg,
                   Row(
                     children: [
                       Expanded(
@@ -524,14 +527,14 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: AppSizes.iconXs),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _generateContactCode,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF9B59B6),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                             ),
                           ),
                           child: const Text(
@@ -544,21 +547,21 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                   ),
                 ] else ...[
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                     ),
                     child: SelectableText(
                       _myContactCode!,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 14,
+                        fontSize: AppTypography.fontSizeMd,
                         fontFamily: 'monospace',
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const AppSpacing.vGapLg,
                   Row(
                     children: [
                       Expanded(
@@ -572,14 +575,14 @@ class _ContactsPageState extends ConsumerState<ContactsPage>
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: AppSizes.iconXs),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _copyContactCode,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF2E86AB),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                             ),
                           ),
                           child: const Text(

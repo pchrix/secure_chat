@@ -1,60 +1,23 @@
-/// 📱 ResponsiveBuilder - Optimisé pour iPhone SE et petits écrans
+/// 📱 ResponsiveBuilder - Design System Responsive Cohérent
 ///
 /// Basé sur les meilleures pratiques Flutter Context7 + Exa Research :
 /// - MediaQuery.sizeOf() pour performance optimale
 /// - LayoutBuilder pour contraintes dynamiques
-/// - Breakpoints ultra-agressifs pour iPhone SE (320px)
+/// - Design tokens centralisés (AppBreakpoints, AppSpacing, AppSizes)
 /// - Approche mobile-first avec scaling fluide
+/// - Intégration complète avec le design system SecureChat
 
 import 'package:flutter/material.dart';
+import '../core/theme/app_breakpoints.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 
 // ============================================================================
-// BREAKPOINTS ULTRA-AGRESSIFS POUR IPHONE SE
+// RESPONSIVE BUILDER WIDGET AMÉLIORÉ
 // ============================================================================
 
-/// Breakpoints optimisés basés sur recherche Exa + Context7
-class ResponsiveBreakpoints {
-  // iPhone SE 1ère génération : 320x568
-  static const double iphoneSE1 = 320.0;
-
-  // iPhone SE 2ème génération : 375x667
-  static const double iphoneSE2 = 375.0;
-
-  // iPhone standard : 390x844
-  static const double iphoneStandard = 390.0;
-
-  // Tablette : 768px+
-  static const double tablet = 768.0;
-
-  // Desktop : 1024px+
-  static const double desktop = 1024.0;
-
-  // Hauteurs critiques - Ultra-agressives pour iPhone SE
-  static const double veryCompactHeight = 700.0; // iPhone SE 1&2 (568, 667)
-  static const double compactHeight = 800.0; // iPhone standard
-  static const double normalHeight = 900.0; // Écrans normaux
-}
-
 // ============================================================================
-// DEVICE TYPE DETECTION
-// ============================================================================
-
-enum DeviceType {
-  iphoneSE1, // 320px - Ultra compact
-  iphoneSE2, // 375px - Très compact
-  iphoneStandard, // 390px+ - Compact
-  tablet, // 768px+ - Large
-  desktop, // 1024px+ - Extra large
-}
-
-enum ScreenHeight {
-  veryCompact, // < 600px - iPhone SE
-  compact, // < 700px - iPhone standard
-  normal, // >= 700px - Écrans normaux
-}
-
-// ============================================================================
-// RESPONSIVE BUILDER WIDGET
+// ENHANCED RESPONSIVE INFO CLASS
 // ============================================================================
 
 class ResponsiveBuilder extends StatelessWidget {
@@ -88,10 +51,6 @@ class ResponsiveBuilder extends StatelessWidget {
   }
 }
 
-// ============================================================================
-// RESPONSIVE INFO CLASS
-// ============================================================================
-
 class ResponsiveInfo {
   const ResponsiveInfo({
     required this.screenSize,
@@ -104,143 +63,107 @@ class ResponsiveInfo {
   final Orientation orientation;
 
   // ============================================================================
-  // DEVICE TYPE DETECTION
+  // DEVICE TYPE DETECTION (Intégré avec AppBreakpoints)
   // ============================================================================
 
-  DeviceType get deviceType {
-    final width = screenSize.width;
+  DeviceType get deviceType => AppBreakpoints.getDeviceType(_buildContext);
+  ScreenSize get screenSize => AppBreakpoints.getScreenSize(_buildContext);
 
-    if (width <= ResponsiveBreakpoints.iphoneSE1) {
-      return DeviceType.iphoneSE1;
-    } else if (width <= ResponsiveBreakpoints.iphoneSE2) {
-      return DeviceType.iphoneSE2;
-    } else if (width < ResponsiveBreakpoints.tablet) {
-      return DeviceType.iphoneStandard;
-    } else if (width < ResponsiveBreakpoints.desktop) {
-      return DeviceType.tablet;
-    } else {
-      return DeviceType.desktop;
-    }
-  }
+  // Fallback BuildContext pour les méthodes statiques
+  BuildContext get _buildContext => throw UnimplementedError(
+    'ResponsiveInfo doit être utilisé dans un contexte avec BuildContext'
+  );
 
-  ScreenHeight get screenHeight {
-    final height = screenSize.height;
+  // Méthodes de détection basées sur les design tokens
+  bool get isVerySmall => screenSize.width < AppBreakpoints.verySmall;
+  bool get isMobile => screenSize.width < AppBreakpoints.mobile;
+  bool get isTablet => screenSize.width >= AppBreakpoints.mobile &&
+                      screenSize.width < AppBreakpoints.desktop;
+  bool get isDesktop => screenSize.width >= AppBreakpoints.desktop;
+  bool get isLargeDesktop => screenSize.width >= AppBreakpoints.largeDesktop;
 
-    if (height < ResponsiveBreakpoints.veryCompactHeight) {
-      return ScreenHeight.veryCompact;
-    } else if (height < ResponsiveBreakpoints.compactHeight) {
-      return ScreenHeight.compact;
-    } else {
-      return ScreenHeight.normal;
-    }
-  }
+  // Détection de hauteur
+  bool get isVeryCompactHeight => screenSize.height < AppBreakpoints.veryCompactHeight;
+  bool get isCompactHeight => screenSize.height < AppBreakpoints.compactHeight;
+  bool get isNormalHeight => screenSize.height >= AppBreakpoints.normalHeight;
 
-  // ============================================================================
-  // CONVENIENCE GETTERS
-  // ============================================================================
-
-  bool get isIPhoneSE1 => deviceType == DeviceType.iphoneSE1;
-  bool get isIPhoneSE2 => deviceType == DeviceType.iphoneSE2;
-  bool get isIPhoneSE => isIPhoneSE1 || isIPhoneSE2;
-  bool get isIPhoneStandard => deviceType == DeviceType.iphoneStandard;
-  bool get isMobile => deviceType.index <= DeviceType.iphoneStandard.index;
-  bool get isTablet => deviceType == DeviceType.tablet;
-  bool get isDesktop => deviceType == DeviceType.desktop;
-
-  bool get isVeryCompact => screenHeight == ScreenHeight.veryCompact;
-  bool get isCompact => screenHeight == ScreenHeight.compact;
-  bool get isNormal => screenHeight == ScreenHeight.normal;
-
+  // Orientation
   bool get isPortrait => orientation == Orientation.portrait;
   bool get isLandscape => orientation == Orientation.landscape;
 
   // ============================================================================
-  // ADAPTIVE DIMENSIONS
+  // ADAPTIVE DIMENSIONS (Intégré avec Design Tokens)
   // ============================================================================
 
-  /// Padding adaptatif ultra-optimisé pour iPhone SE
+  /// Padding adaptatif basé sur les design tokens
   EdgeInsets get adaptivePadding {
-    if (isIPhoneSE1) {
-      return const EdgeInsets.symmetric(horizontal: 8, vertical: 4);
-    } else if (isIPhoneSE2) {
-      return const EdgeInsets.symmetric(horizontal: 12, vertical: 6);
-    } else if (isVeryCompact) {
-      return const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
-    } else if (isCompact) {
-      return const EdgeInsets.symmetric(horizontal: 20, vertical: 12);
+    if (isVerySmall) {
+      return const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs
+      );
+    } else if (isMobile) {
+      return const EdgeInsets.all(AppSpacing.md);
+    } else if (isTablet) {
+      return const EdgeInsets.all(AppSpacing.lg);
     } else {
-      return const EdgeInsets.all(24);
+      return const EdgeInsets.all(AppSpacing.xl);
     }
   }
 
   /// Espacement vertical adaptatif
   double get verticalSpacing {
-    if (isIPhoneSE1) return 4.0;
-    if (isIPhoneSE2) return 6.0;
-    if (isVeryCompact) return 8.0;
-    if (isCompact) return 12.0;
-    return 16.0;
+    if (isVerySmall) return AppSpacing.xs;
+    if (isMobile) return AppSpacing.sm;
+    if (isTablet) return AppSpacing.md;
+    return AppSpacing.lg;
   }
 
   /// Espacement horizontal adaptatif
   double get horizontalSpacing {
-    if (isIPhoneSE1) return 6.0;
-    if (isIPhoneSE2) return 8.0;
-    if (isVeryCompact) return 12.0;
-    if (isCompact) return 16.0;
-    return 20.0;
+    if (isVerySmall) return AppSpacing.sm;
+    if (isMobile) return AppSpacing.md;
+    if (isTablet) return AppSpacing.lg;
+    return AppSpacing.xl;
   }
 
-  /// Taille de police adaptative
-  double getAdaptiveFontSize(double baseSize) {
-    if (isIPhoneSE1) return baseSize * 0.75;
-    if (isIPhoneSE2) return baseSize * 0.85;
-    if (isVeryCompact) return baseSize * 0.9;
-    if (isCompact) return baseSize * 0.95;
-    return baseSize;
-  }
-
-  /// Hauteur de bouton adaptative
+  /// Hauteur de bouton adaptative basée sur AppSizes
   double get buttonHeight {
-    if (isIPhoneSE1) return 36.0;
-    if (isIPhoneSE2) return 40.0;
-    if (isVeryCompact) return 44.0;
-    if (isCompact) return 48.0;
-    return 52.0;
+    if (isVerySmall) return AppSizes.buttonHeightSm;
+    if (isMobile) return AppSizes.buttonHeightMd;
+    if (isTablet) return AppSizes.buttonHeightLg;
+    return AppSizes.buttonHeightXl;
+  }
+
+  /// Taille d'icône adaptative
+  double get iconSize {
+    if (isVerySmall) return AppSizes.iconSm;
+    if (isMobile) return AppSizes.iconMd;
+    if (isTablet) return AppSizes.iconLg;
+    return AppSizes.iconXl;
   }
 
   /// Largeur maximale du contenu
   double get maxContentWidth {
     if (isMobile) return screenSize.width * 0.9;
-    if (isTablet) return 600.0;
-    return 800.0;
+    if (isTablet) return AppSizes.cardMaxWidth;
+    return AppSizes.maxContentWidth;
   }
 
-  /// Hauteur du clavier numérique adaptative
-  double get keypadHeight {
-    if (isIPhoneSE1) return 140.0; // Ultra-compact
-    if (isIPhoneSE2) return 160.0; // Très compact
-    if (isVeryCompact) return 180.0; // Compact
-    if (isCompact) return 220.0; // Standard
-    return 260.0; // Large
+  /// Rayon de bordure adaptatif
+  double get borderRadius {
+    if (isVerySmall) return AppSizes.radiusSm;
+    if (isMobile) return AppSizes.radiusMd;
+    if (isTablet) return AppSizes.radiusLg;
+    return AppSizes.radiusXl;
   }
 
-  /// Espacement du clavier adaptatif
-  double get keypadSpacing {
-    if (isIPhoneSE1) return 4.0;
-    if (isIPhoneSE2) return 6.0;
-    if (isVeryCompact) return 8.0;
-    if (isCompact) return 12.0;
-    return 16.0;
-  }
-
-  /// Taille des touches du clavier
-  double get keySize {
-    if (isIPhoneSE1) return 28.0;
-    if (isIPhoneSE2) return 32.0;
-    if (isVeryCompact) return 36.0;
-    if (isCompact) return 42.0;
-    return 48.0;
+  /// Élévation adaptative
+  double get elevation {
+    if (isVerySmall) return AppSizes.elevationSm;
+    if (isMobile) return AppSizes.elevationMd;
+    if (isTablet) return AppSizes.elevationLg;
+    return AppSizes.elevationXl;
   }
 
   // ============================================================================
@@ -248,13 +171,13 @@ class ResponsiveInfo {
   // ============================================================================
 
   /// Détermine si on doit utiliser un layout compact
-  bool get shouldUseCompactLayout => isVeryCompact || isIPhoneSE;
+  bool get shouldUseCompactLayout => isVeryCompactHeight || isVerySmall;
 
   /// Détermine si on doit désactiver les animations coûteuses
-  bool get shouldDisableHeavyAnimations => isIPhoneSE1 || isVeryCompact;
+  bool get shouldDisableHeavyAnimations => isVerySmall || isVeryCompactHeight;
 
   /// Détermine si on doit réduire les effets visuels
-  bool get shouldReduceVisualEffects => isIPhoneSE || isVeryCompact;
+  bool get shouldReduceVisualEffects => isVerySmall || isVeryCompactHeight;
 
   /// Calcule la hauteur disponible en soustrayant les éléments fixes
   double getAvailableHeight({
@@ -273,13 +196,22 @@ class ResponsiveInfo {
   double get availableWidth {
     return screenSize.width - adaptivePadding.horizontal;
   }
+
+  /// Obtient le nombre de colonnes pour une grille responsive
+  int get gridColumns {
+    if (isVerySmall) return 1;
+    if (isMobile) return 1;
+    if (isTablet) return 2;
+    return 3;
+  }
 }
 
 // ============================================================================
-// RESPONSIVE EXTENSIONS
+// RESPONSIVE EXTENSIONS AMÉLIORÉES
 // ============================================================================
 
 extension ResponsiveExtensions on BuildContext {
+  /// Obtient les informations responsive
   ResponsiveInfo get responsive {
     final screenSize = MediaQuery.sizeOf(this);
     final orientation = MediaQuery.orientationOf(this);
@@ -290,4 +222,29 @@ extension ResponsiveExtensions on BuildContext {
       orientation: orientation,
     );
   }
+
+  /// Raccourcis pour les breakpoints
+  bool get isMobile => AppBreakpoints.isMobile(this);
+  bool get isTablet => AppBreakpoints.isTablet(this);
+  bool get isDesktop => AppBreakpoints.isDesktop(this);
+  bool get isVerySmall => MediaQuery.sizeOf(this).width < AppBreakpoints.verySmall;
+
+  /// Raccourcis pour les espacements responsive
+  EdgeInsets get responsivePadding => AppSpacing.getResponsiveSymmetric(this);
+  EdgeInsets get responsiveHorizontal => AppSpacing.getResponsiveHorizontal(this);
+  EdgeInsets get responsiveVertical => AppSpacing.getResponsiveVertical(this);
+
+  /// Raccourcis pour les valeurs responsive
+  T responsiveValue<T>({
+    required T mobile,
+    T? tablet,
+    T? desktop,
+    T? largeDesktop,
+  }) => AppBreakpoints.getResponsiveValue<T>(
+    this,
+    mobile: mobile,
+    tablet: tablet,
+    desktop: desktop,
+    largeDesktop: largeDesktop,
+  );
 }

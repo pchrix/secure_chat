@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import '../models/room.dart';
 import '../widgets/glass_components.dart';
 import '../utils/responsive_builder.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import '../theme.dart';
 
 class EnhancedRoomCard extends StatelessWidget {
@@ -67,13 +70,13 @@ class EnhancedRoomCard extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Colors.transparent,
-            GlassColors.danger.withValues(alpha: 0.1),
+            AppColors.error.withValues(alpha: 0.1),
           ],
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
         border: Border.all(
-          color: GlassColors.danger.withValues(alpha: 0.5),
-          width: 1,
+          color: AppColors.error.withValues(alpha: 0.5),
+          width: AppSizes.borderThin,
         ),
       ),
       child: Column(
@@ -84,8 +87,8 @@ class EnhancedRoomCard extends StatelessWidget {
             width: _getAdaptiveSize(responsive, 32),
             height: _getAdaptiveSize(responsive, 32),
             decoration: BoxDecoration(
-              color: GlassColors.danger,
-              borderRadius: BorderRadius.circular(8),
+              color: AppColors.error,
+              borderRadius: BorderRadius.circular(AppSizes.radiusSm),
             ),
             child: Icon(
               Icons.delete_outline,
@@ -97,7 +100,7 @@ class EnhancedRoomCard extends StatelessWidget {
           Text(
             'Supprimer',
             style: TextStyle(
-              color: GlassColors.danger,
+              color: AppColors.error,
               fontSize: responsive.getAdaptiveFontSize(10),
               fontWeight: FontWeight.w600,
             ),
@@ -117,8 +120,8 @@ class EnhancedRoomCard extends StatelessWidget {
         Row(
           children: [
             Container(
-              width: MediaQuery.sizeOf(context).width < 600 ? 20 : 24,
-              height: MediaQuery.sizeOf(context).width < 600 ? 20 : 24,
+              width: responsive.isMobile ? AppSizes.iconSm : AppSizes.iconMd,
+              height: responsive.isMobile ? AppSizes.iconSm : AppSizes.iconMd,
               decoration: BoxDecoration(
                 color: _getStatusColor(),
                 shape: BoxShape.circle,
@@ -163,11 +166,11 @@ class EnhancedRoomCard extends StatelessWidget {
   Color _getStatusColor() {
     switch (room.status) {
       case RoomStatus.waiting:
-        return GlassColors.warning;
+        return AppColors.warning;
       case RoomStatus.active:
-        return GlassColors.secondary;
+        return AppColors.secondary;
       case RoomStatus.expired:
-        return GlassColors.danger;
+        return AppColors.error;
     }
   }
 

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import '../theme.dart';
 
 /// Helpers pour améliorer l'expérience utilisateur avec feedback
@@ -15,16 +18,16 @@ class UIHelpers {
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: const TextStyle(color: Colors.white, fontSize: AppTypography.fontSizeLg),
               ),
             ),
           ],
         ),
-        backgroundColor: GlassColors.success,
+        backgroundColor: AppColors.success,
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusMd)),
+        margin: const EdgeInsets.all(AppSpacing.md),
       ),
     );
   }
@@ -40,16 +43,16 @@ class UIHelpers {
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: const TextStyle(color: Colors.white, fontSize: AppTypography.fontSizeLg),
               ),
             ),
           ],
         ),
-        backgroundColor: GlassColors.danger,
+        backgroundColor: AppColors.error,
         duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusMd)),
+        margin: const EdgeInsets.all(AppSpacing.md),
       ),
     );
   }
@@ -65,16 +68,16 @@ class UIHelpers {
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: const TextStyle(color: Colors.white, fontSize: AppTypography.fontSizeLg),
               ),
             ),
           ],
         ),
-        backgroundColor: GlassColors.primary,
+        backgroundColor: AppColors.primary,
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusMd)),
+        margin: const EdgeInsets.all(AppSpacing.md),
       ),
     );
   }
@@ -90,8 +93,8 @@ class UIHelpers {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: GlassColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusLg)),
         title: Text(
           title,
           style: AppTextStyles.pageTitle,
@@ -111,9 +114,9 @@ class UIHelpers {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: GlassColors.danger,
+              backgroundColor: AppColors.error,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
               ),
             ),
             child: Text(
@@ -133,13 +136,13 @@ class UIHelpers {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: GlassColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusLg)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(color: GlassColors.primary),
-            const SizedBox(height: 16),
+            const CircularProgressIndicator(color: AppColors.primary),
+            const AppSpacing.vGapMd,
             Text(
               message,
               style: AppTextStyles.bodyLarge,
@@ -170,11 +173,11 @@ class UIHelpers {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: GlassColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusLg)),
         title: Row(
           children: [
-            const Icon(Icons.help_outline, color: GlassColors.primary),
+            const Icon(Icons.help_outline, color: AppColors.primary),
             const SizedBox(width: 8),
             Text(
               'Guide d\'utilisation',
@@ -199,9 +202,9 @@ class UIHelpers {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
             style: ElevatedButton.styleFrom(
-              backgroundColor: GlassColors.primary,
+              backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
               ),
             ),
             child: const Text(
@@ -220,7 +223,7 @@ class UIHelpers {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 20)),
+          Text(emoji, style: const TextStyle(fontSize: AppTypography.fontSize2xl)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

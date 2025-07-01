@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import '../theme.dart';
 
 /// Tooltip glassmorphique avancé avec animations et styles personnalisés
@@ -135,15 +138,15 @@ class _TooltipOverlay extends StatelessWidget {
   Color _getTypeColor() {
     switch (type) {
       case EnhancedTooltipType.success:
-        return GlassColors.success;
+        return AppColors.success;
       case EnhancedTooltipType.warning:
-        return GlassColors.warning;
+        return AppColors.warning;
       case EnhancedTooltipType.error:
-        return GlassColors.danger;
+        return AppColors.error;
       case EnhancedTooltipType.help:
-        return GlassColors.secondary;
+        return AppColors.secondary;
       case EnhancedTooltipType.info:
-        return GlassColors.primary;
+        return AppColors.primary;
     }
   }
 
@@ -198,7 +201,7 @@ class _TooltipOverlay extends StatelessWidget {
                 scale: scaleAnimation.value,
                 child: Container(
                   width: tooltipWidth,
-                  padding: padding ?? const EdgeInsets.all(16),
+                  padding: padding ?? const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -208,7 +211,7 @@ class _TooltipOverlay extends StatelessWidget {
                         Colors.white.withValues(alpha: 0.05),
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                     border: Border.all(
                       color: typeColor.withValues(alpha: 0.3),
                       width: 1.5,
@@ -234,11 +237,11 @@ class _TooltipOverlay extends StatelessWidget {
                       Row(
                         children: [
                           Container(
-                            width: 32,
-                            height: 32,
+                            width: AppSizes.iconLg,
+                            height: AppSizes.buttonHeightXs,
                             decoration: BoxDecoration(
                               color: typeColor.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                             ),
                             child: Icon(
                               _getTypeIcon(),
@@ -253,7 +256,7 @@ class _TooltipOverlay extends StatelessWidget {
                                 title!,
                                 style: TextStyle(
                                   color: typeColor,
-                                  fontSize: 14,
+                                  fontSize: AppTypography.fontSizeMd,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -262,7 +265,7 @@ class _TooltipOverlay extends StatelessWidget {
                         ],
                       ),
 
-                      if (title != null) const SizedBox(height: 8),
+                      if (title != null) const AppSpacing.vGapSm,
 
                       // Message
                       Text(

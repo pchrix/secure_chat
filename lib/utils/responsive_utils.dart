@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import 'package:flutter/foundation.dart';
 
 /// Utilitaires pour le design responsive et l'accessibilité
@@ -129,22 +132,22 @@ class ResponsiveUtils {
 
     switch (deviceType) {
       case DeviceType.mobile:
-        return mobile ?? const EdgeInsets.all(16.0);
+        return mobile ?? const EdgeInsets.all(AppSpacing.md);
       case DeviceType.tablet:
-        return tablet ?? const EdgeInsets.all(24.0);
+        return tablet ?? const EdgeInsets.all(AppSpacing.lg);
       case DeviceType.desktop:
-        return desktop ?? const EdgeInsets.all(32.0);
+        return desktop ?? const EdgeInsets.all(AppSpacing.xl);
     }
   }
 
   /// Obtenir le padding ultra-adaptatif basé sur la hauteur d'écran
   static EdgeInsets getUltraAdaptivePadding(BuildContext context) {
     if (isVeryCompact(context)) {
-      return const EdgeInsets.all(12.0); // Ultra-compact pour iPhone SE
+      return const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs); // Ultra-compact pour iPhone SE
     } else if (isCompact(context)) {
-      return const EdgeInsets.all(16.0); // Compact pour iPhone standard
+      return const EdgeInsets.all(AppSpacing.md); // Compact pour iPhone standard
     } else {
-      return const EdgeInsets.all(24.0); // Normal pour grands écrans
+      return const EdgeInsets.all(AppSpacing.lg); // Normal pour grands écrans
     }
   }
 

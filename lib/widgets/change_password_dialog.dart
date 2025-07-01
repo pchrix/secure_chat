@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/unified_auth_service.dart';
@@ -179,12 +182,12 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
     }
 
     return Dialog(
-      backgroundColor: GlassColors.authBackground,
+      backgroundColor: AppColors.authBackground,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -195,10 +198,10 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                   GestureDetector(
                     onTap: _goBack,
                     child: Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(AppSpacing.sm),
                       decoration: BoxDecoration(
-                        color: GlassColors.whiteAlpha10,
-                        borderRadius: BorderRadius.circular(8),
+                        color: AppColors.glassWhite,
+                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                       ),
                       child: const Icon(
                         Icons.arrow_back,
@@ -213,7 +216,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                     title,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: AppTypography.fontSize2xl,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -223,10 +226,10 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                     if (mounted) Navigator.of(context).pop();
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: const Icon(
                       Icons.close,
@@ -238,24 +241,24 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
               ],
             ),
 
-            const SizedBox(height: 24),
+            const AppSpacing.vGapLg,
 
             // Subtitle
             Text(
               subtitle,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.7),
-                fontSize: 14,
+                fontSize: AppTypography.fontSizeMd,
               ),
             ),
 
-            const SizedBox(height: 24),
+            const AppSpacing.vGapLg,
 
             // Password input
             Container(
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                 border: Border.all(
                   color: _errorMessage != null
                       ? Colors.red.withValues(alpha: 0.5)
@@ -276,7 +279,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                 ],
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.9),
-                  fontSize: 16,
+                  fontSize: AppTypography.fontSizeLg,
                   letterSpacing: 4,
                 ),
                 textAlign: TextAlign.center,
@@ -284,7 +287,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                   hintText: '••••',
                   hintStyle: TextStyle(
                     color: Colors.white.withValues(alpha: 0.3),
-                    fontSize: 16,
+                    fontSize: AppTypography.fontSizeLg,
                     letterSpacing: 4,
                   ),
                   border: InputBorder.none,
@@ -297,7 +300,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const AppSpacing.vGapMd,
 
             // Error message
             if (_errorMessage != null)
@@ -308,7 +311,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                 ),
                 decoration: BoxDecoration(
                   color: Colors.red.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   border: Border.all(
                     color: Colors.red.withValues(alpha: 0.3),
                     width: 1,
@@ -327,7 +330,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                         _errorMessage!,
                         style: TextStyle(
                           color: Colors.red.withValues(alpha: 0.9),
-                          fontSize: 12,
+                          fontSize: AppTypography.fontSizeSm,
                         ),
                       ),
                     ),
@@ -335,7 +338,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                 ),
               ),
 
-            const SizedBox(height: 24),
+            const AppSpacing.vGapLg,
 
             // Action button
             SizedBox(
@@ -343,17 +346,17 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : onSubmit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: GlassColors.setupPurple,
-                  disabledBackgroundColor: GlassColors.setupPurpleAlpha50,
+                  backgroundColor: AppColors.setupPurple,
+                  disabledBackgroundColor: AppColors.setupPurpleAlpha50,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                   ),
                   elevation: 0,
                 ),
                 child: _isLoading
                     ? const SizedBox(
-                        width: 16,
+                        width: AppSizes.iconXs,
                         height: 16,
                         child: CircularProgressIndicator(
                           color: Colors.white,
@@ -364,7 +367,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                         _currentStep == 2 ? 'Modifier' : 'Continuer',
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 14,
+                          fontSize: AppTypography.fontSizeMd,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

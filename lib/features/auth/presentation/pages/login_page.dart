@@ -4,6 +4,9 @@
 /// et gestion d'état via Riverpod.
 
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_sizes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -54,7 +57,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: _buildLoginForm(),
               ),
             ),
@@ -95,7 +98,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             // Logo et titre
             _buildHeader(),
 
-            const SizedBox(height: 32),
+            const AppSpacing.vGapXl,
 
             // Champ email
             AuthTextField(
@@ -108,7 +111,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               textInputAction: TextInputAction.next,
             ),
 
-            const SizedBox(height: 16),
+            const AppSpacing.vGapMd,
 
             // Champ mot de passe
             AuthTextField(
@@ -133,12 +136,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               onFieldSubmitted: (_) => _handleLogin(),
             ),
 
-            const SizedBox(height: 16),
+            const AppSpacing.vGapMd,
 
             // Options (Se souvenir de moi, Mot de passe oublié)
             _buildOptions(),
 
-            const SizedBox(height: 24),
+            const AppSpacing.vGapLg,
 
             // Bouton de connexion
             AuthButton(
@@ -147,12 +150,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               isLoading: ref.watch(authStateProvider).isLoading,
             ),
 
-            const SizedBox(height: 16),
+            const AppSpacing.vGapMd,
 
             // Lien vers l'inscription
             _buildSignUpLink(),
 
-            const SizedBox(height: 16),
+            const AppSpacing.vGapMd,
 
             // Message d'erreur
             _buildErrorMessage(),
@@ -169,7 +172,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         // Logo
         Container(
           width: 80,
-          height: 80,
+          height: AppSizes.buttonHeightXl + AppSizes.buttonHeightSm,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
@@ -186,7 +189,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
         ),
 
-        const SizedBox(height: 16),
+        const AppSpacing.vGapMd,
 
         // Titre
         Text(
@@ -197,7 +200,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
         ),
 
-        const SizedBox(height: 8),
+        const AppSpacing.vGapSm,
 
         // Sous-titre
         Text(
@@ -287,10 +290,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       data: (_) => const SizedBox.shrink(),
       loading: () => const SizedBox.shrink(),
       error: (error, _) => Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
         decoration: BoxDecoration(
           color: AppTheme.errorColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
           border: Border.all(
             color: AppTheme.errorColor.withValues(alpha: 0.3),
           ),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/room.dart';
 import '../providers/room_provider_riverpod.dart';
@@ -130,7 +133,7 @@ class _HomePageState extends ConsumerState<HomePage>
         // Message d'erreur
         if (error != null) _buildErrorMessage(context, error),
 
-        const SizedBox(height: 24),
+        const AppSpacing.vGapLg,
 
         // Liste des salons ou état de chargement - Contrainte pour laisser place aux boutons
         Expanded(
@@ -176,7 +179,7 @@ class _HomePageState extends ConsumerState<HomePage>
           child: Column(
             children: [
               _buildHeader(context, EdgeInsets.zero),
-              const SizedBox(height: 32),
+              const AppSpacing.vGapXl,
               _buildActionButtons(context, EdgeInsets.zero),
               const Spacer(),
               if (error != null) _buildErrorMessage(context, error),
@@ -192,7 +195,7 @@ class _HomePageState extends ConsumerState<HomePage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildSubtitle(context, EdgeInsets.zero),
-                const SizedBox(height: 24),
+                const AppSpacing.vGapLg,
                 Expanded(
                   child: isLoading
                       ? AccessibilityUtils.accessibleLoadingIndicator(
@@ -220,7 +223,7 @@ class _HomePageState extends ConsumerState<HomePage>
               label: 'SecureChat - Application de chat sécurisé',
               child: ShaderMask(
                 shaderCallback: (bounds) =>
-                    GlassColors.primaryGradient.createShader(bounds),
+                    AppColors.primaryGradient.createShader(bounds),
                 child: Text(
                   'SecureChat',
                   style: ResponsiveUtils.isMobile(context)
@@ -294,7 +297,7 @@ class _HomePageState extends ConsumerState<HomePage>
 
   Widget _buildErrorMessage(BuildContext context, String error) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: AccessibilityUtils.accessibleErrorMessage(
         message: error,
         onRetry: () => ref.read(roomProvider.notifier).clearError(),
@@ -387,7 +390,7 @@ class _HomePageState extends ConsumerState<HomePage>
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const AppSpacing.vGapMd,
 
               // Bouton Rejoindre un salon avec animations
               ButtonPressAnimation(
@@ -396,10 +399,10 @@ class _HomePageState extends ConsumerState<HomePage>
                   child: UnifiedGlassButton(
                     onTap: () => _navigateToJoinRoom(),
                     width: isDesktop ? 250 : double.infinity,
-                    height: 56,
+                    height: AppSizes.buttonHeightLg,
                     semanticLabel: 'Rejoindre un salon existant',
                     tooltip: 'Rejoindre un salon',
-                    color: GlassColors.secondary,
+                    color: AppColors.secondary,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -433,21 +436,21 @@ class _HomePageState extends ConsumerState<HomePage>
           GlassContainer(
             width: 120,
             height: 120,
-            borderRadius: BorderRadius.circular(30),
-            color: GlassColors.primary,
+            borderRadius: BorderRadius.circular(AppSizes.radiusXl),
+            color: AppColors.primary,
             opacity: 0.1,
             child: const Icon(
               Icons.chat_bubble_outline,
               size: 60,
-              color: GlassColors.primary,
+              color: AppColors.primary,
             ),
           ),
-          const SizedBox(height: 24),
+          const AppSpacing.vGapLg,
           Text(
             'Aucun salon actif',
             style: AppTextStyles.sectionTitle,
           ),
-          const SizedBox(height: 8),
+          const AppSpacing.vGapSm,
           Text(
             'Créez votre premier salon sécurisé\npour commencer à échanger',
             textAlign: TextAlign.center,

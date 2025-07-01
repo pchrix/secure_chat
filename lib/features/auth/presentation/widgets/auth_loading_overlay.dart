@@ -5,6 +5,9 @@
 
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_sizes.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import 'glassmorphism_container.dart';
@@ -116,7 +119,7 @@ class _AuthLoadingOverlayState extends State<AuthLoadingOverlay>
 
   Widget _buildLoadingContent() {
     return GlassmorphismVariants.modal(
-      padding: const EdgeInsets.all(32.0),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -124,7 +127,7 @@ class _AuthLoadingOverlayState extends State<AuthLoadingOverlay>
           _buildCustomLoader(),
           
           if (widget.showMessage) ...[
-            const SizedBox(height: 24),
+            const AppSpacing.vGapLg,
             Text(
               widget.message,
               style: AppTheme.bodyMedium.copyWith(
@@ -162,7 +165,7 @@ class _AuthLoadingOverlayState extends State<AuthLoadingOverlay>
               ),
             ),
             child: Container(
-              margin: const EdgeInsets.all(4),
+              margin: const EdgeInsets.all(AppSpacing.xs),
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white,

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/room_provider_riverpod.dart';
@@ -60,7 +63,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                 final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
                 return SingleChildScrollView(
                   reverse: true, // ✅ AJOUTÉ pour keyboard avoidance
-                  padding: const EdgeInsets.all(24.0),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: constraints.maxHeight - 48 - keyboardHeight,
@@ -76,7 +79,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                             child: _buildHeroSection(),
                           ),
 
-                          const SizedBox(height: 40),
+                          const SizedBox(height: AppSizes.buttonHeightSm),
 
                           // Enhanced Input Section
                           WaveSlideAnimation(
@@ -84,7 +87,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                             child: _buildInputSection(),
                           ),
 
-                          const SizedBox(height: 32),
+                          const AppSpacing.vGapXl,
 
                           // Enhanced Instructions
                           WaveSlideAnimation(
@@ -92,7 +95,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                             child: _buildInstructions(),
                           ),
 
-                          const SizedBox(height: 32),
+                          const AppSpacing.vGapXl,
 
                           // Enhanced Action Buttons
                           WaveSlideAnimation(
@@ -100,7 +103,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                             child: _buildActionButtons(),
                           ),
 
-                          const SizedBox(height: 24),
+                          const AppSpacing.vGapLg,
                         ],
                       ),
                     ),
@@ -134,15 +137,15 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
 
   Widget _buildGlassAppBar() {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Row(
         children: [
           // Enhanced Back Button
           EnhancedGlassButton(
-            width: 48,
-            height: 48,
-            padding: const EdgeInsets.all(12),
-            color: GlassColors.primary,
+            width: AppSizes.iconXxl,
+            height: AppSizes.buttonHeightMd,
+            padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
+            color: AppColors.primary,
             onTap: () => Navigator.of(context).pop(),
             child: const Icon(
               Icons.arrow_back_ios,
@@ -156,12 +159,12 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
           // Enhanced Title with Gradient
           ShaderMask(
             shaderCallback: (bounds) =>
-                GlassColors.primaryGradient.createShader(bounds),
+                AppColors.primaryGradient.createShader(bounds),
             child: const Text(
               'Rejoindre un salon',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: AppTypography.fontSize3xl,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
               ),
@@ -171,7 +174,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
           const Spacer(),
 
           // Placeholder for balance
-          const SizedBox(width: 48),
+          const SizedBox(width: AppSizes.iconXxl),
         ],
       ),
     );
@@ -187,11 +190,11 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                gradient: GlassColors.secondaryGradient,
-                borderRadius: BorderRadius.circular(25),
+                gradient: AppColors.secondaryGradient,
+                borderRadius: BorderRadius.circular(AppSizes.radiusXl),
                 boxShadow: [
                   BoxShadow(
-                    color: GlassColors.secondary.withValues(alpha: 0.4),
+                    color: AppColors.secondary.withValues(alpha: 0.4),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -204,12 +207,12 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const AppSpacing.vGapLg,
 
           // Enhanced Title
           ShaderMask(
             shaderCallback: (bounds) =>
-                GlassColors.secondaryGradient.createShader(bounds),
+                AppColors.secondaryGradient.createShader(bounds),
             child: const Text(
               'Rejoindre une conversation',
               style: TextStyle(
@@ -228,7 +231,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white70,
-              fontSize: 16,
+              fontSize: AppTypography.fontSizeLg,
               height: 1.4,
             ),
           ),
@@ -240,7 +243,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
   Widget _buildInputSection() {
     return EnhancedGlassContainer(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -248,14 +251,14 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
           Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: AppSizes.iconXxl,
+                height: AppSizes.buttonHeightMd,
                 decoration: BoxDecoration(
-                  gradient: GlassColors.primaryGradient,
-                  borderRadius: BorderRadius.circular(12),
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                   boxShadow: [
                     BoxShadow(
-                      color: GlassColors.primary.withValues(alpha: 0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -267,7 +270,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                   size: 24,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSizes.iconXs),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,7 +279,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                       'ID du salon',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: AppTypography.fontSizeXl,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -284,7 +287,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                       'Code à 6 caractères (ex: ABC123)',
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: 14,
+                        fontSize: AppTypography.fontSizeMd,
                       ),
                     ),
                   ],
@@ -293,7 +296,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
             ],
           ),
 
-          const SizedBox(height: 24),
+          const AppSpacing.vGapLg,
 
           // Enhanced Input Field
           Container(
@@ -306,10 +309,10 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                   Colors.white.withValues(alpha: 0.05),
                 ],
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppSizes.radiusLg),
               border: Border.all(
                 color: _errorMessage != null
-                    ? GlassColors.danger.withValues(alpha: 0.5)
+                    ? AppColors.error.withValues(alpha: 0.5)
                     : Colors.white.withValues(alpha: 0.2),
                 width: 1.5,
               ),
@@ -321,7 +324,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
               ), // ✅ AJOUTÉ pour keyboard avoidance
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: AppTypography.fontSizeXl,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 2,
               ),
@@ -332,20 +335,20 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                 hintText: 'XXXXXX',
                 hintStyle: TextStyle(
                   color: Colors.white.withValues(alpha: 0.3),
-                  fontSize: 18,
+                  fontSize: AppTypography.fontSizeXl,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 2,
                 ),
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.all(20),
+                contentPadding: const EdgeInsets.all(AppSpacing.lg - AppSpacing.xs),
                 counterText: '',
                 suffixIcon: Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: EnhancedGlassButton(
-                    width: 40,
-                    height: 40,
-                    padding: const EdgeInsets.all(8),
-                    color: GlassColors.secondary,
+                    width: AppSizes.iconXl,
+                    height: AppSizes.buttonHeightSm,
+                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    color: AppColors.secondary,
                     onTap: _pasteFromClipboard,
                     child: const Icon(
                       Icons.paste,
@@ -370,12 +373,12 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
             const SizedBox(height: 12),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: GlassColors.danger.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+                color: AppColors.error.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                 border: Border.all(
-                  color: GlassColors.danger.withValues(alpha: 0.3),
+                  color: AppColors.error.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -383,7 +386,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                 children: [
                   Icon(
                     Icons.error_outline,
-                    color: GlassColors.danger,
+                    color: AppColors.error,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -391,8 +394,8 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                     child: Text(
                       _errorMessage!,
                       style: TextStyle(
-                        color: GlassColors.danger,
-                        fontSize: 14,
+                        color: AppColors.error,
+                        fontSize: AppTypography.fontSizeMd,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -409,7 +412,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
   Widget _buildInstructions() {
     return EnhancedGlassContainer(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.lg - AppSpacing.xs),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -419,8 +422,8 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  gradient: GlassColors.secondaryGradient,
-                  borderRadius: BorderRadius.circular(10),
+                  gradient: AppColors.secondaryGradient,
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                 ),
                 child: const Icon(
                   Icons.info_outline,
@@ -433,13 +436,13 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                 'Comment rejoindre ?',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: AppTypography.fontSizeLg,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const AppSpacing.vGapMd,
           _buildInstructionStep(
               '1', 'Demandez l\'ID du salon à votre correspondant'),
           const SizedBox(height: 12),
@@ -458,13 +461,13 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 24,
+          width: AppSizes.iconMd,
           height: 24,
           decoration: BoxDecoration(
-            color: GlassColors.secondary.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(6),
+            color: AppColors.secondary.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(AppSizes.radiusXs),
             border: Border.all(
-              color: GlassColors.secondary.withValues(alpha: 0.4),
+              color: AppColors.secondary.withValues(alpha: 0.4),
               width: 1,
             ),
           ),
@@ -472,8 +475,8 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
             child: Text(
               number,
               style: TextStyle(
-                color: GlassColors.secondary,
-                fontSize: 12,
+                color: AppColors.secondary,
+                fontSize: AppTypography.fontSizeSm,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -485,7 +488,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
             text,
             style: const TextStyle(
               color: Colors.white70,
-              fontSize: 14,
+              fontSize: AppTypography.fontSizeMd,
               height: 1.3,
             ),
           ),
@@ -502,11 +505,11 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
           width: double.infinity,
           child: EnhancedGlassButton(
             height: 60,
-            color: GlassColors.secondary,
+            color: AppColors.secondary,
             onTap: _isJoining ? null : _joinRoom,
             child: _isJoining
                 ? const SizedBox(
-                    width: 24,
+                    width: AppSizes.iconMd,
                     height: 24,
                     child: CircularProgressIndicator(
                       color: Colors.white,
@@ -526,7 +529,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                         'Rejoindre le salon',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: AppTypography.fontSizeXl,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -535,7 +538,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
           ),
         ),
 
-        const SizedBox(height: 16),
+        const AppSpacing.vGapMd,
 
         // Alternative action
         SizedBox(
@@ -557,7 +560,7 @@ class _JoinRoomPageState extends ConsumerState<JoinRoomPage>
                   'Créer un nouveau salon',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: AppTypography.fontSizeLg,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

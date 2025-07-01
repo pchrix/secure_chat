@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import '../theme.dart';
 
 /// SnackBar glassmorphique avancé avec animations et styles améliorés
@@ -20,10 +23,10 @@ class EnhancedSnackBar extends SnackBar {
           backgroundColor: Colors.transparent,
           elevation: 0,
           behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16),
+          margin: const EdgeInsets.all(AppSpacing.md),
           padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSizes.radiusLg),
           ),
         );
 
@@ -110,13 +113,13 @@ class _EnhancedSnackBarContentState extends State<_EnhancedSnackBarContent>
   Color _getTypeColor() {
     switch (widget.type) {
       case EnhancedSnackBarType.success:
-        return GlassColors.success;
+        return AppColors.success;
       case EnhancedSnackBarType.error:
-        return GlassColors.danger;
+        return AppColors.error;
       case EnhancedSnackBarType.warning:
-        return GlassColors.warning;
+        return AppColors.warning;
       case EnhancedSnackBarType.info:
-        return GlassColors.primary;
+        return AppColors.primary;
     }
   }
 
@@ -163,7 +166,7 @@ class _EnhancedSnackBarContentState extends State<_EnhancedSnackBarContent>
     final borderRadius = isCompact ? 8.0 : 10.0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -173,7 +176,7 @@ class _EnhancedSnackBarContentState extends State<_EnhancedSnackBarContent>
             typeColor.withValues(alpha: 0.05),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
         border: Border.all(
           color: typeColor.withValues(alpha: 0.3),
           width: 1.5,
@@ -233,7 +236,7 @@ class _EnhancedSnackBarContentState extends State<_EnhancedSnackBarContent>
                         ),
                         decoration: BoxDecoration(
                           color: typeColor.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                           border: Border.all(
                             color: typeColor.withValues(alpha: 0.5),
                             width: 1,
@@ -243,7 +246,7 @@ class _EnhancedSnackBarContentState extends State<_EnhancedSnackBarContent>
                           widget.actionLabel!,
                           style: TextStyle(
                             color: typeColor,
-                            fontSize: 12,
+                            fontSize: AppTypography.fontSizeSm,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

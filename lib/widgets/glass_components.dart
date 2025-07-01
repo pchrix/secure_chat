@@ -1,5 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import 'package:flutter/services.dart';
 import '../theme.dart';
 import '../utils/responsive_utils.dart';
@@ -129,8 +132,8 @@ class UnifiedGlassContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveRadius = borderRadius ?? BorderRadius.circular(20);
-    final effectiveColor = color ?? GlassColors.primary;
+    final effectiveRadius = borderRadius ?? BorderRadius.circular(AppSizes.radiusLg);
+    final effectiveColor = color ?? AppColors.primary;
 
     // OPTIMISATION PERFORMANCE : Utiliser ResponsiveUtils pour optimiser les effets glass
     final glassConfig = ResponsiveUtils.getOptimizedGlassConfig(
@@ -307,7 +310,7 @@ class UnifiedGlassContainer extends StatelessWidget {
       top: 1,
       left: 1,
       right: 1,
-      height: 40,
+      height: AppSizes.buttonHeightSm,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
@@ -558,7 +561,7 @@ class _UnifiedGlassButtonState extends State<UnifiedGlassButton>
 
     if (widget.enableAdvancedEffects && _isPressed) {
       shadows.add(BoxShadow(
-        color: (widget.color ?? GlassColors.primary)
+        color: (widget.color ?? AppColors.primary)
             .withValues(alpha: 0.4 * _glowAnimation.value),
         blurRadius: 20,
         offset: const Offset(0, 0),
@@ -665,7 +668,7 @@ class _UnifiedGlassCardState extends State<UnifiedGlassCard>
         color: Colors.transparent,
         child: InkWell(
           onTap: widget.onTap,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
           splashColor: Colors.white.withValues(alpha: 0.15),
           highlightColor: Colors.white.withValues(alpha: 0.08),
           child: cardContent,
@@ -699,7 +702,7 @@ class _UnifiedGlassCardState extends State<UnifiedGlassCard>
           child: UnifiedGlassContainer.enhanced(
             width: widget.width,
             height: widget.height,
-            padding: widget.padding ?? const EdgeInsets.all(20),
+            padding: widget.padding ?? const EdgeInsets.all(AppSpacing.lg - AppSpacing.xs),
             margin: widget.margin,
             color: widget.color,
             opacity: 0.15 + (_hoverAnimation.value * 0.05),
@@ -712,7 +715,7 @@ class _UnifiedGlassCardState extends State<UnifiedGlassCard>
               ),
               if (_isHovered)
                 BoxShadow(
-                  color: (widget.color ?? GlassColors.primary)
+                  color: (widget.color ?? AppColors.primary)
                       .withValues(alpha: 0.2 * _hoverAnimation.value),
                   blurRadius: 25,
                   offset: const Offset(0, 0),
@@ -730,7 +733,7 @@ class _UnifiedGlassCardState extends State<UnifiedGlassCard>
     return UnifiedGlassContainer.simple(
       width: widget.width,
       height: widget.height,
-      padding: widget.padding ?? const EdgeInsets.all(16),
+      padding: widget.padding ?? const EdgeInsets.all(AppSpacing.md),
       margin: widget.margin,
       color: widget.color,
       child: widget.child,

@@ -4,6 +4,9 @@
 /// et gestion d'état via Riverpod.
 
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_sizes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -60,7 +63,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: _buildRegisterForm(),
               ),
             ),
@@ -101,7 +104,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             // En-tête
             _buildHeader(),
             
-            const SizedBox(height: 32),
+            const AppSpacing.vGapXl,
             
             // Champ email
             AuthTextField(
@@ -114,7 +117,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               textInputAction: TextInputAction.next,
             ),
             
-            const SizedBox(height: 16),
+            const AppSpacing.vGapMd,
             
             // Champ nom d'utilisateur
             AuthTextField(
@@ -126,7 +129,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               textInputAction: TextInputAction.next,
             ),
             
-            const SizedBox(height: 16),
+            const AppSpacing.vGapMd,
             
             // Champ nom d'affichage (optionnel)
             AuthTextField(
@@ -137,7 +140,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               textInputAction: TextInputAction.next,
             ),
             
-            const SizedBox(height: 16),
+            const AppSpacing.vGapMd,
             
             // Champ mot de passe
             AuthTextField(
@@ -161,7 +164,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               textInputAction: TextInputAction.next,
             ),
             
-            const SizedBox(height: 16),
+            const AppSpacing.vGapMd,
             
             // Champ confirmation mot de passe
             AuthTextField(
@@ -189,12 +192,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               onFieldSubmitted: (_) => _handleRegister(),
             ),
             
-            const SizedBox(height: 16),
+            const AppSpacing.vGapMd,
             
             // Acceptation des conditions
             _buildTermsAcceptance(),
             
-            const SizedBox(height: 24),
+            const AppSpacing.vGapLg,
             
             // Bouton d'inscription
             AuthButton(
@@ -203,12 +206,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               isLoading: ref.watch(authStateProvider).isLoading,
             ),
             
-            const SizedBox(height: 16),
+            const AppSpacing.vGapMd,
             
             // Lien vers la connexion
             _buildSignInLink(),
             
-            const SizedBox(height: 16),
+            const AppSpacing.vGapMd,
             
             // Message d'erreur
             _buildErrorMessage(),
@@ -225,7 +228,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         // Icône
         Container(
           width: 80,
-          height: 80,
+          height: AppSizes.buttonHeightXl + AppSizes.buttonHeightSm,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
@@ -242,7 +245,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ),
         ),
         
-        const SizedBox(height: 16),
+        const AppSpacing.vGapMd,
         
         // Titre
         Text(
@@ -253,7 +256,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ),
         ),
         
-        const SizedBox(height: 8),
+        const AppSpacing.vGapSm,
         
         // Sous-titre
         Text(
@@ -353,10 +356,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       data: (_) => const SizedBox.shrink(),
       loading: () => const SizedBox.shrink(),
       error: (error, _) => Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
         decoration: BoxDecoration(
           color: AppTheme.errorColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
           border: Border.all(
             color: AppTheme.errorColor.withValues(alpha: 0.3),
           ),

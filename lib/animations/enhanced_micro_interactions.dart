@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_sizes.dart';
 
 /// Animation de morphing fluide pour les transitions entre éléments
 class MorphTransition extends StatefulWidget {
@@ -374,7 +377,7 @@ class _BreathingPulseAnimationState extends State<BreathingPulseAnimation>
           child: widget.enableGlow
               ? Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                     boxShadow: [
                       BoxShadow(
                         color: (widget.glowColor ?? Colors.white)

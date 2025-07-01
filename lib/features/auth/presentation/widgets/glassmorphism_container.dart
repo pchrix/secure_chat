@@ -5,6 +5,9 @@
 
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_sizes.dart';
 
 import '../../../../core/theme/app_theme.dart';
 
@@ -15,7 +18,7 @@ class GlassmorphismContainer extends StatelessWidget {
     required this.child,
     this.width,
     this.height,
-    this.padding = const EdgeInsets.all(24.0),
+    this.padding = const EdgeInsets.all(AppSpacing.lg),
     this.margin = EdgeInsets.zero,
     this.borderRadius = 20.0,
     this.opacity = 0.15,
@@ -116,7 +119,7 @@ class GlassmorphismVariants {
     EdgeInsetsGeometry? margin,
   }) {
     return GlassmorphismContainer(
-      padding: padding ?? const EdgeInsets.all(16.0),
+      padding: padding ?? const EdgeInsets.all(AppSpacing.md),
       margin: margin ?? EdgeInsets.zero,
       borderRadius: 16.0,
       opacity: 0.1,
@@ -137,7 +140,7 @@ class GlassmorphismVariants {
     EdgeInsetsGeometry? margin,
   }) {
     return GlassmorphismContainer(
-      padding: padding ?? const EdgeInsets.all(24.0),
+      padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
       margin: margin ?? EdgeInsets.zero,
       borderRadius: 24.0,
       opacity: 0.2,
@@ -186,7 +189,7 @@ class GlassmorphismVariants {
     EdgeInsetsGeometry? margin,
   }) {
     return GlassmorphismContainer(
-      padding: padding ?? const EdgeInsets.all(12.0),
+      padding: padding ?? const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
       margin: margin ?? EdgeInsets.zero,
       borderRadius: 12.0,
       opacity: 0.08,
@@ -208,7 +211,7 @@ class GlassmorphismVariants {
     Color? backgroundColor,
   }) {
     return GlassmorphismContainer(
-      padding: padding ?? const EdgeInsets.all(16.0),
+      padding: padding ?? const EdgeInsets.all(AppSpacing.md),
       margin: margin ?? EdgeInsets.zero,
       borderRadius: 14.0,
       opacity: 0.15,
@@ -222,7 +225,7 @@ class GlassmorphismVariants {
         decoration: backgroundColor != null
             ? BoxDecoration(
                 color: backgroundColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(14.0),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
               )
             : null,
         child: child,
@@ -251,7 +254,7 @@ extension GlassmorphismExtension on Widget {
     return GlassmorphismContainer(
       width: width,
       height: height,
-      padding: padding ?? const EdgeInsets.all(24.0),
+      padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
       margin: margin ?? EdgeInsets.zero,
       borderRadius: borderRadius,
       opacity: opacity,

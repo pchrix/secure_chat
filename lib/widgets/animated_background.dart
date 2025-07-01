@@ -1,5 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import '../theme.dart';
 import '../utils/responsive_utils.dart';
 
@@ -83,7 +86,7 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
 
     return Container(
       decoration: const BoxDecoration(
-        gradient: GlassColors.backgroundGradient,
+        gradient: AppColors.backgroundGradient,
       ),
       child: Stack(
         children: [
@@ -128,7 +131,7 @@ class _OptimizedFloatingShapes extends StatelessWidget {
         _OptimizedFloatingShape(
           animation: animation1,
           size: 120,
-          color: GlassColors.secondary,
+          color: AppColors.secondary,
           top: 0.1,
           left: 0.8,
           screenSize: screenSize,
@@ -136,7 +139,7 @@ class _OptimizedFloatingShapes extends StatelessWidget {
         _OptimizedFloatingShape(
           animation: animation2,
           size: 80,
-          color: GlassColors.accent,
+          color: AppColors.accent,
           top: 0.3,
           left: 0.1,
           screenSize: screenSize,
@@ -144,7 +147,7 @@ class _OptimizedFloatingShapes extends StatelessWidget {
         _OptimizedFloatingShape(
           animation: animation3,
           size: 100,
-          color: GlassColors.tertiary,
+          color: AppColors.tertiary,
           top: 0.7,
           left: 0.7,
           screenSize: screenSize,
@@ -152,7 +155,7 @@ class _OptimizedFloatingShapes extends StatelessWidget {
         _OptimizedFloatingShape(
           animation: animation1,
           size: 60,
-          color: GlassColors.primary,
+          color: AppColors.primary,
           top: 0.6,
           left: 0.2,
           screenSize: screenSize,
@@ -161,7 +164,7 @@ class _OptimizedFloatingShapes extends StatelessWidget {
         _OptimizedFloatingShape(
           animation: animation2,
           size: 90,
-          color: GlassColors.secondary,
+          color: AppColors.secondary,
           top: 0.8,
           left: 0.9,
           screenSize: screenSize,
@@ -260,8 +263,8 @@ class GradientBackground extends StatelessWidget {
           end: end,
           colors: colors ??
               const [
-                GlassColors.backgroundStart,
-                GlassColors.backgroundEnd,
+                AppColors.backgroundStart,
+                AppColors.backgroundEnd,
               ],
         ),
       ),

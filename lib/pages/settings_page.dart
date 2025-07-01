@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/change_password_dialog.dart';
 import '../widgets/glass_components.dart';
@@ -124,10 +127,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
             children: [
               // Enhanced Back Button
               EnhancedGlassButton(
-                width: 48,
-                height: 48,
-                padding: const EdgeInsets.all(12),
-                color: GlassColors.primary,
+                width: AppSizes.iconXxl,
+                height: AppSizes.buttonHeightMd,
+                padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
+                color: AppColors.primary,
                 onTap: () {
                   _animationController.reverse().then((_) {
                     Navigator.of(context).pop();
@@ -145,12 +148,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               // Enhanced Title with Gradient
               ShaderMask(
                 shaderCallback: (bounds) =>
-                    GlassColors.primaryGradient.createShader(bounds),
+                    AppColors.primaryGradient.createShader(bounds),
                 child: const Text(
                   'Paramètres',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: AppTypography.fontSize3xl,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
                   ),
@@ -161,10 +164,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
 
               // Enhanced Home Button
               EnhancedGlassButton(
-                width: 48,
-                height: 48,
-                padding: const EdgeInsets.all(12),
-                color: GlassColors.secondary,
+                width: AppSizes.iconXxl,
+                height: AppSizes.buttonHeightMd,
+                padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
+                color: AppColors.secondary,
                 onTap: () {
                   _animationController.reverse().then((_) {
                     Navigator.of(context).pop();
@@ -186,7 +189,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   Widget _buildEnhancedPasswordSection() {
     return EnhancedGlassContainer(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -194,14 +197,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: AppSizes.iconXxl,
+                height: AppSizes.buttonHeightMd,
                 decoration: BoxDecoration(
-                  gradient: GlassColors.primaryGradient,
-                  borderRadius: BorderRadius.circular(12),
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                   boxShadow: [
                     BoxShadow(
-                      color: GlassColors.primary.withValues(alpha: 0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -213,7 +216,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                   size: 24,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSizes.iconXs),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,7 +225,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       'Sécurité',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: AppTypography.fontSize2xl,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -230,7 +233,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       'Gestion de votre authentification',
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: 14,
+                        fontSize: AppTypography.fontSizeMd,
                       ),
                     ),
                   ],
@@ -239,24 +242,24 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
             ],
           ),
 
-          const SizedBox(height: 24),
+          const AppSpacing.vGapLg,
 
           // Current Auth Status
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.lg - AppSpacing.xs),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  GlassColors.success.withValues(alpha: 0.15),
-                  GlassColors.primary.withValues(alpha: 0.1),
+                  AppColors.success.withValues(alpha: 0.15),
+                  AppColors.primary.withValues(alpha: 0.1),
                 ],
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppSizes.radiusLg),
               border: Border.all(
-                color: GlassColors.success.withValues(alpha: 0.3),
+                color: AppColors.success.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
@@ -267,7 +270,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                   children: [
                     Icon(
                       Icons.verified_user,
-                      color: GlassColors.success,
+                      color: AppColors.success,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -275,25 +278,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       'Authentification active',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: AppTypography.fontSizeLg,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const AppSpacing.vGapSm,
                 const Text(
                   'Code PIN numérique (4-6 chiffres)',
                   style: TextStyle(
                     color: Colors.white70,
-                    fontSize: 14,
+                    fontSize: AppTypography.fontSizeMd,
                   ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 24),
+          const AppSpacing.vGapLg,
 
           // Action Button
           _buildEnhancedPasswordOption(
@@ -315,17 +318,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   ) {
     return EnhancedGlassButton(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      color: GlassColors.primary,
+      padding: const EdgeInsets.all(AppSpacing.lg - AppSpacing.xs),
+      color: AppColors.primary,
       onTap: onTap,
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: AppSizes.iconXl,
+            height: AppSizes.buttonHeightSm,
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppSizes.radiusSm),
             ),
             child: Icon(
               icon,
@@ -333,7 +336,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               size: 20,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSizes.iconXs),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +345,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                   title,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: AppTypography.fontSizeLg,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -351,7 +354,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                   description,
                   style: const TextStyle(
                     color: Colors.white70,
-                    fontSize: 14,
+                    fontSize: AppTypography.fontSizeMd,
                   ),
                 ),
               ],
@@ -370,7 +373,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   Widget _buildEnhancedAppInfoSection() {
     return EnhancedGlassContainer(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -378,14 +381,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: AppSizes.iconXxl,
+                height: AppSizes.buttonHeightMd,
                 decoration: BoxDecoration(
-                  gradient: GlassColors.secondaryGradient,
-                  borderRadius: BorderRadius.circular(12),
+                  gradient: AppColors.secondaryGradient,
+                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                   boxShadow: [
                     BoxShadow(
-                      color: GlassColors.secondary.withValues(alpha: 0.3),
+                      color: AppColors.secondary.withValues(alpha: 0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -397,7 +400,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                   size: 24,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSizes.iconXs),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -406,7 +409,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       'À propos',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: AppTypography.fontSize2xl,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -414,7 +417,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       'Informations sur l\'application',
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: 14,
+                        fontSize: AppTypography.fontSizeMd,
                       ),
                     ),
                   ],
@@ -456,7 +459,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           height: 36,
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppSizes.radiusSm),
           ),
           child: Icon(
             icon,
@@ -494,18 +497,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   Widget _buildEnhancedVersionInfo() {
     return EnhancedGlassContainer(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.lg - AppSpacing.xs),
       child: Column(
         children: [
           Container(
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              gradient: GlassColors.primaryGradient,
-              borderRadius: BorderRadius.circular(16),
+              gradient: AppColors.primaryGradient,
+              borderRadius: BorderRadius.circular(AppSizes.radiusLg),
               boxShadow: [
                 BoxShadow(
-                  color: GlassColors.primary.withValues(alpha: 0.3),
+                  color: AppColors.primary.withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -517,16 +520,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               size: 28,
             ),
           ),
-          const SizedBox(height: 16),
+          const AppSpacing.vGapMd,
           ShaderMask(
             shaderCallback: (bounds) =>
-                GlassColors.primaryGradient.createShader(bounds),
+                AppColors.primaryGradient.createShader(bounds),
             child: Text(
               'SecureChat',
               style: AppTextStyles.sectionTitle,
             ),
           ),
-          const SizedBox(height: 8),
+          const AppSpacing.vGapSm,
           Text(
             'Version 1.0.0',
             style: AppTextStyles.versionText,

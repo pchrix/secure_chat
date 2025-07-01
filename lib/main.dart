@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'core/theme/app_colors.dart';
+import 'core/theme/app_spacing.dart';
+import 'core/theme/app_sizes.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -121,10 +124,10 @@ class _StartupPageState extends State<StartupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GlassColors.background,
+      backgroundColor: AppColors.background,
       body: const Center(
         child: CircularProgressIndicator(
-          color: GlassColors.primary,
+          color: AppColors.primary,
         ),
       ),
     );

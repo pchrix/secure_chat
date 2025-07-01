@@ -242,7 +242,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage>
             'Étape ${pinState.currentStep + 1} sur 2',
             style: AppTheme.bodyMedium.copyWith(
               color: Colors.white.withValues(alpha: 0.6),
-              fontSize: 14,
+              fontSize: AppTypography.fontSizeMd,
             ),
           ),
         ],

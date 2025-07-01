@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../providers/app_state_provider.dart';
@@ -173,11 +176,11 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: GlassColors.setupPurple,
+        backgroundColor: AppColors.setupPurple,
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
         ),
       ),
     );
@@ -239,7 +242,7 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
         }
       },
       child: Scaffold(
-        backgroundColor: GlassColors.authBackground,
+        backgroundColor: AppColors.authBackground,
         body: FadeTransition(
           opacity: _slideAnimation,
           child: SafeArea(
@@ -255,10 +258,10 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                       GestureDetector(
                         onTap: _navigateToSettings,
                         child: Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(AppSpacing.sm),
                           decoration: BoxDecoration(
-                            color: GlassColors.whiteAlpha10,
-                            borderRadius: BorderRadius.circular(12),
+                            color: AppColors.glassWhite,
+                            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                           ),
                           child: const Icon(
                             Icons.settings,
@@ -275,10 +278,10 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          color: GlassColors.setupPurpleAlpha20,
-                          borderRadius: BorderRadius.circular(20),
+                          color: AppColors.setupPurpleAlpha20,
+                          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                           border: Border.all(
-                            color: GlassColors.setupPurple,
+                            color: AppColors.setupPurple,
                             width: 1,
                           ),
                         ),
@@ -287,15 +290,15 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                           children: [
                             const Icon(
                               Icons.access_time,
-                              color: GlassColors.setupPurple,
+                              color: AppColors.setupPurple,
                               size: 16,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               _formatRemainingTime(),
                               style: const TextStyle(
-                                color: GlassColors.setupPurple,
-                                fontSize: 14,
+                                color: AppColors.setupPurple,
+                                fontSize: AppTypography.fontSizeMd,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -309,10 +312,10 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                       GestureDetector(
                         onTap: _navigateToContacts,
                         child: Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(AppSpacing.sm),
                           decoration: BoxDecoration(
-                            color: GlassColors.whiteAlpha10,
-                            borderRadius: BorderRadius.circular(12),
+                            color: AppColors.glassWhite,
+                            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                           ),
                           child: const Icon(
                             Icons.people_alt_outlined,
@@ -328,17 +331,17 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                 // Main content area
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     child: Column(
                       children: [
                         // Input message area
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: GlassColors.whiteAlpha05,
-                              borderRadius: BorderRadius.circular(16),
+                              color: AppColors.glassHighlight,
+                              borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                               border: Border.all(
-                                color: GlassColors.whiteAlpha10,
+                                color: AppColors.glassWhite,
                               ),
                             ),
                             child: Column(
@@ -346,13 +349,13 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                               children: [
                                 // Header
                                 Padding(
-                                  padding: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(AppSpacing.md),
                                   child: Text(
                                     'Entrée',
                                     style: TextStyle(
                                       color:
                                           Colors.white.withValues(alpha: 0.8),
-                                      fontSize: 16,
+                                      fontSize: AppTypography.fontSizeLg,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -370,7 +373,7 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                                       textAlignVertical: TextAlignVertical.top,
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 16,
+                                        fontSize: AppTypography.fontSizeLg,
                                       ),
                                       decoration: InputDecoration(
                                         hintText:
@@ -378,7 +381,7 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                                         hintStyle: TextStyle(
                                           color: Colors.white
                                               .withValues(alpha: 0.4),
-                                          fontSize: 16,
+                                          fontSize: AppTypography.fontSizeLg,
                                         ),
                                         border: InputBorder.none,
                                         contentPadding: EdgeInsets.zero,
@@ -387,20 +390,20 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                                   ),
                                 ),
 
-                                const SizedBox(height: 16),
+                                const AppSpacing.vGapMd,
                               ],
                             ),
                           ),
                         ),
 
-                        const SizedBox(height: 16),
+                        const AppSpacing.vGapMd,
 
                         // Result area
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                               border: Border.all(
                                 color: Colors.white.withValues(alpha: 0.1),
                               ),
@@ -410,7 +413,7 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                               children: [
                                 // Header with copy button
                                 Padding(
-                                  padding: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(AppSpacing.md),
                                   child: Row(
                                     children: [
                                       Text(
@@ -418,7 +421,7 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                                         style: TextStyle(
                                           color: Colors.white
                                               .withValues(alpha: 0.8),
-                                          fontSize: 16,
+                                          fontSize: AppTypography.fontSizeLg,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
@@ -435,7 +438,7 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                                               color: const Color(0xFF2E86AB)
                                                   .withValues(alpha: 0.2),
                                               borderRadius:
-                                                  BorderRadius.circular(12),
+                                                  BorderRadius.circular(AppSizes.radiusMd),
                                             ),
                                             child: const Row(
                                               mainAxisSize: MainAxisSize.min,
@@ -450,7 +453,7 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                                                   'Copy',
                                                   style: TextStyle(
                                                     color: Color(0xFF2E86AB),
-                                                    fontSize: 12,
+                                                    fontSize: AppTypography.fontSizeSm,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -475,7 +478,7 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                                       readOnly: true,
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 16,
+                                        fontSize: AppTypography.fontSizeLg,
                                       ),
                                       decoration: InputDecoration(
                                         hintText:
@@ -483,7 +486,7 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                                         hintStyle: TextStyle(
                                           color: Colors.white
                                               .withValues(alpha: 0.4),
-                                          fontSize: 16,
+                                          fontSize: AppTypography.fontSizeLg,
                                         ),
                                         border: InputBorder.none,
                                         contentPadding: EdgeInsets.zero,
@@ -492,19 +495,19 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                                   ),
                                 ),
 
-                                const SizedBox(height: 16),
+                                const AppSpacing.vGapMd,
                               ],
                             ),
                           ),
                         ),
 
-                        const SizedBox(height: 16),
+                        const AppSpacing.vGapMd,
 
                         // Action buttons row: Encrypt | Clear | Decrypt (moved to bottom)
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                           ),
                           child: Row(
                             children: [
@@ -559,17 +562,17 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
     VoidCallback onTap,
   ) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
               border: Border.all(
                 color: color.withValues(alpha: 0.3),
                 width: 1,
@@ -588,7 +591,7 @@ class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
                   text,
                   style: TextStyle(
                     color: color,
-                    fontSize: 14,
+                    fontSize: AppTypography.fontSizeMd,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

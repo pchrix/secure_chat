@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
+import '../core/theme/app_sizes.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/room.dart';
@@ -176,11 +179,11 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: GlassColors.primary,
+        backgroundColor: AppColors.primary,
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
         ),
       ),
     );
@@ -203,7 +206,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
         body: AnimatedBackground(
           child: const Center(
             child: CircularProgressIndicator(
-              color: GlassColors.primary,
+              color: AppColors.primary,
             ),
           ),
         ),
@@ -224,34 +227,34 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
         body: AnimatedBackground(
           child: Center(
             child: EnhancedGlassContainer(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(AppSpacing.xl),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(
                     Icons.error_outline,
-                    color: GlassColors.danger,
+                    color: AppColors.error,
                     size: 48,
                   ),
-                  const SizedBox(height: 16),
+                  const AppSpacing.vGapMd,
                   const Text(
                     'Salon non trouvé',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: AppTypography.fontSize2xl,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const AppSpacing.vGapSm,
                   const Text(
                     'Ce salon n\'existe pas ou a expiré',
                     style: TextStyle(
                       color: Colors.white70,
-                      fontSize: 16,
+                      fontSize: AppTypography.fontSizeLg,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 24),
+                  const AppSpacing.vGapLg,
                   UnifiedGlassButton(
                     onTap: () => Navigator.of(context).pop(),
                     child: const Text(
@@ -298,10 +301,10 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                                 // ✅ OPTIMISATION: Utiliser les valeurs cachées au lieu de MediaQuery répétés
                                 // Espacements adaptatifs ultra-réduits
                                 final contentPadding = _isVeryCompact
-                                    ? const EdgeInsets.all(12.0) // Divisé par 2
+                                    ? const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs) // Divisé par 2
                                     : _isCompact
-                                        ? const EdgeInsets.all(16.0) // Réduit
-                                        : const EdgeInsets.all(24.0); // Normal
+                                        ? const EdgeInsets.all(AppSpacing.md) // Réduit
+                                        : const EdgeInsets.all(AppSpacing.lg); // Normal
 
                                 final mainSpacing = _isVeryCompact
                                     ? 12.0
@@ -370,15 +373,15 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
 
   Widget _buildEnhancedAppBar(Room room) {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Row(
         children: [
           // Enhanced Back Button
           EnhancedGlassButton(
-            width: 48,
-            height: 48,
-            padding: const EdgeInsets.all(12),
-            color: GlassColors.primary,
+            width: AppSizes.iconXxl,
+            height: AppSizes.buttonHeightMd,
+            padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
+            color: AppColors.primary,
             onTap: () => Navigator.of(context).pop(),
             child: const Icon(
               Icons.arrow_back_ios,
@@ -387,7 +390,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
             ),
           ),
 
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSizes.iconXs),
 
           // Enhanced Room Info
           Expanded(
@@ -396,12 +399,12 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
               children: [
                 ShaderMask(
                   shaderCallback: (bounds) =>
-                      GlassColors.primaryGradient.createShader(bounds),
+                      AppColors.primaryGradient.createShader(bounds),
                   child: Text(
                     'Salon #${room.id}',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: AppTypography.fontSize2xl,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.5,
                     ),
@@ -423,7 +426,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                       room.statusDisplay,
                       style: TextStyle(
                         color: _getStatusColor(room.status),
-                        fontSize: 14,
+                        fontSize: AppTypography.fontSizeMd,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -435,10 +438,10 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
 
           // Enhanced Share Button
           EnhancedGlassButton(
-            width: 48,
-            height: 48,
-            padding: const EdgeInsets.all(12),
-            color: GlassColors.secondary,
+            width: AppSizes.iconXxl,
+            height: AppSizes.buttonHeightMd,
+            padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
+            color: AppColors.secondary,
             onTap: _shareRoomId,
             child: const Icon(
               Icons.share,
@@ -454,19 +457,19 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
   Widget _buildRoomStatusCard(Room room) {
     return EnhancedGlassContainer(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.lg - AppSpacing.xs),
       child: Row(
         children: [
           // Enhanced Security Icon
           Container(
-            width: 48,
-            height: 48,
+            width: AppSizes.iconXxl,
+            height: AppSizes.buttonHeightMd,
             decoration: BoxDecoration(
-              gradient: GlassColors.secondaryGradient,
-              borderRadius: BorderRadius.circular(12),
+              gradient: AppColors.secondaryGradient,
+              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
               boxShadow: [
                 BoxShadow(
-                  color: GlassColors.secondary.withValues(alpha: 0.3),
+                  color: AppColors.secondary.withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -479,7 +482,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
             ),
           ),
 
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSizes.iconXs),
 
           // Room Details
           Expanded(
@@ -490,7 +493,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                   'Chiffrement actif',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: AppTypography.fontSizeLg,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -499,7 +502,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                   'AES-256 • Messages sécurisés',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 14,
+                    fontSize: AppTypography.fontSizeMd,
                   ),
                 ),
               ],
@@ -513,18 +516,18 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
               gradient: LinearGradient(
                 colors: room.isExpired
                     ? [
-                        GlassColors.danger.withValues(alpha: 0.2),
-                        GlassColors.danger.withValues(alpha: 0.1)
+                        AppColors.error.withValues(alpha: 0.2),
+                        AppColors.error.withValues(alpha: 0.1)
                       ]
                     : [
-                        GlassColors.primary.withValues(alpha: 0.2),
-                        GlassColors.primary.withValues(alpha: 0.1)
+                        AppColors.primary.withValues(alpha: 0.2),
+                        AppColors.primary.withValues(alpha: 0.1)
                       ],
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
               border: Border.all(
                 color:
-                    room.isExpired ? GlassColors.danger : GlassColors.primary,
+                    room.isExpired ? AppColors.error : AppColors.primary,
                 width: 1,
               ),
             ),
@@ -534,7 +537,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                 Icon(
                   Icons.schedule,
                   color:
-                      room.isExpired ? GlassColors.danger : GlassColors.primary,
+                      room.isExpired ? AppColors.error : AppColors.primary,
                   size: 16,
                 ),
                 const SizedBox(width: 6),
@@ -544,9 +547,9 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                       : _formatTimeRemaining(room.timeRemaining),
                   style: TextStyle(
                     color: room.isExpired
-                        ? GlassColors.danger
-                        : GlassColors.primary,
-                    fontSize: 12,
+                        ? AppColors.error
+                        : AppColors.primary,
+                    fontSize: AppTypography.fontSizeSm,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -564,10 +567,10 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
         // ✅ OPTIMISATION: Utiliser les valeurs cachées au lieu de MediaQuery répétés
         // Espacements adaptatifs ultra-réduits
         final containerPadding = _isVeryCompact
-            ? const EdgeInsets.all(12) // Divisé par 2
+            ? const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs) // Divisé par 2
             : _isCompact
-                ? const EdgeInsets.all(16) // Réduit
-                : const EdgeInsets.all(24); // Normal
+                ? const EdgeInsets.all(AppSpacing.md) // Réduit
+                : const EdgeInsets.all(AppSpacing.lg); // Normal
 
         final headerSpacing = _isVeryCompact ? 8.0 : (_isCompact ? 12.0 : 20.0);
         final iconSpacing = _isVeryCompact ? 8.0 : (_isCompact ? 10.0 : 12.0);
@@ -582,11 +585,11 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
               Row(
                 children: [
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: AppSizes.iconXl,
+                    height: AppSizes.buttonHeightSm,
                     decoration: BoxDecoration(
-                      gradient: GlassColors.primaryGradient,
-                      borderRadius: BorderRadius.circular(10),
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: const Icon(
                       Icons.edit_outlined,
@@ -599,7 +602,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                     'Votre message',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: AppTypography.fontSizeXl,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -620,7 +623,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                         Colors.white.withValues(alpha: 0.03),
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                     border: Border.all(
                       color: Colors.white.withValues(alpha: 0.15),
                       width: 1,
@@ -636,7 +639,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                     ), // ✅ AJOUTÉ pour keyboard avoidance
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
+                      fontSize: AppTypography.fontSizeLg,
                       height: 1.5,
                     ),
                     decoration: InputDecoration(
@@ -644,11 +647,11 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                           'Tapez votre message ici...\nIl sera chiffré automatiquement avant l\'envoi',
                       hintStyle: TextStyle(
                         color: Colors.white.withValues(alpha: 0.4),
-                        fontSize: 16,
+                        fontSize: AppTypography.fontSizeLg,
                         height: 1.5,
                       ),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.all(20),
+                      contentPadding: const EdgeInsets.all(AppSpacing.lg - AppSpacing.xs),
                     ),
                   ),
                 ),
@@ -666,10 +669,10 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
         // ✅ OPTIMISATION: Utiliser les valeurs cachées au lieu de MediaQuery répétés
         // Espacements adaptatifs ultra-réduits
         final containerPadding = _isVeryCompact
-            ? const EdgeInsets.all(12) // Divisé par 2
+            ? const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs) // Divisé par 2
             : _isCompact
-                ? const EdgeInsets.all(16) // Réduit
-                : const EdgeInsets.all(24); // Normal
+                ? const EdgeInsets.all(AppSpacing.md) // Réduit
+                : const EdgeInsets.all(AppSpacing.lg); // Normal
 
         final iconSpacing = _isVeryCompact ? 8.0 : (_isCompact ? 10.0 : 12.0);
 
@@ -683,11 +686,11 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
               Row(
                 children: [
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: AppSizes.iconXl,
+                    height: AppSizes.buttonHeightSm,
                     decoration: BoxDecoration(
-                      gradient: GlassColors.secondaryGradient,
-                      borderRadius: BorderRadius.circular(10),
+                      gradient: AppColors.secondaryGradient,
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: const Icon(
                       Icons.lock_outlined,
@@ -700,7 +703,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                     'Résultat',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: AppTypography.fontSizeXl,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -709,7 +712,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                     EnhancedGlassButton(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
-                      color: GlassColors.secondary,
+                      color: AppColors.secondary,
                       onTap: () {
                         _copyResult();
                         HapticFeedback.lightImpact();
@@ -727,7 +730,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                             'Copier',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
+                              fontSize: AppTypography.fontSizeMd,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -751,7 +754,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                         Colors.white.withValues(alpha: 0.03),
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                     border: Border.all(
                       color: Colors.white.withValues(alpha: 0.15),
                       width: 1,
@@ -768,7 +771,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                     ), // ✅ AJOUTÉ pour keyboard avoidance
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
+                      fontSize: AppTypography.fontSizeLg,
                       height: 1.5,
                       fontFamily: 'monospace',
                     ),
@@ -777,11 +780,11 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                           'Le résultat du chiffrement/déchiffrement\napparaîtra ici...',
                       hintStyle: TextStyle(
                         color: Colors.white.withValues(alpha: 0.4),
-                        fontSize: 16,
+                        fontSize: AppTypography.fontSizeLg,
                         height: 1.5,
                       ),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.all(20),
+                      contentPadding: const EdgeInsets.all(AppSpacing.lg - AppSpacing.xs),
                     ),
                   ),
                 ),
@@ -799,8 +802,8 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
         // Encrypt Button
         Expanded(
           child: EnhancedGlassButton(
-            height: 56,
-            color: GlassColors.primary,
+            height: AppSizes.buttonHeightLg,
+            color: AppColors.primary,
             onTap: _encryptMessage,
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -815,7 +818,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                   'Chiffrer',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: AppTypography.fontSizeLg,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -824,13 +827,13 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
           ),
         ),
 
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSizes.iconXs),
 
         // Decrypt Button
         Expanded(
           child: EnhancedGlassButton(
-            height: 56,
-            color: GlassColors.secondary,
+            height: AppSizes.buttonHeightLg,
+            color: AppColors.secondary,
             onTap: _decryptMessage,
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -845,7 +848,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                   'Déchiffrer',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: AppTypography.fontSizeLg,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -854,13 +857,13 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
           ),
         ),
 
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSizes.iconXs),
 
         // Clear Button
         EnhancedGlassButton(
           width: 56,
-          height: 56,
-          padding: const EdgeInsets.all(16),
+          height: AppSizes.buttonHeightLg,
+          padding: const EdgeInsets.all(AppSpacing.md),
           color: Colors.white,
           onTap: _clearMessage,
           child: Icon(
@@ -876,11 +879,11 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
   Color _getStatusColor(RoomStatus status) {
     switch (status) {
       case RoomStatus.waiting:
-        return GlassColors.warning;
+        return AppColors.warning;
       case RoomStatus.active:
-        return GlassColors.secondary;
+        return AppColors.secondary;
       case RoomStatus.expired:
-        return GlassColors.danger;
+        return AppColors.error;
     }
   }
 

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_sizes.dart';
 import 'package:flutter/services.dart';
 import '../widgets/glass_components.dart';
 import '../utils/responsive_utils.dart'; // ✅ AJOUTÉ pour unifier les breakpoints
@@ -128,7 +131,7 @@ class _EnhancedNumericKeypadState extends State<EnhancedNumericKeypad>
             adaptivePadding = const EdgeInsets.symmetric(
                 horizontal: 12, vertical: 4); // ✅ COMPACT : Réduit
           } else {
-            adaptivePadding = const EdgeInsets.all(16); // ✅ NORMAL : Standard
+            adaptivePadding = const EdgeInsets.all(AppSpacing.md); // ✅ NORMAL : Standard
           }
 
           return SingleChildScrollView(
@@ -183,7 +186,7 @@ class _EnhancedNumericKeypadState extends State<EnhancedNumericKeypad>
               onPressed: () => _handleKeyPress(key),
               onLongPress:
                   key == 'backspace' ? _handleBackspaceLongPress : null,
-              accentColor: widget.accentColor ?? GlassColors.primary,
+              accentColor: widget.accentColor ?? AppColors.primary,
               keyHeight: keyHeight,
             ),
           ),
@@ -303,7 +306,7 @@ class _NumericKeyState extends State<_NumericKey>
             child: Container(
               height: widget.keyHeight ?? 80,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.2),
@@ -352,7 +355,7 @@ class _NumericKeyState extends State<_NumericKey>
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                           gradient: RadialGradient(
                             center: Alignment.center,
                             radius: _rippleAnimation.value * 0.8,
@@ -471,7 +474,7 @@ class _PinIndicatorState extends State<PinIndicator>
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = widget.activeColor ?? GlassColors.primary;
+    final activeColor = widget.activeColor ?? AppColors.primary;
     final inactiveColor =
         widget.inactiveColor ?? Colors.white.withValues(alpha: 0.3);
 
@@ -709,9 +712,9 @@ class _PinEntryWidgetState extends State<PinEntryWidget> {
             // Indicateur de chargement ou clavier
             if (widget.isLoading)
               const Padding(
-                padding: EdgeInsets.all(40.0),
+                padding: EdgeInsets.all(AppSpacing.xl + AppSpacing.sm),
                 child: CircularProgressIndicator(
-                  color: GlassColors.primary,
+                  color: AppColors.primary,
                 ),
               )
             else

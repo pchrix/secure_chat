@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'core/theme/app_colors.dart';
+import 'core/theme/app_spacing.dart';
+import 'core/theme/app_sizes.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // Palette de couleurs glassmorphism - Design cible
@@ -96,58 +99,58 @@ class GlassColors {
 class AppTextStyles {
   // Titres principaux
   static TextStyle get appTitle => GoogleFonts.inter(
-        fontSize: 32,
+        fontSize: AppTypography.fontSize4xl,
         fontWeight: FontWeight.w800,
         letterSpacing: -0.5,
         color: Colors.white,
       );
 
   static TextStyle get pageTitle => GoogleFonts.inter(
-        fontSize: 24,
+        fontSize: AppTypography.fontSize3xl,
         fontWeight: FontWeight.w600,
         color: Colors.white.withValues(alpha: 0.9),
       );
 
   static TextStyle get sectionTitle => GoogleFonts.inter(
-        fontSize: 20,
+        fontSize: AppTypography.fontSize2xl,
         fontWeight: FontWeight.w600,
         color: Colors.white.withValues(alpha: 0.8),
       );
 
   // Corps de texte
   static TextStyle get bodyLarge => GoogleFonts.inter(
-        fontSize: 16,
+        fontSize: AppTypography.fontSizeLg,
         fontWeight: FontWeight.w400,
         color: Colors.white.withValues(alpha: 0.8),
       );
 
   static TextStyle get bodyMedium => GoogleFonts.inter(
-        fontSize: 14,
+        fontSize: AppTypography.fontSizeMd,
         fontWeight: FontWeight.w400,
         color: Colors.white.withValues(alpha: 0.7),
       );
 
   static TextStyle get bodySmall => GoogleFonts.inter(
-        fontSize: 12,
+        fontSize: AppTypography.fontSizeSm,
         fontWeight: FontWeight.w400,
         color: Colors.white.withValues(alpha: 0.6),
       );
 
   // Labels et boutons
   static TextStyle get buttonLarge => GoogleFonts.inter(
-        fontSize: 18,
+        fontSize: AppTypography.fontSizeXl,
         fontWeight: FontWeight.w700,
         color: Colors.white,
       );
 
   static TextStyle get buttonMedium => GoogleFonts.inter(
-        fontSize: 16,
+        fontSize: AppTypography.fontSizeLg,
         fontWeight: FontWeight.w600,
         color: Colors.white.withValues(alpha: 0.9),
       );
 
   static TextStyle get label => GoogleFonts.inter(
-        fontSize: 14,
+        fontSize: AppTypography.fontSizeMd,
         fontWeight: FontWeight.w500,
         color: Colors.white.withValues(alpha: 0.7),
       );
@@ -160,14 +163,14 @@ class AppTextStyles {
       );
 
   static TextStyle get roomTitle => GoogleFonts.inter(
-        fontSize: 18,
+        fontSize: AppTypography.fontSizeXl,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.5,
         color: Colors.white,
       );
 
   static TextStyle get statusText => GoogleFonts.inter(
-        fontSize: 14,
+        fontSize: AppTypography.fontSizeMd,
         fontWeight: FontWeight.w600,
       );
 
@@ -178,19 +181,19 @@ class AppTextStyles {
       );
 
   static TextStyle get hintText => GoogleFonts.inter(
-        fontSize: 16,
+        fontSize: AppTypography.fontSizeLg,
         fontWeight: FontWeight.w400,
         color: Colors.white.withValues(alpha: 0.5),
       );
 
   static TextStyle get errorText => GoogleFonts.inter(
-        fontSize: 14,
+        fontSize: AppTypography.fontSizeMd,
         fontWeight: FontWeight.w500,
         color: Colors.red.withValues(alpha: 0.9),
       );
 
   static TextStyle get versionText => GoogleFonts.inter(
-        fontSize: 14,
+        fontSize: AppTypography.fontSizeMd,
         fontWeight: FontWeight.w500,
         color: Colors.white60,
       );
@@ -298,11 +301,11 @@ class AppLayout {
 ThemeData get lightTheme => ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.light(
-        primary: GlassColors.primary,
-        secondary: GlassColors.secondary,
-        tertiary: GlassColors.accent,
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        tertiary: AppColors.accent,
         surface: const Color(0xFFF1F4F8),
-        error: GlassColors.danger,
+        error: AppColors.error,
         onPrimary: GlassColors.onPrimary,
         onSecondary: const Color(0xFF15161E),
         onTertiary: const Color(0xFF15161E),
@@ -325,11 +328,11 @@ ThemeData get lightTheme => ThemeData(
           fontWeight: FontWeight.w600,
         ),
         headlineLarge: GoogleFonts.inter(
-          fontSize: 32.0,
+          fontSize: AppTypography.fontSize4xl,
           fontWeight: FontWeight.normal,
         ),
         headlineMedium: GoogleFonts.inter(
-          fontSize: 24.0,
+          fontSize: AppTypography.fontSize3xl,
           fontWeight: FontWeight.w500,
         ),
         headlineSmall: GoogleFonts.inter(
@@ -341,35 +344,35 @@ ThemeData get lightTheme => ThemeData(
           fontWeight: FontWeight.w500,
         ),
         titleMedium: GoogleFonts.inter(
-          fontSize: 18.0,
+          fontSize: AppTypography.fontSizeXl,
           fontWeight: FontWeight.w500,
         ),
         titleSmall: GoogleFonts.inter(
-          fontSize: 16.0,
+          fontSize: AppTypography.fontSizeLg,
           fontWeight: FontWeight.w500,
         ),
         labelLarge: GoogleFonts.inter(
-          fontSize: 16.0,
+          fontSize: AppTypography.fontSizeLg,
           fontWeight: FontWeight.w500,
         ),
         labelMedium: GoogleFonts.inter(
-          fontSize: 14.0,
+          fontSize: AppTypography.fontSizeMd,
           fontWeight: FontWeight.w500,
         ),
         labelSmall: GoogleFonts.inter(
-          fontSize: 12.0,
+          fontSize: AppTypography.fontSizeSm,
           fontWeight: FontWeight.w500,
         ),
         bodyLarge: GoogleFonts.inter(
-          fontSize: 16.0,
+          fontSize: AppTypography.fontSizeLg,
           fontWeight: FontWeight.normal,
         ),
         bodyMedium: GoogleFonts.inter(
-          fontSize: 14.0,
+          fontSize: AppTypography.fontSizeMd,
           fontWeight: FontWeight.normal,
         ),
         bodySmall: GoogleFonts.inter(
-          fontSize: 12.0,
+          fontSize: AppTypography.fontSizeSm,
           fontWeight: FontWeight.normal,
         ),
       ),
@@ -378,12 +381,12 @@ ThemeData get lightTheme => ThemeData(
 ThemeData get darkTheme => ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.dark(
-        primary: GlassColors.primary,
-        secondary: GlassColors.secondary,
-        tertiary: GlassColors.accent,
-        surface: GlassColors.surface,
-        surfaceContainerHighest: GlassColors.surfaceVariant,
-        error: GlassColors.danger,
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        tertiary: AppColors.accent,
+        surface: AppColors.surface,
+        surfaceContainerHighest: AppColors.surfaceVariant,
+        error: AppColors.error,
         onPrimary: GlassColors.onPrimary,
         onSecondary: GlassColors.onSurface,
         onTertiary: GlassColors.onSurface,
@@ -392,7 +395,7 @@ ThemeData get darkTheme => ThemeData(
         outline: GlassColors.onSurfaceVariant,
       ),
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: GlassColors.background,
+      scaffoldBackgroundColor: AppColors.background,
       textTheme: TextTheme(
         displayLarge: GoogleFonts.inter(
           fontSize: 57.0,
@@ -407,11 +410,11 @@ ThemeData get darkTheme => ThemeData(
           fontWeight: FontWeight.w600,
         ),
         headlineLarge: GoogleFonts.inter(
-          fontSize: 32.0,
+          fontSize: AppTypography.fontSize4xl,
           fontWeight: FontWeight.normal,
         ),
         headlineMedium: GoogleFonts.inter(
-          fontSize: 24.0,
+          fontSize: AppTypography.fontSize3xl,
           fontWeight: FontWeight.w500,
         ),
         headlineSmall: GoogleFonts.inter(
@@ -423,35 +426,35 @@ ThemeData get darkTheme => ThemeData(
           fontWeight: FontWeight.w500,
         ),
         titleMedium: GoogleFonts.inter(
-          fontSize: 18.0,
+          fontSize: AppTypography.fontSizeXl,
           fontWeight: FontWeight.w500,
         ),
         titleSmall: GoogleFonts.inter(
-          fontSize: 16.0,
+          fontSize: AppTypography.fontSizeLg,
           fontWeight: FontWeight.w500,
         ),
         labelLarge: GoogleFonts.inter(
-          fontSize: 16.0,
+          fontSize: AppTypography.fontSizeLg,
           fontWeight: FontWeight.w500,
         ),
         labelMedium: GoogleFonts.inter(
-          fontSize: 14.0,
+          fontSize: AppTypography.fontSizeMd,
           fontWeight: FontWeight.w500,
         ),
         labelSmall: GoogleFonts.inter(
-          fontSize: 12.0,
+          fontSize: AppTypography.fontSizeSm,
           fontWeight: FontWeight.w500,
         ),
         bodyLarge: GoogleFonts.inter(
-          fontSize: 16.0,
+          fontSize: AppTypography.fontSizeLg,
           fontWeight: FontWeight.normal,
         ),
         bodyMedium: GoogleFonts.inter(
-          fontSize: 14.0,
+          fontSize: AppTypography.fontSizeMd,
           fontWeight: FontWeight.normal,
         ),
         bodySmall: GoogleFonts.inter(
-          fontSize: 12.0,
+          fontSize: AppTypography.fontSizeSm,
           fontWeight: FontWeight.normal,
         ),
       ),
