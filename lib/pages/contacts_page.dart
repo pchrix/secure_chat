@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_state_provider.dart';
 import '../models/contact.dart';
 import '../utils/security_utils.dart';
 
-class ContactsPage extends StatefulWidget {
+class ContactsPage extends ConsumerStatefulWidget {
   const ContactsPage({super.key});
 
   @override
-  State<ContactsPage> createState() => _ContactsPageState();
+  ConsumerState<ContactsPage> createState() => _ContactsPageState();
 }
 
-class _ContactsPageState extends State<ContactsPage>
+class _ContactsPageState extends ConsumerState<ContactsPage>
     with SingleTickerProviderStateMixin {
   final TextEditingController _codeController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
@@ -63,7 +63,7 @@ class _ContactsPageState extends State<ContactsPage>
 
     final contact = Contact.fromShareCode(code);
     if (contact != null) {
-      Provider.of<AppStateProvider>(context, listen: false).addContact(contact);
+      ref.read(appStateProvider.notifier).addContact(contact);
       setState(() => _isAddingContact = false);
       _showSnackBar('Contact ajouté avec succès');
     } else {
@@ -133,8 +133,7 @@ class _ContactsPageState extends State<ContactsPage>
           ),
           TextButton(
             onPressed: () {
-              Provider.of<AppStateProvider>(context, listen: false)
-                  .removeContact(id);
+              ref.read(appStateProvider.notifier).removeContact(id);
               Navigator.of(context).pop();
               _showSnackBar('Contact supprimé');
             },
@@ -150,7 +149,7 @@ class _ContactsPageState extends State<ContactsPage>
 
   @override
   Widget build(BuildContext context) {
-    final contacts = Provider.of<AppStateProvider>(context).contacts;
+    final contacts = ref.watch(appStateProvider).contacts;
 
     return Scaffold(
       backgroundColor:

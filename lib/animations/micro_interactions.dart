@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:async';
 
 class PulseAnimation extends StatefulWidget {
   final Widget child;
@@ -214,6 +215,7 @@ class _SlideInAnimationState extends State<SlideInAnimation>
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _fadeAnimation;
+  Timer? _delayTimer; // ✅ Timer trackable pour cleanup
 
   @override
   void initState() {
@@ -232,7 +234,7 @@ class _SlideInAnimationState extends State<SlideInAnimation>
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    Future.delayed(widget.delay, () {
+    _delayTimer = Timer(widget.delay, () {
       if (mounted) {
         _controller.forward();
       }
@@ -241,6 +243,7 @@ class _SlideInAnimationState extends State<SlideInAnimation>
 
   @override
   void dispose() {
+    _delayTimer?.cancel(); // ✅ Cleanup critique du timer
     _controller.dispose();
     super.dispose();
   }
@@ -347,6 +350,7 @@ class _LoadingDotsState extends State<LoadingDots>
     with TickerProviderStateMixin {
   late List<AnimationController> _controllers;
   late List<Animation<double>> _animations;
+  final List<Timer> _delayTimers = []; // ✅ Liste des timers pour cleanup
 
   @override
   void initState() {
@@ -362,16 +366,21 @@ class _LoadingDotsState extends State<LoadingDots>
     }).toList();
 
     for (int i = 0; i < _controllers.length; i++) {
-      Future.delayed(Duration(milliseconds: i * 200), () {
+      final timer = Timer(Duration(milliseconds: i * 200), () {
         if (mounted) {
           _controllers[i].repeat(reverse: true);
         }
       });
+      _delayTimers.add(timer); // ✅ Tracker le timer pour cleanup
     }
   }
 
   @override
   void dispose() {
+    // ✅ Cleanup critique de tous les timers
+    for (final timer in _delayTimers) {
+      timer.cancel();
+    }
     for (var controller in _controllers) {
       controller.dispose();
     }

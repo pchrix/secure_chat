@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../widgets/glass_container.dart';
+import 'dart:math' as math;
+import '../widgets/glass_components.dart';
 import '../theme.dart';
-import 'auth_page.dart';
+import 'enhanced_auth_page.dart';
 
 class TutorialPage extends StatefulWidget {
   const TutorialPage({super.key});
@@ -16,7 +17,7 @@ class _TutorialPageState extends State<TutorialPage>
   late PageController _pageController;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  
+
   int _currentPage = 0;
   final int _totalPages = 5;
 
@@ -28,11 +29,11 @@ class _TutorialPageState extends State<TutorialPage>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-    
+
     _animationController.forward();
   }
 
@@ -69,7 +70,7 @@ class _TutorialPageState extends State<TutorialPage>
 
   void _completeTutorial() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const AuthPage()),
+      MaterialPageRoute(builder: (context) => const EnhancedAuthPage()),
     );
   }
 
@@ -77,69 +78,93 @@ class _TutorialPageState extends State<TutorialPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: GlassColors.background,
+      resizeToAvoidBottomInset: true, // ✅ AJOUTÉ pour keyboard avoidance
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: SafeArea(
-          child: Column(
-            children: [
-              // Header avec bouton Skip
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'SecureChat',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (_currentPage > 0)
-                      GestureDetector(
-                        onTap: _skipTutorial,
-                        child: Text(
-                          'Passer',
-                          style: TextStyle(
-                            color: GlassColors.primary.withValues(alpha: 0.8),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                children: [
+                  // Header avec bouton Skip - Responsive
+                  Builder(
+                    builder: (context) {
+                      final screenHeight = MediaQuery.of(context).size.height;
+                      final isVeryCompact = screenHeight < 700; // iPhone SE
+                      final isCompact = screenHeight < 800; // iPhone Standard
+
+                      final headerPadding =
+                          isVeryCompact ? 12.0 : (isCompact ? 16.0 : 24.0);
+                      final titleFontSize =
+                          isVeryCompact ? 16.0 : (isCompact ? 18.0 : 20.0);
+                      final skipFontSize =
+                          isVeryCompact ? 14.0 : (isCompact ? 15.0 : 16.0);
+
+                      return Padding(
+                        padding: EdgeInsets.all(headerPadding),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                'SecureChat',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  fontSize: titleFontSize,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (_currentPage > 0)
+                              GestureDetector(
+                                onTap: _skipTutorial,
+                                child: Text(
+                                  'Passer',
+                                  style: TextStyle(
+                                    color: GlassColors.primary
+                                        .withValues(alpha: 0.8),
+                                    fontSize: skipFontSize,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                      ),
-                  ],
-                ),
-              ),
+                      );
+                    },
+                  ),
 
-              // Indicateurs de progression
-              _buildProgressIndicator(),
+                  // Indicateurs de progression
+                  _buildProgressIndicator(),
 
-              const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
-              // Contenu des pages
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                    HapticFeedback.lightImpact();
-                  },
-                  children: [
-                    _buildWelcomePage(),
-                    _buildSecurityPage(),
-                    _buildRoomsPage(),
-                    _buildEncryptionPage(),
-                    _buildReadyPage(),
-                  ],
-                ),
-              ),
+                  // Contenu des pages avec scroll
+                  Expanded(
+                    child: PageView(
+                      controller: _pageController,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                        HapticFeedback.lightImpact();
+                      },
+                      children: [
+                        _buildWelcomePage(constraints),
+                        _buildSecurityPage(constraints),
+                        _buildRoomsPage(constraints),
+                        _buildEncryptionPage(constraints),
+                        _buildReadyPage(constraints),
+                      ],
+                    ),
+                  ),
 
-              // Boutons de navigation
-              _buildNavigationButtons(),
-            ],
+                  // Boutons de navigation
+                  _buildNavigationButtons(),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -170,312 +195,443 @@ class _TutorialPageState extends State<TutorialPage>
     );
   }
 
-  Widget _buildWelcomePage() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GlassContainer(
-            width: 120,
-            height: 120,
-            borderRadius: BorderRadius.circular(30),
-            color: GlassColors.primary,
-            opacity: 0.2,
-            child: const Icon(
-              Icons.security,
-              size: 60,
+  Widget _buildWelcomePage(BoxConstraints constraints) {
+    // Breakpoints ultra-agressifs pour iPhone SE et petits écrans
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isVeryCompact = screenHeight < 700; // iPhone SE
+    final isCompact = screenHeight < 800; // iPhone Standard
+
+    // Padding adaptatif ultra-réduit
+    final adaptivePadding = isVeryCompact ? 12.0 : (isCompact ? 16.0 : 24.0);
+
+    // Tailles d'icônes ultra-compactes
+    final iconSize = isVeryCompact ? 80 : (isCompact ? 100 : 120);
+    final iconInnerSize = isVeryCompact ? 40 : (isCompact ? 50 : 60);
+
+    // Tailles de texte ultra-adaptatives
+    final titleSize = isVeryCompact ? 20.0 : (isCompact ? 24.0 : 28.0);
+    final subtitleSize = isVeryCompact ? 12.0 : (isCompact ? 14.0 : 16.0);
+
+    // Espacements ultra-réduits
+    final titleSpacing = isVeryCompact ? 16.0 : (isCompact ? 24.0 : 32.0);
+    final subtitleSpacing = isVeryCompact ? 8.0 : (isCompact ? 12.0 : 16.0);
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(adaptivePadding),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          // Réduction drastique de l'espace réservé pour éviter débordement
+          minHeight:
+              math.max(0, constraints.maxHeight - (isVeryCompact ? 180 : 220)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GlassContainer(
+              width: iconSize.toDouble(),
+              height: iconSize.toDouble(),
+              borderRadius: BorderRadius.circular(isVeryCompact ? 20 : 30),
               color: GlassColors.primary,
+              opacity: 0.2,
+              child: Icon(
+                Icons.security,
+                size: iconInnerSize.toDouble(),
+                color: GlassColors.primary,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          Text(
-            'Bienvenue dans SecureChat',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.95),
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            SizedBox(height: titleSpacing),
+            Text(
+              'Bienvenue dans SecureChat',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.95),
+                fontSize: titleSize,
+                fontWeight: FontWeight.bold,
+                // Réduction de la hauteur de ligne sur petits écrans
+                height: isVeryCompact ? 1.2 : 1.3,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          Text(
-            'Votre nouvelle application de messagerie sécurisée avec chiffrement de bout en bout.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 16,
-              height: 1.5,
+            SizedBox(height: subtitleSpacing),
+            Text(
+              'Votre nouvelle application de messagerie sécurisée avec chiffrement de bout en bout.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: subtitleSize,
+                height: isVeryCompact ? 1.3 : 1.5,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSecurityPage() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GlassContainer(
-            width: 120,
-            height: 120,
-            borderRadius: BorderRadius.circular(30),
-            color: GlassColors.secondary,
-            opacity: 0.2,
-            child: const Icon(
-              Icons.lock_outline,
-              size: 60,
+  Widget _buildSecurityPage(BoxConstraints constraints) {
+    // Breakpoints ultra-agressifs cohérents
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isVeryCompact = screenHeight < 700; // iPhone SE
+    final isCompact = screenHeight < 800; // iPhone Standard
+
+    // Padding adaptatif ultra-réduit
+    final adaptivePadding = isVeryCompact ? 12.0 : (isCompact ? 16.0 : 24.0);
+
+    // Tailles d'icônes ultra-compactes
+    final iconSize = isVeryCompact ? 80 : (isCompact ? 100 : 120);
+    final iconInnerSize = isVeryCompact ? 40 : (isCompact ? 50 : 60);
+
+    // Tailles de texte ultra-adaptatives
+    final titleSize = isVeryCompact ? 20.0 : (isCompact ? 24.0 : 28.0);
+    final subtitleSize = isVeryCompact ? 12.0 : (isCompact ? 14.0 : 16.0);
+
+    // Espacements ultra-réduits
+    final titleSpacing = isVeryCompact ? 16.0 : (isCompact ? 24.0 : 32.0);
+    final subtitleSpacing = isVeryCompact ? 8.0 : (isCompact ? 12.0 : 16.0);
+    final featureSpacing = isVeryCompact ? 12.0 : (isCompact ? 16.0 : 24.0);
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(adaptivePadding),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight:
+              math.max(0, constraints.maxHeight - (isVeryCompact ? 180 : 220)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GlassContainer(
+              width: iconSize.toDouble(),
+              height: iconSize.toDouble(),
+              borderRadius: BorderRadius.circular(isVeryCompact ? 20 : 30),
               color: GlassColors.secondary,
+              opacity: 0.2,
+              child: Icon(
+                Icons.lock_outline,
+                size: iconInnerSize.toDouble(),
+                color: GlassColors.secondary,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          Text(
-            'Sécurité Maximale',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.95),
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            SizedBox(height: titleSpacing),
+            Text(
+              'Sécurité Maximale',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.95),
+                fontSize: titleSize,
+                fontWeight: FontWeight.bold,
+                height: isVeryCompact ? 1.2 : 1.3,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          Text(
-            'Vos conversations sont protégées par un chiffrement AES-256 de niveau militaire. Seuls vous et votre correspondant pouvez lire les messages.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 16,
-              height: 1.5,
+            SizedBox(height: subtitleSpacing),
+            Text(
+              'Vos conversations sont protégées par un chiffrement AES-256 de niveau militaire. Seuls vous et votre correspondant pouvez lire les messages.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: subtitleSize,
+                height: isVeryCompact ? 1.3 : 1.5,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          _buildFeatureList([
-            'Chiffrement AES-256',
-            'Aucune donnée stockée sur nos serveurs',
-            'Authentification par code PIN',
-          ]),
-        ],
+            SizedBox(height: featureSpacing),
+            _buildFeatureList([
+              'Chiffrement AES-256',
+              'Aucune donnée stockée sur nos serveurs',
+              'Authentification par code PIN',
+            ]),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildRoomsPage() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GlassContainer(
-            width: 120,
-            height: 120,
-            borderRadius: BorderRadius.circular(30),
-            color: GlassColors.accent,
-            opacity: 0.2,
-            child: const Icon(
-              Icons.chat_bubble_outline,
-              size: 60,
+  Widget _buildRoomsPage(BoxConstraints constraints) {
+    // Breakpoints ultra-agressifs cohérents
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isVeryCompact = screenHeight < 700; // iPhone SE
+    final isCompact = screenHeight < 800; // iPhone Standard
+
+    // Padding adaptatif ultra-réduit
+    final adaptivePadding = isVeryCompact ? 12.0 : (isCompact ? 16.0 : 24.0);
+
+    // Tailles d'icônes ultra-compactes
+    final iconSize = isVeryCompact ? 80 : (isCompact ? 100 : 120);
+    final iconInnerSize = isVeryCompact ? 40 : (isCompact ? 50 : 60);
+
+    // Tailles de texte ultra-adaptatives
+    final titleSize = isVeryCompact ? 20.0 : (isCompact ? 24.0 : 28.0);
+    final subtitleSize = isVeryCompact ? 12.0 : (isCompact ? 14.0 : 16.0);
+
+    // Espacements ultra-réduits
+    final titleSpacing = isVeryCompact ? 16.0 : (isCompact ? 24.0 : 32.0);
+    final subtitleSpacing = isVeryCompact ? 8.0 : (isCompact ? 12.0 : 16.0);
+    final featureSpacing = isVeryCompact ? 12.0 : (isCompact ? 16.0 : 24.0);
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(adaptivePadding),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight:
+              math.max(0, constraints.maxHeight - (isVeryCompact ? 180 : 220)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GlassContainer(
+              width: iconSize.toDouble(),
+              height: iconSize.toDouble(),
+              borderRadius: BorderRadius.circular(isVeryCompact ? 20 : 30),
               color: GlassColors.accent,
+              opacity: 0.2,
+              child: Icon(
+                Icons.chat_bubble_outline,
+                size: iconInnerSize.toDouble(),
+                color: GlassColors.accent,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          Text(
-            'Salons Temporaires',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.95),
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            SizedBox(height: titleSpacing),
+            Text(
+              'Salons Temporaires',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.95),
+                fontSize: titleSize,
+                fontWeight: FontWeight.bold,
+                height: isVeryCompact ? 1.2 : 1.3,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          Text(
-            'Créez des salons sécurisés temporaires pour vos conversations. Chaque salon expire automatiquement pour une sécurité maximale.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 16,
-              height: 1.5,
+            SizedBox(height: subtitleSpacing),
+            Text(
+              'Créez des salons sécurisés temporaires pour vos conversations. Chaque salon expire automatiquement pour une sécurité maximale.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: subtitleSize,
+                height: isVeryCompact ? 1.3 : 1.5,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          _buildFeatureList([
-            'Salons 1-to-1 uniquement',
-            'Expiration automatique',
-            'Partage par ID unique',
-          ]),
-        ],
+            SizedBox(height: featureSpacing),
+            _buildFeatureList([
+              'Salons 1-to-1 uniquement',
+              'Expiration automatique',
+              'Partage par ID unique',
+            ]),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildEncryptionPage() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GlassContainer(
-            width: 120,
-            height: 120,
-            borderRadius: BorderRadius.circular(30),
-            color: GlassColors.warning,
-            opacity: 0.2,
-            child: const Icon(
-              Icons.vpn_key_outlined,
-              size: 60,
+  Widget _buildEncryptionPage(BoxConstraints constraints) {
+    // Breakpoints ultra-agressifs cohérents
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isVeryCompact = screenHeight < 700; // iPhone SE
+    final isCompact = screenHeight < 800; // iPhone Standard
+
+    // Padding adaptatif ultra-réduit
+    final adaptivePadding = isVeryCompact ? 12.0 : (isCompact ? 16.0 : 24.0);
+
+    // Tailles d'icônes ultra-compactes
+    final iconSize = isVeryCompact ? 80 : (isCompact ? 100 : 120);
+    final iconInnerSize = isVeryCompact ? 40 : (isCompact ? 50 : 60);
+
+    // Tailles de texte ultra-adaptatives
+    final titleSize = isVeryCompact ? 20.0 : (isCompact ? 24.0 : 28.0);
+    final subtitleSize = isVeryCompact ? 12.0 : (isCompact ? 14.0 : 16.0);
+
+    // Espacements ultra-réduits
+    final titleSpacing = isVeryCompact ? 16.0 : (isCompact ? 24.0 : 32.0);
+    final subtitleSpacing = isVeryCompact ? 8.0 : (isCompact ? 12.0 : 16.0);
+    final stepsSpacing = isVeryCompact ? 12.0 : (isCompact ? 16.0 : 24.0);
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(adaptivePadding),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight:
+              math.max(0, constraints.maxHeight - (isVeryCompact ? 180 : 220)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GlassContainer(
+              width: iconSize.toDouble(),
+              height: iconSize.toDouble(),
+              borderRadius: BorderRadius.circular(isVeryCompact ? 20 : 30),
               color: GlassColors.warning,
+              opacity: 0.2,
+              child: Icon(
+                Icons.vpn_key_outlined,
+                size: iconInnerSize.toDouble(),
+                color: GlassColors.warning,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          Text(
-            'Comment ça marche',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.95),
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            SizedBox(height: titleSpacing),
+            Text(
+              'Comment ça marche',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.95),
+                fontSize: titleSize,
+                fontWeight: FontWeight.bold,
+                height: isVeryCompact ? 1.2 : 1.3,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          Text(
-            'Tapez votre message, il sera chiffré automatiquement. Copiez le résultat et envoyez-le via n\'importe quelle application.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 16,
-              height: 1.5,
+            SizedBox(height: subtitleSpacing),
+            Text(
+              'Tapez votre message, il sera chiffré automatiquement. Copiez le résultat et envoyez-le via n\'importe quelle application.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: subtitleSize,
+                height: isVeryCompact ? 1.3 : 1.5,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          _buildStepsList([
-            'Créez ou rejoignez un salon',
-            'Tapez votre message',
-            'Le message est chiffré automatiquement',
-            'Copiez et envoyez via WhatsApp, SMS...',
-          ]),
-        ],
+            SizedBox(height: stepsSpacing),
+            _buildStepsList([
+              'Créez ou rejoignez un salon',
+              'Tapez votre message',
+              'Le message est chiffré automatiquement',
+              'Copiez et envoyez via WhatsApp, SMS...',
+            ]),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildReadyPage() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GlassContainer(
-            width: 120,
-            height: 120,
-            borderRadius: BorderRadius.circular(30),
-            color: GlassColors.secondary,
-            opacity: 0.2,
-            child: const Icon(
-              Icons.check_circle_outline,
-              size: 60,
+  Widget _buildReadyPage(BoxConstraints constraints) {
+    // Breakpoints ultra-agressifs cohérents
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isVeryCompact = screenHeight < 700; // iPhone SE
+    final isCompact = screenHeight < 800; // iPhone Standard
+
+    // Padding adaptatif ultra-réduit
+    final adaptivePadding = isVeryCompact ? 12.0 : (isCompact ? 16.0 : 24.0);
+
+    // Tailles d'icônes ultra-compactes
+    final iconSize = isVeryCompact ? 80 : (isCompact ? 100 : 120);
+    final iconInnerSize = isVeryCompact ? 40 : (isCompact ? 50 : 60);
+
+    // Tailles de texte ultra-adaptatives
+    final titleSize = isVeryCompact ? 20.0 : (isCompact ? 24.0 : 28.0);
+    final subtitleSize = isVeryCompact ? 12.0 : (isCompact ? 14.0 : 16.0);
+    final infoSize = isVeryCompact ? 11.0 : (isCompact ? 12.0 : 14.0);
+
+    // Espacements ultra-réduits
+    final titleSpacing = isVeryCompact ? 16.0 : (isCompact ? 24.0 : 32.0);
+    final subtitleSpacing = isVeryCompact ? 8.0 : (isCompact ? 12.0 : 16.0);
+    final infoSpacing = isVeryCompact ? 16.0 : (isCompact ? 24.0 : 32.0);
+
+    // Tailles d'icônes info
+    final infoIconSize = isVeryCompact ? 18.0 : (isCompact ? 20.0 : 24.0);
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(adaptivePadding),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight:
+              math.max(0, constraints.maxHeight - (isVeryCompact ? 180 : 220)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GlassContainer(
+              width: iconSize.toDouble(),
+              height: iconSize.toDouble(),
+              borderRadius: BorderRadius.circular(isVeryCompact ? 20 : 30),
               color: GlassColors.secondary,
+              opacity: 0.2,
+              child: Icon(
+                Icons.check_circle_outline,
+                size: iconInnerSize.toDouble(),
+                color: GlassColors.secondary,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          Text(
-            'Vous êtes prêt !',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.95),
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            SizedBox(height: titleSpacing),
+            Text(
+              'Vous êtes prêt !',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.95),
+                fontSize: titleSize,
+                fontWeight: FontWeight.bold,
+                height: isVeryCompact ? 1.2 : 1.3,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          Text(
-            'Configurez maintenant votre code PIN pour sécuriser l\'accès à SecureChat.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 16,
-              height: 1.5,
+            SizedBox(height: subtitleSpacing),
+            Text(
+              'Configurez maintenant votre code PIN pour sécuriser l\'accès à SecureChat.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: subtitleSize,
+                height: isVeryCompact ? 1.3 : 1.5,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          GlassContainer(
-            padding: const EdgeInsets.all(16),
-            color: GlassColors.primary,
-            opacity: 0.1,
-            child: Row(
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  color: GlassColors.primary,
-                  size: 24,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Votre code PIN sera votre seule façon d\'accéder à l\'application. Choisissez-le bien !',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 14,
+            SizedBox(height: infoSpacing),
+            GlassContainer(
+              padding:
+                  EdgeInsets.all(isVeryCompact ? 10 : (isCompact ? 12 : 16)),
+              color: GlassColors.primary,
+              opacity: 0.1,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: GlassColors.primary,
+                    size: infoIconSize,
+                  ),
+                  SizedBox(width: isVeryCompact ? 8 : 12),
+                  Expanded(
+                    child: Text(
+                      'Votre code PIN sera votre seule façon d\'accéder à l\'application. Choisissez-le bien !',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: infoSize,
+                        height: isVeryCompact ? 1.3 : 1.4,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFeatureList(List<String> features) {
+    // Breakpoints ultra-agressifs pour les listes
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isVeryCompact = screenHeight < 700; // iPhone SE
+    final isCompact = screenHeight < 800; // iPhone Standard
+
+    // Tailles adaptatives pour les listes
+    final iconSize = isVeryCompact ? 16.0 : (isCompact ? 18.0 : 20.0);
+    final fontSize = isVeryCompact ? 12.0 : (isCompact ? 13.0 : 14.0);
+    final verticalPadding = isVeryCompact ? 2.0 : (isCompact ? 3.0 : 4.0);
+    final horizontalSpacing = isVeryCompact ? 8.0 : (isCompact ? 10.0 : 12.0);
+
     return Column(
       children: features.map((feature) {
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: EdgeInsets.symmetric(vertical: verticalPadding),
           child: Row(
             children: [
               Icon(
                 Icons.check_circle,
                 color: GlassColors.secondary,
-                size: 20,
+                size: iconSize,
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: horizontalSpacing),
               Expanded(
                 child: Text(
                   feature,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 14,
+                    fontSize: fontSize,
+                    height: isVeryCompact ? 1.3 : 1.4,
                   ),
                 ),
               ),
@@ -487,45 +643,59 @@ class _TutorialPageState extends State<TutorialPage>
   }
 
   Widget _buildStepsList(List<String> steps) {
+    // Breakpoints ultra-agressifs pour les étapes
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isVeryCompact = screenHeight < 700; // iPhone SE
+    final isCompact = screenHeight < 800; // iPhone Standard
+
+    // Tailles adaptatives pour les étapes
+    final circleSize = isVeryCompact ? 20.0 : (isCompact ? 22.0 : 24.0);
+    final numberFontSize = isVeryCompact ? 10.0 : (isCompact ? 11.0 : 12.0);
+    final textFontSize = isVeryCompact ? 12.0 : (isCompact ? 13.0 : 14.0);
+    final verticalPadding = isVeryCompact ? 4.0 : (isCompact ? 5.0 : 6.0);
+    final horizontalSpacing = isVeryCompact ? 8.0 : (isCompact ? 10.0 : 12.0);
+    final borderWidth = isVeryCompact ? 1.5 : 2.0;
+
     return Column(
       children: steps.asMap().entries.map((entry) {
         int index = entry.key;
         String step = entry.value;
-        
+
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: EdgeInsets.symmetric(vertical: verticalPadding),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 24,
-                height: 24,
+                width: circleSize,
+                height: circleSize,
                 decoration: BoxDecoration(
                   color: GlassColors.primary.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: GlassColors.primary,
-                    width: 2,
+                    width: borderWidth,
                   ),
                 ),
                 child: Center(
                   child: Text(
                     '${index + 1}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: GlassColors.primary,
-                      fontSize: 12,
+                      fontSize: numberFontSize,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: horizontalSpacing),
               Expanded(
                 child: Text(
                   step,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 14,
+                    fontSize: textFontSize,
+                    height: isVeryCompact ? 1.3 : 1.4,
                   ),
                 ),
               ),
@@ -537,45 +707,60 @@ class _TutorialPageState extends State<TutorialPage>
   }
 
   Widget _buildNavigationButtons() {
+    // Breakpoints ultra-agressifs pour les boutons
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isVeryCompact = screenHeight < 700; // iPhone SE
+    final isCompact = screenHeight < 800; // iPhone Standard
+
+    // Padding adaptatif ultra-réduit
+    final adaptivePadding = isVeryCompact ? 16.0 : (isCompact ? 20.0 : 24.0);
+
+    // Hauteur des boutons adaptative - AUGMENTÉE pour éviter les boutons coupés
+    final buttonHeight = isVeryCompact ? 48.0 : (isCompact ? 52.0 : 56.0);
+
+    // Taille de police adaptative
+    final fontSize = isVeryCompact ? 15.0 : (isCompact ? 16.0 : 17.0);
+
+    // Espacement entre boutons adaptatif
+    final buttonSpacing = isVeryCompact ? 16.0 : (isCompact ? 18.0 : 20.0);
+
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: EdgeInsets.all(adaptivePadding),
       child: Row(
         children: [
           // Bouton Précédent
-          if (_currentPage > 0)
+          if (_currentPage > 0) ...[
             Expanded(
               child: GlassButton(
-                height: 48,
+                height: buttonHeight,
                 color: Colors.white,
-                opacity: 0.1,
                 onTap: _previousPage,
-                child: const Text(
+                child: Text(
                   'Précédent',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: fontSize,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-            )
-          else
+            ),
+            SizedBox(width: buttonSpacing),
+          ] else ...[
             const Expanded(child: SizedBox()),
-
-          const SizedBox(width: 16),
+          ],
 
           // Bouton Suivant/Commencer
           Expanded(
             child: GlassButton(
-              height: 48,
+              height: buttonHeight,
               color: GlassColors.primary,
-              opacity: 0.2,
               onTap: _nextPage,
               child: Text(
                 _currentPage == _totalPages - 1 ? 'Commencer' : 'Suivant',
-                style: const TextStyle(
+                style: TextStyle(
                   color: GlassColors.primary,
-                  fontSize: 16,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w600,
                 ),
               ),

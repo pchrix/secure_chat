@@ -1,10 +1,47 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:securechat/services/room_key_service.dart';
 
 void main() {
   group('RoomKeyService', () {
     late RoomKeyService roomKeyService;
+
+    setUpAll(() async {
+      // Initialiser les bindings Flutter pour flutter_secure_storage
+      TestWidgetsFlutterBinding.ensureInitialized();
+
+      // Mock du canal de méthode pour flutter_secure_storage
+      final Map<String, String> mockStorage = {};
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+        (MethodCall methodCall) async {
+          switch (methodCall.method) {
+            case 'read':
+              final key = methodCall.arguments['key'] as String;
+              return mockStorage[key];
+            case 'write':
+              final key = methodCall.arguments['key'] as String;
+              final value = methodCall.arguments['value'] as String;
+              mockStorage[key] = value;
+              return null;
+            case 'delete':
+              final key = methodCall.arguments['key'] as String;
+              mockStorage.remove(key);
+              return null;
+            case 'readAll':
+              return Map<String, String>.from(mockStorage);
+            case 'deleteAll':
+              mockStorage.clear();
+              return null;
+            default:
+              return null;
+          }
+        },
+      );
+    });
 
     setUp(() async {
       // Mock SharedPreferences
@@ -33,15 +70,15 @@ void main() {
       const roomId = 'ROOM001';
       final generatedKey = await roomKeyService.generateKeyForRoom(roomId);
 
-      final retrievedKey = roomKeyService.getKeyForRoom(roomId);
+      final retrievedKey = await roomKeyService.getKeyForRoom(roomId);
 
       expect(retrievedKey, equals(generatedKey));
     });
 
-    test('should return null for non-existent room keys', () {
+    test('should return null for non-existent room keys', () async {
       const nonExistentRoomId = 'NONEXISTENT';
 
-      final key = roomKeyService.getKeyForRoom(nonExistentRoomId);
+      final key = await roomKeyService.getKeyForRoom(nonExistentRoomId);
 
       expect(key, isNull);
     });
@@ -51,7 +88,7 @@ void main() {
       const customKey = 'custom_test_key_123';
 
       await roomKeyService.setKeyForRoom(roomId, customKey);
-      final retrievedKey = roomKeyService.getKeyForRoom(roomId);
+      final retrievedKey = await roomKeyService.getKeyForRoom(roomId);
 
       expect(retrievedKey, equals(customKey));
     });
@@ -60,12 +97,12 @@ void main() {
       const roomId = 'ROOM001';
       await roomKeyService.generateKeyForRoom(roomId);
 
-      expect(roomKeyService.hasKeyForRoom(roomId), isTrue);
+      expect(await roomKeyService.hasKeyForRoom(roomId), isTrue);
 
       await roomKeyService.removeKeyForRoom(roomId);
 
-      expect(roomKeyService.hasKeyForRoom(roomId), isFalse);
-      expect(roomKeyService.getKeyForRoom(roomId), isNull);
+      expect(await roomKeyService.hasKeyForRoom(roomId), isFalse);
+      expect(await roomKeyService.getKeyForRoom(roomId), isNull);
     });
 
     test('should encrypt and decrypt messages correctly', () async {
@@ -74,30 +111,32 @@ void main() {
 
       await roomKeyService.generateKeyForRoom(roomId);
 
-      final encrypted = roomKeyService.encryptMessageForRoom(roomId, message);
+      final encrypted =
+          await roomKeyService.encryptMessageForRoom(roomId, message);
       expect(encrypted, isNotNull);
       expect(encrypted, isNot(equals(message)));
 
       final decrypted =
-          roomKeyService.decryptMessageForRoom(roomId, encrypted!);
+          await roomKeyService.decryptMessageForRoom(roomId, encrypted!);
       expect(decrypted, equals(message));
     });
 
-    test('should return null when encrypting with non-existent key', () {
+    test('should return null when encrypting with non-existent key', () async {
       const roomId = 'NONEXISTENT';
       const message = 'Test message';
 
-      final encrypted = roomKeyService.encryptMessageForRoom(roomId, message);
+      final encrypted =
+          await roomKeyService.encryptMessageForRoom(roomId, message);
 
       expect(encrypted, isNull);
     });
 
-    test('should return null when decrypting with non-existent key', () {
+    test('should return null when decrypting with non-existent key', () async {
       const roomId = 'NONEXISTENT';
       const encryptedMessage = 'fake_encrypted_message';
 
       final decrypted =
-          roomKeyService.decryptMessageForRoom(roomId, encryptedMessage);
+          await roomKeyService.decryptMessageForRoom(roomId, encryptedMessage);
 
       expect(decrypted, isNull);
     });
@@ -109,20 +148,20 @@ void main() {
       await roomKeyService.generateKeyForRoom(activeRoomId);
       await roomKeyService.generateKeyForRoom(expiredRoomId);
 
-      expect(roomKeyService.hasKeyForRoom(activeRoomId), isTrue);
-      expect(roomKeyService.hasKeyForRoom(expiredRoomId), isTrue);
+      expect(await roomKeyService.hasKeyForRoom(activeRoomId), isTrue);
+      expect(await roomKeyService.hasKeyForRoom(expiredRoomId), isTrue);
 
       await roomKeyService.cleanupExpiredRoomKeys([activeRoomId]);
 
-      expect(roomKeyService.hasKeyForRoom(activeRoomId), isTrue);
-      expect(roomKeyService.hasKeyForRoom(expiredRoomId), isFalse);
+      expect(await roomKeyService.hasKeyForRoom(activeRoomId), isTrue);
+      expect(await roomKeyService.hasKeyForRoom(expiredRoomId), isFalse);
     });
 
     test('should generate key hash for verification', () async {
       const roomId = 'ROOM001';
       await roomKeyService.generateKeyForRoom(roomId);
 
-      final keyHash = roomKeyService.getKeyHashForRoom(roomId);
+      final keyHash = await roomKeyService.getKeyHashForRoom(roomId);
 
       expect(keyHash, isNotNull);
       expect(keyHash!.length, equals(8));
@@ -197,9 +236,10 @@ void main() {
 
       await roomKeyService.syncKeyBetweenRooms(sourceRoomId, targetRoomId);
 
-      final targetKey = roomKeyService.getKeyForRoom(targetRoomId);
+      final targetKey = await roomKeyService.getKeyForRoom(targetRoomId);
       expect(targetKey, equals(sourceKey));
-      expect(roomKeyService.canRoomsCommunicate(sourceRoomId, targetRoomId),
+      expect(
+          await roomKeyService.canRoomsCommunicate(sourceRoomId, targetRoomId),
           isTrue);
     });
 
@@ -212,16 +252,19 @@ void main() {
       await roomKeyService.generateKeyForRoom(roomId2);
 
       // Rooms with different keys cannot communicate
-      expect(roomKeyService.canRoomsCommunicate(roomId1, roomId2), isFalse);
+      expect(
+          await roomKeyService.canRoomsCommunicate(roomId1, roomId2), isFalse);
 
       // Sync keys
       await roomKeyService.syncKeyBetweenRooms(roomId1, roomId2);
 
       // Now they can communicate
-      expect(roomKeyService.canRoomsCommunicate(roomId1, roomId2), isTrue);
+      expect(
+          await roomKeyService.canRoomsCommunicate(roomId1, roomId2), isTrue);
 
       // Room without key cannot communicate
-      expect(roomKeyService.canRoomsCommunicate(roomId1, roomId3), isFalse);
+      expect(
+          await roomKeyService.canRoomsCommunicate(roomId1, roomId3), isFalse);
     });
   });
 }

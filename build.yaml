@@ -1,0 +1,28 @@
+# Configuration globale pour Freezed selon les meilleures pratiques Context7 + Exa
+# 
+# Cette configuration optimise la génération de code Freezed pour SecureChat
+# en appliquant des paramètres cohérents à travers tout le projet.
+
+targets:
+  $default:
+    builders:
+      freezed:
+        options:
+          # Active les factory génériques pour la désérialisation de types génériques
+          generic_argument_factories: true
+          
+          # Configuration pour les unions/sealed classes
+          union_key: type
+          union_value_case: pascal
+          
+          # Optimisations de performance
+          # Note: Le formatage peut ralentir la génération, désactivé pour de meilleures performances
+          format: false
+          
+          # Fonctionnalités activées par défaut (explicitement définies pour clarté)
+          copy_with: true
+          equal: true
+          to_string: true
+          
+          # Rend les collections immutables par défaut (sécurité)
+          make_collections_unmodifiable: true

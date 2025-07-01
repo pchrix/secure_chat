@@ -1,15 +1,12 @@
 import 'dart:convert';
-import 'dart:math';
-import 'dart:typed_data';
-import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:crypto/crypto.dart';
+import 'package:securechat/services/secure_encryption_service.dart';
 
 class EncryptionService {
-  // Generate a random encryption key
-  static String generateRandomKey({int length = 32}) {
-    final random = Random.secure();
-    final values = List<int>.generate(length, (i) => random.nextInt(256));
-    return base64Url.encode(values);
+  // Generate a random encryption key using AES-256-GCM
+  static Future<String> generateRandomKey({int length = 32}) async {
+    final keyBytes = await SecureEncryptionService.generateSecureKey();
+    return base64Url.encode(keyBytes);
   }
 
   // Convert a passphrase to a 256-bit encryption key
@@ -19,8 +16,8 @@ class EncryptionService {
     return base64Url.encode(digest.bytes);
   }
 
-  // Encrypt a message using AES-256
-  static String encryptMessage(String message, String keyString) {
+  // Encrypt a message using AES-256-GCM
+  static Future<String> encryptMessage(String message, String keyString) async {
     try {
       final keyBytes = base64Url.decode(keyString);
 
@@ -38,33 +35,16 @@ class EncryptionService {
         }
       }
 
-      final key = encrypt.Key(Uint8List.fromList(finalKeyBytes));
-      final iv = encrypt.IV.fromSecureRandom(16);
-      final encrypter = encrypt.Encrypter(encrypt.AES(key));
-
-      final encrypted = encrypter.encrypt(message, iv: iv);
-
-      // Combine IV and encrypted content for easy decryption later
-      final combined = jsonEncode({
-        'iv': base64.encode(iv.bytes),
-        'content': encrypted.base64,
-      });
-
-      return base64Url.encode(utf8.encode(combined));
+      return await SecureEncryptionService.encrypt(message, finalKeyBytes);
     } catch (e) {
       throw Exception('Encryption failed: $e');
     }
   }
 
-  // Decrypt a message using AES-256
-  static String decryptMessage(String encryptedMessage, String keyString) {
+  // Decrypt a message using AES-256-GCM
+  static Future<String> decryptMessage(
+      String encryptedMessage, String keyString) async {
     try {
-      final decoded = utf8.decode(base64Url.decode(encryptedMessage));
-      final Map<String, dynamic> parts = jsonDecode(decoded);
-
-      final iv = encrypt.IV.fromBase64(parts['iv']);
-      final encrypted = encrypt.Encrypted.fromBase64(parts['content']);
-
       final keyBytes = base64Url.decode(keyString);
 
       // Ensure key is exactly 32 bytes for AES-256 (same logic as encryption)
@@ -81,24 +61,30 @@ class EncryptionService {
         }
       }
 
-      final key = encrypt.Key(Uint8List.fromList(finalKeyBytes));
-      final encrypter = encrypt.Encrypter(encrypt.AES(key));
-
-      return encrypter.decrypt(encrypted, iv: iv);
+      return await SecureEncryptionService.decrypt(
+          encryptedMessage, finalKeyBytes);
     } catch (e) {
       throw Exception('Decryption failed: $e');
     }
   }
 
-  // Verify if a string is a valid encrypted message
+  // Verify if a string is a valid encrypted message (AES-GCM format)
   static bool isValidEncryptedMessage(String text) {
     try {
-      final decoded = utf8.decode(base64Url.decode(text));
-      final Map<String, dynamic> parts = jsonDecode(decoded);
+      // Try to decode as base64 - AES-GCM format
+      final decoded = base64.decode(text);
 
-      return parts.containsKey('iv') && parts.containsKey('content');
+      // Check minimum length: nonce (12) + tag (16) + at least 1 byte content
+      return decoded.length >= 29;
     } catch (e) {
-      return false;
+      // Also try legacy format for backward compatibility
+      try {
+        final decoded = utf8.decode(base64Url.decode(text));
+        final Map<String, dynamic> parts = jsonDecode(decoded);
+        return parts.containsKey('iv') && parts.containsKey('content');
+      } catch (e2) {
+        return false;
+      }
     }
   }
 }

@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../providers/app_state_provider.dart';
 
 import '../services/encryption_service.dart';
 import '../utils/security_utils.dart';
+import '../theme.dart';
 
 import 'contacts_page.dart';
 import 'settings_page.dart';
 
-class ModernEncryptionPage extends StatefulWidget {
+class ModernEncryptionPage extends ConsumerStatefulWidget {
   const ModernEncryptionPage({super.key});
 
   @override
-  State<ModernEncryptionPage> createState() => _ModernEncryptionPageState();
+  ConsumerState<ModernEncryptionPage> createState() =>
+      _ModernEncryptionPageState();
 }
 
-class _ModernEncryptionPageState extends State<ModernEncryptionPage>
+class _ModernEncryptionPageState extends ConsumerState<ModernEncryptionPage>
     with SingleTickerProviderStateMixin {
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _resultController = TextEditingController();
@@ -81,10 +83,10 @@ class _ModernEncryptionPageState extends State<ModernEncryptionPage>
   }
 
   void _initializeKey() {
-    final provider = Provider.of<AppStateProvider>(context, listen: false);
-    if (provider.isKeyValid()) {
+    final appState = ref.read(appStateProvider);
+    if (appState.hasValidKey) {
       setState(() {
-        _temporaryKey = provider.temporaryKey;
+        _temporaryKey = appState.temporaryKey;
       });
     }
   }
@@ -158,8 +160,7 @@ class _ModernEncryptionPageState extends State<ModernEncryptionPage>
 
   void _generateNewKey() {
     final newKey = EncryptionService.generateRandomKey();
-    final provider = Provider.of<AppStateProvider>(context, listen: false);
-    provider.setTemporaryKey(newKey);
+    ref.read(appStateProvider.notifier).setTemporaryKey(newKey);
 
     setState(() {
       _temporaryKey = newKey;
@@ -172,7 +173,7 @@ class _ModernEncryptionPageState extends State<ModernEncryptionPage>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: const Color(0xFF9B59B6),
+        backgroundColor: GlassColors.setupPurple,
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -238,8 +239,7 @@ class _ModernEncryptionPageState extends State<ModernEncryptionPage>
         }
       },
       child: Scaffold(
-        backgroundColor:
-            const Color(0xFF1C1C1E), // Dark background like calculator
+        backgroundColor: GlassColors.authBackground,
         body: FadeTransition(
           opacity: _slideAnimation,
           child: SafeArea(
@@ -257,7 +257,7 @@ class _ModernEncryptionPageState extends State<ModernEncryptionPage>
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1),
+                            color: GlassColors.whiteAlpha10,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -275,10 +275,10 @@ class _ModernEncryptionPageState extends State<ModernEncryptionPage>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF9B59B6).withValues(alpha: 0.2),
+                          color: GlassColors.setupPurpleAlpha20,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: const Color(0xFF9B59B6),
+                            color: GlassColors.setupPurple,
                             width: 1,
                           ),
                         ),
@@ -287,14 +287,14 @@ class _ModernEncryptionPageState extends State<ModernEncryptionPage>
                           children: [
                             const Icon(
                               Icons.access_time,
-                              color: Color(0xFF9B59B6),
+                              color: GlassColors.setupPurple,
                               size: 16,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               _formatRemainingTime(),
                               style: const TextStyle(
-                                color: Color(0xFF9B59B6),
+                                color: GlassColors.setupPurple,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -311,7 +311,7 @@ class _ModernEncryptionPageState extends State<ModernEncryptionPage>
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1),
+                            color: GlassColors.whiteAlpha10,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -335,10 +335,10 @@ class _ModernEncryptionPageState extends State<ModernEncryptionPage>
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.05),
+                              color: GlassColors.whiteAlpha05,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.1),
+                                color: GlassColors.whiteAlpha10,
                               ),
                             ),
                             child: Column(

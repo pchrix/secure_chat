@@ -1,87 +1,129 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/contact.dart';
+import '../services/secure_storage_service.dart';
 
-class AppStateProvider extends ChangeNotifier {
-  List<Contact> _contacts = [];
-  DateTime? _keyExpiryTime;
-  String? _temporaryKey;
-  final int _defaultKeyDurationHours = 6;
+// État de l'application
+class AppState {
+  final List<Contact> contacts;
+  final DateTime? keyExpiryTime;
+  final String? temporaryKey;
+  final bool isLoading;
+  final String? error;
 
-  List<Contact> get contacts => _contacts;
+  const AppState({
+    this.contacts = const [],
+    this.keyExpiryTime,
+    this.temporaryKey,
+    this.isLoading = false,
+    this.error,
+  });
+
   bool get hasValidKey =>
-      _temporaryKey != null &&
-      _keyExpiryTime != null &&
-      _keyExpiryTime!.isAfter(DateTime.now());
-  String? get temporaryKey => _temporaryKey;
-  DateTime? get keyExpiryTime => _keyExpiryTime;
+      temporaryKey != null &&
+      keyExpiryTime != null &&
+      keyExpiryTime!.isAfter(DateTime.now());
 
-  AppStateProvider() {
-    _loadContacts();
-    _loadKeyData();
+  AppState copyWith({
+    List<Contact>? contacts,
+    DateTime? keyExpiryTime,
+    String? temporaryKey,
+    bool? isLoading,
+    String? error,
+    bool clearKeyExpiryTime = false,
+    bool clearTemporaryKey = false,
+    bool clearError = false,
+  }) {
+    return AppState(
+      contacts: contacts ?? this.contacts,
+      keyExpiryTime:
+          clearKeyExpiryTime ? null : (keyExpiryTime ?? this.keyExpiryTime),
+      temporaryKey:
+          clearTemporaryKey ? null : (temporaryKey ?? this.temporaryKey),
+      isLoading: isLoading ?? this.isLoading,
+      error: clearError ? null : (error ?? this.error),
+    );
+  }
+}
+
+class AppStateNotifier extends StateNotifier<AppState> {
+  static const int _defaultKeyDurationHours = 6;
+
+  AppStateNotifier() : super(const AppState()) {
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    state = state.copyWith(isLoading: true);
+    await _loadContacts();
+    await _loadKeyData();
+    state = state.copyWith(isLoading: false);
   }
 
   void addContact(Contact contact) {
-    if (!_contacts.any((c) => c.id == contact.id)) {
-      _contacts.add(contact);
+    if (!state.contacts.any((c) => c.id == contact.id)) {
+      final updatedContacts = [...state.contacts, contact];
+      state = state.copyWith(contacts: updatedContacts);
       _saveContacts();
-      notifyListeners();
     }
   }
 
   void removeContact(String contactId) {
-    _contacts.removeWhere((contact) => contact.id == contactId);
+    final updatedContacts =
+        state.contacts.where((contact) => contact.id != contactId).toList();
+    state = state.copyWith(contacts: updatedContacts);
     _saveContacts();
-    notifyListeners();
   }
 
   void generateNewKey() {
     // The actual key generation is handled in the encryption service
     // Here we just manage expiry time
-    _keyExpiryTime =
-        DateTime.now().add(Duration(hours: _defaultKeyDurationHours));
+    final keyExpiryTime =
+        DateTime.now().add(const Duration(hours: _defaultKeyDurationHours));
+    state = state.copyWith(keyExpiryTime: keyExpiryTime);
     _saveKeyData();
-    notifyListeners();
   }
 
   void setTemporaryKey(String key, {int? durationHours}) {
-    _temporaryKey = key;
-    _keyExpiryTime = DateTime.now()
+    final keyExpiryTime = DateTime.now()
         .add(Duration(hours: durationHours ?? _defaultKeyDurationHours));
+    state = state.copyWith(
+      temporaryKey: key,
+      keyExpiryTime: keyExpiryTime,
+    );
     _saveKeyData();
-    notifyListeners();
   }
 
   bool isKeyValid() {
-    if (_temporaryKey == null || _keyExpiryTime == null) return false;
-    return _keyExpiryTime!.isAfter(DateTime.now());
+    return state.hasValidKey;
   }
 
   void clearKey() {
-    _temporaryKey = null;
-    _keyExpiryTime = null;
+    state = state.copyWith(
+      clearTemporaryKey: true,
+      clearKeyExpiryTime: true,
+    );
     _saveKeyData();
-    notifyListeners();
   }
 
   Future<void> _loadContacts() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final contactsJson = prefs.getStringList('contacts') ?? [];
-      _contacts = contactsJson.map((json) => Contact.fromJson(json)).toList();
+      final contactsJson =
+          await SecureStorageService.getStringList('contacts') ?? [];
+      final contacts =
+          contactsJson.map((json) => Contact.fromJson(json)).toList();
+      state = state.copyWith(contacts: contacts);
     } catch (e) {
       // Handle error silently to avoid revealing app's true nature
-      _contacts = [];
+      state = state.copyWith(contacts: []);
     }
   }
 
   Future<void> _saveContacts() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
       final contactsJson =
-          _contacts.map((contact) => contact.toJson()).toList();
-      await prefs.setStringList('contacts', contactsJson);
+          state.contacts.map((contact) => contact.toJson()).toList();
+      await SecureStorageService.setStringList('contacts', contactsJson);
     } catch (e) {
       // Handle error silently
     }
@@ -89,13 +131,17 @@ class AppStateProvider extends ChangeNotifier {
 
   Future<void> _loadKeyData() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final expiryMillis = prefs.getInt('key_expiry');
+      final expiryMillis = await SecureStorageService.getInt('key_expiry');
       if (expiryMillis != null) {
-        _keyExpiryTime = DateTime.fromMillisecondsSinceEpoch(expiryMillis);
-        if (!_keyExpiryTime!.isAfter(DateTime.now())) {
-          _keyExpiryTime = null;
-          _temporaryKey = null;
+        final keyExpiryTime = DateTime.fromMillisecondsSinceEpoch(expiryMillis);
+        if (!keyExpiryTime.isAfter(DateTime.now())) {
+          // Key expired, clear it
+          state = state.copyWith(
+            clearKeyExpiryTime: true,
+            clearTemporaryKey: true,
+          );
+        } else {
+          state = state.copyWith(keyExpiryTime: keyExpiryTime);
         }
       }
     } catch (e) {
@@ -105,15 +151,20 @@ class AppStateProvider extends ChangeNotifier {
 
   Future<void> _saveKeyData() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      if (_keyExpiryTime != null) {
-        await prefs.setInt(
-            'key_expiry', _keyExpiryTime!.millisecondsSinceEpoch);
+      if (state.keyExpiryTime != null) {
+        await SecureStorageService.setInt(
+            'key_expiry', state.keyExpiryTime!.millisecondsSinceEpoch);
       } else {
-        await prefs.remove('key_expiry');
+        await SecureStorageService.remove('key_expiry');
       }
     } catch (e) {
       // Handle error silently
     }
   }
 }
+
+// Provider global pour AppState
+final appStateProvider =
+    StateNotifierProvider<AppStateNotifier, AppState>((ref) {
+  return AppStateNotifier();
+});

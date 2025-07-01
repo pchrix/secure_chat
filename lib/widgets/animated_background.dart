@@ -28,17 +28,17 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
   @override
   void initState() {
     super.initState();
-    
+
     _controller1 = AnimationController(
       duration: const Duration(seconds: 20),
       vsync: this,
     )..repeat();
-    
+
     _controller2 = AnimationController(
       duration: const Duration(seconds: 15),
       vsync: this,
     )..repeat();
-    
+
     _controller3 = AnimationController(
       duration: const Duration(seconds: 25),
       vsync: this,
@@ -105,7 +105,7 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
               reverse: true,
             ),
           ],
-          
+
           // Contenu principal
           widget.child,
         ],
@@ -125,8 +125,9 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
       animation: animation,
       builder: (context, child) {
         final screenSize = MediaQuery.of(context).size;
-        final animationValue = reverse ? (1 - animation.value) : animation.value;
-        
+        final animationValue =
+            reverse ? (1 - animation.value) : animation.value;
+
         return Positioned(
           top: screenSize.height * top + sin(animationValue * 2 * pi) * 30,
           left: screenSize.width * left + cos(animationValue * 2 * pi) * 20,
@@ -174,10 +175,11 @@ class GradientBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: begin,
           end: end,
-          colors: colors ?? [
-            GlassColors.backgroundStart,
-            GlassColors.backgroundEnd,
-          ],
+          colors: colors ??
+              [
+                GlassColors.backgroundStart,
+                GlassColors.backgroundEnd,
+              ],
         ),
       ),
       child: child,
@@ -218,11 +220,12 @@ class _FloatingOrbState extends State<FloatingOrb>
       vsync: this,
     )..repeat(reverse: true);
 
+    final random = Random.secure();
     _animation = Tween<Offset>(
       begin: Offset(widget.initialX, widget.initialY),
       end: Offset(
-        widget.initialX + (Random().nextDouble() - 0.5) * 0.3,
-        widget.initialY + (Random().nextDouble() - 0.5) * 0.3,
+        widget.initialX + (random.nextDouble() - 0.5) * 0.3,
+        widget.initialY + (random.nextDouble() - 0.5) * 0.3,
       ),
     ).animate(CurvedAnimation(
       parent: _controller,

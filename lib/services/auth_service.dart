@@ -23,7 +23,14 @@ class AuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final hash = prefs.getString(_passwordHashKey);
-      return hash != null && hash.isNotEmpty;
+      
+      // MVP: Si aucun mot de passe n'est défini, créer un PIN par défaut "1234"
+      if (hash == null || hash.isEmpty) {
+        await setPassword('1234');
+        return true;
+      }
+      
+      return true;
     } catch (e) {
       return false;
     }
@@ -32,7 +39,7 @@ class AuthService {
   /// Set a new password
   static Future<bool> setPassword(String password) async {
     try {
-      // Validate password (4-6 digits)
+      // Validate password (4 digits)
       if (!_isValidPassword(password)) {
         return false;
       }
@@ -89,9 +96,9 @@ class AuthService {
     }
   }
 
-  /// Validate password format (4-6 digits)
+  /// Validate password format (4 digits)
   static bool _isValidPassword(String password) {
-    if (password.length < 4 || password.length > 6) {
+    if (password.length != 4) {
       return false;
     }
     

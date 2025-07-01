@@ -1,40 +1,210 @@
+import 'dart:async';
+import 'dart:developer' as developer;
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/room.dart';
 import '../models/message.dart';
+import '../config/app_config.dart';
+
+/// Exception personnalisée pour les erreurs Supabase
+class SupabaseServiceException implements Exception {
+  final String message;
+  final String? code;
+  final String? details;
+  final SupabaseErrorType type;
+  final DateTime timestamp;
+
+  SupabaseServiceException(
+    this.message, {
+    this.code,
+    this.details,
+    this.type = SupabaseErrorType.unknown,
+  }) : timestamp = DateTime.now();
+
+  factory SupabaseServiceException._fromPostgrest(PostgrestException e) {
+    _logError('PostgrestException', e.message, e.code, e.details?.toString());
+    return SupabaseServiceException(
+      'Erreur de base de données: ${e.message}',
+      code: e.code,
+      details: e.details?.toString(),
+      type: SupabaseErrorType.database,
+    );
+  }
+
+  factory SupabaseServiceException._fromTimeout() {
+    _logError('TimeoutException', 'Délai d\'attente dépassé', null, null);
+    return SupabaseServiceException(
+      'Délai d\'attente dépassé. Vérifiez votre connexion internet.',
+      type: SupabaseErrorType.timeout,
+    );
+  }
+
+  factory SupabaseServiceException._fromConnection(String details) {
+    _logError('ConnectionException', 'Erreur de connexion', null, details);
+    return SupabaseServiceException(
+      'Impossible de se connecter au serveur. Vérifiez votre connexion.',
+      details: details,
+      type: SupabaseErrorType.connection,
+    );
+  }
+
+  static void _logError(
+      String type, String message, String? code, String? details) {
+    if (kDebugMode) {
+      developer.log(
+        '🔴 SupabaseError [$type]: $message',
+        name: 'SupabaseService',
+        error: {
+          'type': type,
+          'message': message,
+          'code': code,
+          'details': details,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+    }
+  }
+
+  @override
+  String toString() => message;
+}
+
+/// Types d'erreurs Supabase pour un meilleur handling
+enum SupabaseErrorType {
+  database,
+  connection,
+  timeout,
+  authentication,
+  permission,
+  unknown,
+}
 
 class SupabaseService {
-  static const String supabaseUrl = 'https://wfcnymkoufwtsalnbgvb.supabase.co';
-  static const String supabaseAnonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmY255bWtvdWZ3dHNhbG5iZ3ZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NjgxMDMsImV4cCI6MjA2NjA0NDEwM30.0pbagW0K-nAkO_PZuH2ZXzs9kiCTAU2NLSmSIgZbxH0';
-
   static SupabaseClient get client => Supabase.instance.client;
 
-  // Initialisation du service Supabase
+  static bool _isInitialized = false;
+  static bool get isInitialized => _isInitialized;
+
+  // Initialisation sécurisée du service Supabase
   static Future<void> initialize() async {
-    await Supabase.initialize(
-      url: supabaseUrl,
-      anonKey: supabaseAnonKey,
-      authOptions: const FlutterAuthClientOptions(
-        authFlowType: AuthFlowType.pkce,
-      ),
-    );
+    if (_isInitialized) return;
+
+    // Vérifier si la configuration Supabase est disponible
+    if (!AppConfig.isSupabaseConfigured) {
+      if (kDebugMode) {
+        // ignore: avoid_print
+        print('📱 Application en mode hors-ligne (MVP)');
+        // ignore: avoid_print
+        print(
+            '💡 Pour activer Supabase, configurez les variables d\'environnement');
+      }
+      _isInitialized = true;
+      return;
+    }
+
+    try {
+      // Utiliser les credentials directs pour MVP
+      final url = AppConfig.supabaseUrl;
+      final anonKey = AppConfig.supabaseAnonKey;
+
+      if (kDebugMode) {
+        print('🔄 Initialisation Supabase...');
+        print('📍 URL: $url');
+        print('🔑 Key: ${anonKey.substring(0, 20)}...');
+      }
+
+      await Supabase.initialize(
+        url: url,
+        anonKey: anonKey,
+        authOptions: const FlutterAuthClientOptions(
+          authFlowType: AuthFlowType.pkce,
+        ),
+      );
+      _isInitialized = true;
+      if (kDebugMode) {
+        // ignore: avoid_print
+        print('✅ Supabase initialisé avec succès');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        // ignore: avoid_print
+        print('⚠️ Erreur d\'initialisation Supabase, mode hors-ligne activé');
+        // ignore: avoid_print
+        print('🔧 Erreur: $e');
+      }
+      // Marquer comme initialisé pour permettre le mode offline
+      _isInitialized = true;
+    }
+  }
+
+  // Vérifier si Supabase est réellement disponible
+  static bool get isOnlineMode =>
+      _isInitialized && AppConfig.isSupabaseConfigured;
+
+  // Vérification de la connexion
+  static Future<bool> checkConnection() async {
+    if (!isOnlineMode) {
+      return false;
+    }
+
+    try {
+      await client.from('rooms').select().limit(1);
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        // ignore: avoid_print
+        print('❌ Connexion Supabase échouée: $e');
+      }
+      return false;
+    }
   }
 
   // === GESTION DES SALONS ===
 
   /// Créer un nouveau salon dans Supabase
   static Future<void> createRoom(Room room) async {
+    if (!_isInitialized) {
+      throw SupabaseServiceException(
+        'Service Supabase non initialisé',
+        type: SupabaseErrorType.connection,
+      );
+    }
+
+    if (!isOnlineMode) {
+      throw SupabaseServiceException(
+        'Mode hors-ligne actif. Impossible de créer un salon en ligne.',
+        type: SupabaseErrorType.connection,
+      );
+    }
+
     try {
+      developer.log('🔄 Création du salon ${room.id}', name: 'SupabaseService');
+
       await client.from('rooms').insert({
         'id': room.id,
         'created_at': room.createdAt.toIso8601String(),
         'expires_at': room.expiresAt.toIso8601String(),
         'status': room.status.name,
         'participant_count': 0,
-        'max_participants': 10, // Limite par défaut
-      });
+        'max_participants': AppConfig.maxRoomParticipants,
+      }).timeout(AppConfig.connectionTimeout);
+
+      developer.log('✅ Salon ${room.id} créé avec succès',
+          name: 'SupabaseService');
+    } on TimeoutException {
+      throw SupabaseServiceException._fromTimeout();
+    } on PostgrestException catch (e) {
+      throw SupabaseServiceException._fromPostgrest(e);
+    } on SocketException catch (e) {
+      throw SupabaseServiceException._fromConnection(e.toString());
     } catch (e) {
-      throw Exception('Erreur lors de la création du salon: $e');
+      developer.log('❌ Erreur création salon: $e', name: 'SupabaseService');
+      throw SupabaseServiceException(
+        'Erreur inattendue lors de la création du salon',
+        details: e.toString(),
+        type: SupabaseErrorType.unknown,
+      );
     }
   }
 
@@ -46,6 +216,7 @@ class SupabaseService {
 
       return Room(
         id: response['id'],
+        name: response['name'] ?? 'Salon ${response['id']}',
         createdAt: DateTime.parse(response['created_at']),
         expiresAt: DateTime.parse(response['expires_at']),
         status: RoomStatus.values.firstWhere(
@@ -53,6 +224,7 @@ class SupabaseService {
           orElse: () => RoomStatus.active,
         ),
         participantCount: response['participant_count'] ?? 0,
+        maxParticipants: response['max_participants'] ?? 2,
       );
     } catch (e) {
       return null;
@@ -96,6 +268,7 @@ class SupabaseService {
       return response
           .map<Room>((data) => Room(
                 id: data['id'],
+                name: data['name'] ?? 'Salon ${data['id']}',
                 createdAt: DateTime.parse(data['created_at']),
                 expiresAt: DateTime.parse(data['expires_at']),
                 status: RoomStatus.values.firstWhere(
@@ -103,6 +276,7 @@ class SupabaseService {
                   orElse: () => RoomStatus.active,
                 ),
                 participantCount: data['participant_count'] ?? 0,
+                maxParticipants: data['max_participants'] ?? 2,
               ))
           .toList();
     } catch (e) {
