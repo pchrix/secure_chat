@@ -76,7 +76,7 @@ class GlassmorphismContainer extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(shadowOpacity),
+            color: Colors.black.withValues(alpha: shadowOpacity),
             blurRadius: shadowBlurRadius,
             offset: shadowOffset,
           ),
@@ -91,10 +91,10 @@ class GlassmorphismContainer extends StatelessWidget {
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(opacity),
+              color: Colors.white.withValues(alpha: opacity),
               borderRadius: BorderRadius.circular(borderRadius),
               border: Border.all(
-                color: Colors.white.withOpacity(borderOpacity),
+                color: Colors.white.withValues(alpha: borderOpacity),
                 width: borderWidth,
               ),
             ),
@@ -221,7 +221,7 @@ class GlassmorphismVariants {
       child: Container(
         decoration: backgroundColor != null
             ? BoxDecoration(
-                color: backgroundColor.withOpacity(0.1),
+                color: backgroundColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14.0),
               )
             : null,

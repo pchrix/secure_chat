@@ -177,16 +177,16 @@ class _EnhancedSnackBarContentState extends State<_EnhancedSnackBarContent>
                 children: [
                   // Icon
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: MediaQuery.sizeOf(context).width < 600 ? 36 : 40,
+                    height: MediaQuery.sizeOf(context).width < 600 ? 36 : 40,
                     decoration: BoxDecoration(
                       color: typeColor.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(MediaQuery.sizeOf(context).width < 600 ? 8 : 10),
                     ),
                     child: Icon(
                       _getTypeIcon(),
                       color: typeColor,
-                      size: 20,
+                      size: MediaQuery.sizeOf(context).width < 600 ? 18 : 20,
                     ),
                   ),
 

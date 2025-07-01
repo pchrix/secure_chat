@@ -359,19 +359,19 @@ class _HomePageState extends ConsumerState<HomePage>
                 child: ButtonHoverAnimation(
                   child: UnifiedGlassButton(
                     onTap: () => _navigateToCreateRoom(),
-                    width: isDesktop ? 250 : double.infinity,
-                    height: 56,
+                    width: isDesktop ? MediaQuery.sizeOf(context).width * 0.2 : double.infinity,
+                    height: MediaQuery.sizeOf(context).height < 700 ? 48 : 56,
                     semanticLabel: 'Créer un nouveau salon sécurisé',
                     tooltip: 'Créer un salon',
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.add_circle_outline,
                           color: Colors.white,
-                          size: 24,
+                          size: MediaQuery.sizeOf(context).width < 600 ? 20 : 24,
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: MediaQuery.sizeOf(context).width < 600 ? 8 : 12),
                         Text(
                           'Créer un salon',
                           style: AppTextStyles.buttonLarge,

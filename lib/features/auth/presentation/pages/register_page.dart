@@ -81,9 +81,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
           colors: [
-            AppTheme.accentColor.withOpacity(0.8),
-            AppTheme.primaryColor.withOpacity(0.6),
-            AppTheme.secondaryColor.withOpacity(0.4),
+            AppTheme.accentColor.withValues(alpha: 0.8),
+            AppTheme.primaryColor.withValues(alpha: 0.6),
+            AppTheme.secondaryColor.withValues(alpha: 0.4),
           ],
         ),
       ),
@@ -355,10 +355,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       error: (error, _) => Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppTheme.errorColor.withOpacity(0.1),
+          color: AppTheme.errorColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: AppTheme.errorColor.withOpacity(0.3),
+            color: AppTheme.errorColor.withValues(alpha: 0.3),
           ),
         ),
         child: Row(

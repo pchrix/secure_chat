@@ -117,8 +117,8 @@ class EnhancedRoomCard extends StatelessWidget {
         Row(
           children: [
             Container(
-              width: _getAdaptiveSize(responsive, 24),
-              height: _getAdaptiveSize(responsive, 24),
+              width: MediaQuery.sizeOf(context).width < 600 ? 20 : 24,
+              height: MediaQuery.sizeOf(context).width < 600 ? 20 : 24,
               decoration: BoxDecoration(
                 color: _getStatusColor(),
                 shape: BoxShape.circle,

@@ -75,9 +75,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.primaryColor.withOpacity(0.8),
-            AppTheme.secondaryColor.withOpacity(0.6),
-            AppTheme.accentColor.withOpacity(0.4),
+            AppTheme.primaryColor.withValues(alpha: 0.8),
+            AppTheme.secondaryColor.withValues(alpha: 0.6),
+            AppTheme.accentColor.withValues(alpha: 0.4),
           ],
         ),
       ),
@@ -289,10 +289,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       error: (error, _) => Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppTheme.errorColor.withOpacity(0.1),
+          color: AppTheme.errorColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: AppTheme.errorColor.withOpacity(0.3),
+            color: AppTheme.errorColor.withValues(alpha: 0.3),
           ),
         ),
         child: Row(

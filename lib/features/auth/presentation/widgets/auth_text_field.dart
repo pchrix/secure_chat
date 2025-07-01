@@ -164,7 +164,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
             decoration: InputDecoration(
               hintText: widget.hintText,
               hintStyle: AppTheme.bodyMedium.copyWith(
-                color: AppTheme.textSecondaryColor.withOpacity(0.7),
+                color: AppTheme.textSecondaryColor.withValues(alpha: 0.7),
               ),
               prefixIcon: widget.prefixIcon != null
                   ? Icon(

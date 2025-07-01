@@ -146,19 +146,19 @@ class _AuthButtonState extends State<AuthButton>
       boxShadow: _canPress
           ? [
               BoxShadow(
-                color: colors.primary.withOpacity(0.3),
+                color: colors.primary.withValues(alpha: 0.3),
                 blurRadius: 12.0,
                 offset: const Offset(0, 6),
               ),
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 8.0,
                 offset: const Offset(0, 2),
               ),
             ]
           : [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 4.0,
                 offset: const Offset(0, 2),
               ),
@@ -171,7 +171,7 @@ class _AuthButtonState extends State<AuthButton>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16.0),
         border: Border.all(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           width: 1.0,
         ),
       ),
@@ -249,17 +249,17 @@ class _AuthButtonState extends State<AuthButton>
               )
             : _ButtonColors(
                 primary: AppTheme.disabledColor,
-                secondary: AppTheme.disabledColor.withOpacity(0.8),
+                secondary: AppTheme.disabledColor.withValues(alpha: 0.8),
               );
       case AuthButtonStyle.secondary:
         return _canPress
             ? _ButtonColors(
                 primary: AppTheme.secondaryColor,
-                secondary: AppTheme.primaryColor.withOpacity(0.8),
+                secondary: AppTheme.primaryColor.withValues(alpha: 0.8),
               )
             : _ButtonColors(
                 primary: AppTheme.disabledColor,
-                secondary: AppTheme.disabledColor.withOpacity(0.8),
+                secondary: AppTheme.disabledColor.withValues(alpha: 0.8),
               );
       case AuthButtonStyle.outline:
         return _ButtonColors(

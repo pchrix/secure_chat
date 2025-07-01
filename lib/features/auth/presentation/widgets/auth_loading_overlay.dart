@@ -104,8 +104,8 @@ class _AuthLoadingOverlayState extends State<AuthLoadingOverlay>
           sigmaY: widget.blurSigma,
         ),
         child: Container(
-          color: widget.backgroundColor ?? 
-                 Colors.black.withOpacity(0.3),
+          color: widget.backgroundColor ??
+                 Colors.black.withValues(alpha: 0.3),
           child: Center(
             child: _buildLoadingContent(),
           ),

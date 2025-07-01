@@ -254,7 +254,7 @@ class AppTheme {
   
   /// Obtient une couleur avec opacité
   static Color withOpacity(Color color, double opacity) {
-    return color.withOpacity(opacity);
+    return color.withValues(alpha: opacity);
   }
   
   /// Vérifie si l'écran est mobile
