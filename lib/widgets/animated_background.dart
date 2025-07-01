@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../theme.dart';
+import '../utils/responsive_utils.dart';
 
 class AnimatedBackground extends StatefulWidget {
   final Widget child;
@@ -25,28 +26,45 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
   late Animation<double> _animation2;
   late Animation<double> _animation3;
 
+  // ✅ OPTIMISATION: Cache la taille de l'écran pour éviter MediaQuery à chaque frame
+  late Size _screenSize;
+
+  // ✅ OPTIMISATION: Pré-calculer les valeurs pour éviter calculs répétés
+  static const double _twoPi = 2 * pi;
+
   @override
   void initState() {
     super.initState();
 
+    // ✅ OPTIMISATION: Réduire la durée sur appareils bas de gamme
+    final isLowEnd = ResponsiveUtils.isVeryCompact(context);
+    final durationMultiplier = isLowEnd ? 2.0 : 1.0;
+
     _controller1 = AnimationController(
-      duration: const Duration(seconds: 20),
+      duration: Duration(seconds: (20 * durationMultiplier).round()),
       vsync: this,
     )..repeat();
 
     _controller2 = AnimationController(
-      duration: const Duration(seconds: 15),
+      duration: Duration(seconds: (15 * durationMultiplier).round()),
       vsync: this,
     )..repeat();
 
     _controller3 = AnimationController(
-      duration: const Duration(seconds: 25),
+      duration: Duration(seconds: (25 * durationMultiplier).round()),
       vsync: this,
     )..repeat();
 
-    _animation1 = Tween<double>(begin: 0, end: 2 * pi).animate(_controller1);
-    _animation2 = Tween<double>(begin: 0, end: 2 * pi).animate(_controller2);
-    _animation3 = Tween<double>(begin: 0, end: 2 * pi).animate(_controller3);
+    _animation1 = Tween<double>(begin: 0, end: _twoPi).animate(_controller1);
+    _animation2 = Tween<double>(begin: 0, end: _twoPi).animate(_controller2);
+    _animation3 = Tween<double>(begin: 0, end: _twoPi).animate(_controller3);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // ✅ OPTIMISATION: Cache la taille une seule fois
+    _screenSize = MediaQuery.of(context).size;
   }
 
   @override
@@ -59,94 +77,159 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
 
   @override
   Widget build(BuildContext context) {
+    // ✅ OPTIMISATION: Désactiver animations sur appareils très bas de gamme
+    final shouldShowAnimations = widget.showFloatingShapes &&
+        !ResponsiveUtils.shouldDisableAdvancedEffects(context);
+
     return Container(
       decoration: const BoxDecoration(
         gradient: GlassColors.backgroundGradient,
       ),
       child: Stack(
         children: [
-          // Formes géométriques flottantes
-          if (widget.showFloatingShapes) ...[
-            _buildFloatingShape(
-              animation: _animation1,
-              size: 120,
-              color: GlassColors.secondary,
-              top: 0.1,
-              left: 0.8,
+          // ✅ OPTIMISATION: RepaintBoundary pour isoler les animations
+          if (shouldShowAnimations)
+            RepaintBoundary(
+              child: _OptimizedFloatingShapes(
+                animation1: _animation1,
+                animation2: _animation2,
+                animation3: _animation3,
+                screenSize: _screenSize,
+              ),
             ),
-            _buildFloatingShape(
-              animation: _animation2,
-              size: 80,
-              color: GlassColors.accent,
-              top: 0.3,
-              left: 0.1,
-            ),
-            _buildFloatingShape(
-              animation: _animation3,
-              size: 100,
-              color: GlassColors.tertiary,
-              top: 0.7,
-              left: 0.7,
-            ),
-            _buildFloatingShape(
-              animation: _animation1,
-              size: 60,
-              color: GlassColors.primary,
-              top: 0.6,
-              left: 0.2,
-              reverse: true,
-            ),
-            _buildFloatingShape(
-              animation: _animation2,
-              size: 90,
-              color: GlassColors.secondary,
-              top: 0.8,
-              left: 0.9,
-              reverse: true,
-            ),
-          ],
 
-          // Contenu principal
-          widget.child,
+          // ✅ OPTIMISATION: RepaintBoundary pour le contenu principal
+          RepaintBoundary(child: widget.child),
         ],
       ),
     );
   }
 
-  Widget _buildFloatingShape({
-    required Animation<double> animation,
-    required double size,
-    required Color color,
-    required double top,
-    required double left,
-    bool reverse = false,
-  }) {
+}
+
+/// ✅ OPTIMISATION: Widget séparé pour les formes flottantes avec RepaintBoundary
+class _OptimizedFloatingShapes extends StatelessWidget {
+  final Animation<double> animation1;
+  final Animation<double> animation2;
+  final Animation<double> animation3;
+  final Size screenSize;
+
+  const _OptimizedFloatingShapes({
+    required this.animation1,
+    required this.animation2,
+    required this.animation3,
+    required this.screenSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        _OptimizedFloatingShape(
+          animation: animation1,
+          size: 120,
+          color: GlassColors.secondary,
+          top: 0.1,
+          left: 0.8,
+          screenSize: screenSize,
+        ),
+        _OptimizedFloatingShape(
+          animation: animation2,
+          size: 80,
+          color: GlassColors.accent,
+          top: 0.3,
+          left: 0.1,
+          screenSize: screenSize,
+        ),
+        _OptimizedFloatingShape(
+          animation: animation3,
+          size: 100,
+          color: GlassColors.tertiary,
+          top: 0.7,
+          left: 0.7,
+          screenSize: screenSize,
+        ),
+        _OptimizedFloatingShape(
+          animation: animation1,
+          size: 60,
+          color: GlassColors.primary,
+          top: 0.6,
+          left: 0.2,
+          screenSize: screenSize,
+          reverse: true,
+        ),
+        _OptimizedFloatingShape(
+          animation: animation2,
+          size: 90,
+          color: GlassColors.secondary,
+          top: 0.8,
+          left: 0.9,
+          screenSize: screenSize,
+          reverse: true,
+        ),
+      ],
+    );
+  }
+}
+
+/// ✅ OPTIMISATION: Widget optimisé pour une forme flottante individuelle
+class _OptimizedFloatingShape extends StatelessWidget {
+  final Animation<double> animation;
+  final double size;
+  final Color color;
+  final double top;
+  final double left;
+  final Size screenSize;
+  final bool reverse;
+
+  // ✅ OPTIMISATION: Pré-calculer les valeurs constantes
+  static const double _twoPi = 2 * pi;
+  static const double _movementAmplitudeX = 20;
+  static const double _movementAmplitudeY = 30;
+
+  const _OptimizedFloatingShape({
+    required this.animation,
+    required this.size,
+    required this.color,
+    required this.top,
+    required this.left,
+    required this.screenSize,
+    this.reverse = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: animation,
+      // ✅ OPTIMISATION: Passer le child pour éviter rebuild
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [
+              color.withValues(alpha: 0.3),
+              color.withValues(alpha: 0.1),
+              Colors.transparent,
+            ],
+          ),
+        ),
+      ),
       builder: (context, child) {
-        final screenSize = MediaQuery.of(context).size;
-        final animationValue =
-            reverse ? (1 - animation.value) : animation.value;
+        final animationValue = reverse ? (1 - animation.value) : animation.value;
+
+        // ✅ OPTIMISATION: Pré-calculer les valeurs trigonométriques
+        final angle = animationValue * _twoPi;
+        final sinValue = sin(angle);
+        final cosValue = cos(angle);
 
         return Positioned(
-          top: screenSize.height * top + sin(animationValue * 2 * pi) * 30,
-          left: screenSize.width * left + cos(animationValue * 2 * pi) * 20,
+          top: screenSize.height * top + sinValue * _movementAmplitudeY,
+          left: screenSize.width * left + cosValue * _movementAmplitudeX,
           child: Transform.rotate(
-            angle: animationValue * 2 * pi,
-            child: Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    color.withValues(alpha: 0.3),
-                    color.withValues(alpha: 0.1),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
+            angle: angle,
+            child: child,
           ),
         );
       },
@@ -176,7 +259,7 @@ class GradientBackground extends StatelessWidget {
           begin: begin,
           end: end,
           colors: colors ??
-              [
+              const [
                 GlassColors.backgroundStart,
                 GlassColors.backgroundEnd,
               ],
@@ -241,28 +324,32 @@ class _FloatingOrbState extends State<FloatingOrb>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return FractionalTranslation(
-          translation: _animation.value,
-          child: Container(
-            width: widget.size,
-            height: widget.size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  widget.color.withValues(alpha: 0.4),
-                  widget.color.withValues(alpha: 0.2),
-                  widget.color.withValues(alpha: 0.05),
-                  Colors.transparent,
-                ],
-              ),
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _animation,
+        // ✅ OPTIMISATION: Passer le child pour éviter rebuild
+        child: Container(
+          width: widget.size,
+          height: widget.size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(
+              colors: [
+                widget.color.withValues(alpha: 0.4),
+                widget.color.withValues(alpha: 0.2),
+                widget.color.withValues(alpha: 0.05),
+                Colors.transparent,
+              ],
             ),
           ),
-        );
-      },
+        ),
+        builder: (context, child) {
+          return FractionalTranslation(
+            translation: _animation.value,
+            child: child,
+          );
+        },
+      ),
     );
   }
 }

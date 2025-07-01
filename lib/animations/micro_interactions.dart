@@ -53,14 +53,18 @@ class _PulseAnimationState extends State<PulseAnimation>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _animation.value,
-          child: widget.child,
-        );
-      },
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _animation,
+        // ✅ OPTIMISATION: Passer le child pour éviter rebuild
+        child: widget.child,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _animation.value,
+            child: child,
+          );
+        },
+      ),
     );
   }
 }
@@ -109,16 +113,20 @@ class _ShakeAnimationState extends State<ShakeAnimation>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        final sineValue =
-            (widget.offset * math.sin(_animation.value * 2 * math.pi)).abs();
-        return Transform.translate(
-          offset: Offset(sineValue, 0),
-          child: widget.child,
-        );
-      },
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _animation,
+        // ✅ OPTIMISATION: Passer le child pour éviter rebuild
+        child: widget.child,
+        builder: (context, child) {
+          final sineValue =
+              (widget.offset * math.sin(_animation.value * 2 * math.pi)).abs();
+          return Transform.translate(
+            offset: Offset(sineValue, 0),
+            child: child,
+          );
+        },
+      ),
     );
   }
 }
@@ -179,14 +187,18 @@ class _BounceAnimationState extends State<BounceAnimation>
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
       onTapCancel: _onTapCancel,
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _animation.value,
-            child: widget.child,
-          );
-        },
+      child: RepaintBoundary(
+        child: AnimatedBuilder(
+          animation: _animation,
+          // ✅ OPTIMISATION: Passer le child pour éviter rebuild
+          child: widget.child,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _animation.value,
+              child: child,
+            );
+          },
+        ),
       ),
     );
   }
@@ -250,17 +262,21 @@ class _SlideInAnimationState extends State<SlideInAnimation>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: _slideAnimation.value,
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: widget.child,
-          ),
-        );
-      },
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        // ✅ OPTIMISATION: Passer le child pour éviter rebuild
+        child: widget.child,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: _slideAnimation.value,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: child,
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -317,14 +333,16 @@ class _CounterAnimationState extends State<CounterAnimation>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Text(
-          '${_animation.value}',
-          style: widget.textStyle,
-        );
-      },
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          return Text(
+            '${_animation.value}',
+            style: widget.textStyle,
+          );
+        },
+      ),
     );
   }
 }
@@ -389,24 +407,35 @@ class _LoadingDotsState extends State<LoadingDots>
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(3, (index) {
-        return AnimatedBuilder(
-          animation: _animations[index],
-          builder: (context, child) {
-            return Container(
+    return RepaintBoundary(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(3, (index) {
+          return AnimatedBuilder(
+            animation: _animations[index],
+            // ✅ OPTIMISATION: Pré-créer le child pour éviter rebuild
+            child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 2),
               width: widget.size,
               height: widget.size,
-              decoration: BoxDecoration(
-                color: widget.color.withValues(alpha: _animations[index].value),
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
               ),
-            );
-          },
-        );
-      }),
+            ),
+            builder: (context, child) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                width: widget.size,
+                height: widget.size,
+                decoration: BoxDecoration(
+                  color: widget.color.withValues(alpha: _animations[index].value),
+                  shape: BoxShape.circle,
+                ),
+              );
+            },
+          );
+        }),
+      ),
     );
   }
 }

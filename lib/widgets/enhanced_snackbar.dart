@@ -137,55 +137,73 @@ class _EnhancedSnackBarContentState extends State<_EnhancedSnackBarContent>
   Widget build(BuildContext context) {
     final typeColor = _getTypeColor();
 
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, _slideAnimation.value),
-          child: Opacity(
-            opacity: _fadeAnimation.value,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    typeColor.withValues(alpha: 0.15),
-                    typeColor.withValues(alpha: 0.05),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: typeColor.withValues(alpha: 0.3),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: typeColor.withValues(alpha: 0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  // Icon
-                  Container(
-                    width: MediaQuery.sizeOf(context).width < 600 ? 36 : 40,
-                    height: MediaQuery.sizeOf(context).width < 600 ? 36 : 40,
-                    decoration: BoxDecoration(
-                      color: typeColor.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(MediaQuery.sizeOf(context).width < 600 ? 8 : 10),
-                    ),
-                    child: Icon(
-                      _getTypeIcon(),
-                      color: typeColor,
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _animationController,
+        // ✅ OPTIMISATION: Pré-créer le child pour éviter rebuild
+        child: _buildSnackBarContent(context, typeColor),
+        builder: (context, child) {
+          return Transform.translate(
+            offset: Offset(0, _slideAnimation.value),
+            child: Opacity(
+              opacity: _fadeAnimation.value,
+              child: child,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSnackBarContent(BuildContext context, Color typeColor) {
+    // ✅ OPTIMISATION: Cache la taille pour éviter MediaQuery répétés
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isCompact = screenWidth < 600;
+    final iconSize = isCompact ? 36.0 : 40.0;
+    final borderRadius = isCompact ? 8.0 : 10.0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            typeColor.withValues(alpha: 0.15),
+            typeColor.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: typeColor.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: typeColor.withValues(alpha: 0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Icon
+          Container(
+            width: iconSize,
+            height: iconSize,
+            decoration: BoxDecoration(
+              color: typeColor.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+            child: Icon(
+              _getTypeIcon(),
+              color: typeColor,
                       size: MediaQuery.sizeOf(context).width < 600 ? 18 : 20,
                     ),
                   ),

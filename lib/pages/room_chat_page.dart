@@ -32,6 +32,11 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _resultController = TextEditingController();
 
+  // ✅ OPTIMISATION: Cache des valeurs responsive pour éviter MediaQuery répétés
+  late double _screenHeight;
+  late bool _isVeryCompact;
+  late bool _isCompact;
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +52,15 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
     _animationController.forward();
     _initializeKey();
     _checkClipboard();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // ✅ OPTIMISATION: Cache les valeurs responsive une seule fois
+    _screenHeight = MediaQuery.of(context).size.height;
+    _isVeryCompact = _screenHeight < 700;
+    _isCompact = _screenHeight < 800;
   }
 
   @override
@@ -281,25 +295,20 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
                           Expanded(
                             child: LayoutBuilder(
                               builder: (context, constraints) {
-                                // Breakpoints ultra-agressifs pour espacements
-                                final screenHeight =
-                                    MediaQuery.of(context).size.height;
-                                final isVeryCompact = screenHeight < 700;
-                                final isCompact = screenHeight < 800;
-
+                                // ✅ OPTIMISATION: Utiliser les valeurs cachées au lieu de MediaQuery répétés
                                 // Espacements adaptatifs ultra-réduits
-                                final contentPadding = isVeryCompact
+                                final contentPadding = _isVeryCompact
                                     ? const EdgeInsets.all(12.0) // Divisé par 2
-                                    : isCompact
+                                    : _isCompact
                                         ? const EdgeInsets.all(16.0) // Réduit
                                         : const EdgeInsets.all(24.0); // Normal
 
-                                final mainSpacing = isVeryCompact
+                                final mainSpacing = _isVeryCompact
                                     ? 12.0
-                                    : (isCompact ? 16.0 : 24.0);
-                                final secondarySpacing = isVeryCompact
+                                    : (_isCompact ? 16.0 : 24.0);
+                                final secondarySpacing = _isVeryCompact
                                     ? 8.0
-                                    : (isCompact ? 12.0 : 16.0);
+                                    : (_isCompact ? 12.0 : 16.0);
 
                                 return Padding(
                                   padding: contentPadding,
@@ -552,20 +561,16 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
   Widget _buildMessageInputArea() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Breakpoints ultra-agressifs pour espacements internes
-        final screenHeight = MediaQuery.of(context).size.height;
-        final isVeryCompact = screenHeight < 700;
-        final isCompact = screenHeight < 800;
-
+        // ✅ OPTIMISATION: Utiliser les valeurs cachées au lieu de MediaQuery répétés
         // Espacements adaptatifs ultra-réduits
-        final containerPadding = isVeryCompact
+        final containerPadding = _isVeryCompact
             ? const EdgeInsets.all(12) // Divisé par 2
-            : isCompact
+            : _isCompact
                 ? const EdgeInsets.all(16) // Réduit
                 : const EdgeInsets.all(24); // Normal
 
-        final headerSpacing = isVeryCompact ? 8.0 : (isCompact ? 12.0 : 20.0);
-        final iconSpacing = isVeryCompact ? 8.0 : (isCompact ? 10.0 : 12.0);
+        final headerSpacing = _isVeryCompact ? 8.0 : (_isCompact ? 12.0 : 20.0);
+        final iconSpacing = _isVeryCompact ? 8.0 : (_isCompact ? 10.0 : 12.0);
 
         return EnhancedGlassContainer(
           width: double.infinity,
@@ -658,19 +663,15 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
   Widget _buildResultArea() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Breakpoints ultra-agressifs pour espacements internes
-        final screenHeight = MediaQuery.of(context).size.height;
-        final isVeryCompact = screenHeight < 700;
-        final isCompact = screenHeight < 800;
-
+        // ✅ OPTIMISATION: Utiliser les valeurs cachées au lieu de MediaQuery répétés
         // Espacements adaptatifs ultra-réduits
-        final containerPadding = isVeryCompact
+        final containerPadding = _isVeryCompact
             ? const EdgeInsets.all(12) // Divisé par 2
-            : isCompact
+            : _isCompact
                 ? const EdgeInsets.all(16) // Réduit
                 : const EdgeInsets.all(24); // Normal
 
-        final iconSpacing = isVeryCompact ? 8.0 : (isCompact ? 10.0 : 12.0);
+        final iconSpacing = _isVeryCompact ? 8.0 : (_isCompact ? 10.0 : 12.0);
 
         return EnhancedGlassContainer(
           width: double.infinity,
