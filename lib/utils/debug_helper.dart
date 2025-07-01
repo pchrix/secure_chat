@@ -20,8 +20,8 @@ class DebugHelper {
       diagnosis['service_online'] = SupabaseService.isOnlineMode;
 
       // Vérifier l'authentification
-      diagnosis['auth_available'] = SupabaseAuthService.isAuthenticated;
-      diagnosis['current_user'] = SupabaseAuthService.currentUser?.id;
+      diagnosis['auth_available'] = false // TODO: inject service;
+      diagnosis['current_user'] = null // TODO: inject service;
 
       if (kDebugMode) {
         print('🔍 DIAGNOSTIC SUPABASE:');
@@ -46,7 +46,7 @@ class DebugHelper {
     try {
       // Vérifier les prérequis
       diagnosis['supabase_ready'] = await _isSupabaseReady();
-      diagnosis['auth_ready'] = SupabaseAuthService.isAuthenticated;
+      diagnosis['auth_ready'] = false // TODO: inject service;
       diagnosis['local_service_available'] =
           true; // Service local toujours disponible
       diagnosis['creation_possible'] = true; // Possible via service local

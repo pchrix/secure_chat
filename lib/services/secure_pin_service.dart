@@ -4,7 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'secure_storage_service.dart';
 
-/// Service d'authentification PIN sécurisé
+/// Service d'authentification PIN sécurisé avec injection de dépendances
 /// Conforme aux meilleures pratiques Context7 bcrypt et PBKDF2
 class SecurePinService {
   static const String _pinHashKey = 'secure_pin_hash';
@@ -21,9 +21,18 @@ class SecurePinService {
   static const int minPinLength = 6; // Minimum sécurisé
   static const int maxPinLength = 12;
 
+  /// Constructeur avec injection de dépendances
+  /// [secureStorageService] Service de stockage sécurisé
+  SecurePinService({
+    required SecureStorageService secureStorageService,
+  }) : _secureStorageService = secureStorageService;
+
+  /// Service de stockage sécurisé injecté
+  final SecureStorageService _secureStorageService;
+
   /// Initialise le service PIN sécurisé
-  static Future<void> initialize() async {
-    await SecureStorageService.initialize();
+  Future<void> initialize() async {
+    await _secureStorageService.initialize();
   }
 
   /// Génère un salt cryptographiquement sécurisé
@@ -52,7 +61,7 @@ class SecurePinService {
   }
 
   /// Valide la force du PIN selon les critères de sécurité
-  static PinValidationResult validatePinStrength(String pin) {
+  PinValidationResult validatePinStrength(String pin) {
     if (pin.length < minPinLength) {
       return PinValidationResult.tooShort(minPinLength);
     }
@@ -103,7 +112,7 @@ class SecurePinService {
   }
 
   /// Vérifie si le PIN contient des séquences dangereuses (4+ chiffres consécutifs)
-  static bool _hasSequentialDigits(String pin) {
+  bool _hasSequentialDigits(String pin) {
     // Chercher des séquences de 4 chiffres ou plus
     for (int i = 0; i < pin.length - 3; i++) {
       final a = int.tryParse(pin[i]);
@@ -123,7 +132,7 @@ class SecurePinService {
   }
 
   /// Définit un nouveau PIN sécurisé
-  static Future<PinSetResult> setPin(String pin) async {
+  Future<PinSetResult> setPin(String pin) async {
     try {
       // Valider la force du PIN
       final validation = validatePinStrength(pin);
@@ -138,8 +147,8 @@ class SecurePinService {
       final pinHash = _deriveKeyPBKDF2(pin, salt);
 
       // Stocker de manière sécurisée
-      await SecureStorageService.storeConfigValue(_pinHashKey, pinHash);
-      await SecureStorageService.storeConfigValue(_pinSaltKey, salt);
+      await _secureStorageService.storeConfigValue(_pinHashKey, pinHash);
+      await _secureStorageService.storeConfigValue(_pinSaltKey, salt);
 
       // Réinitialiser les tentatives échouées
       await _resetFailedAttempts();
@@ -155,10 +164,10 @@ class SecurePinService {
   }
 
   /// Vérifie si un PIN a été défini
-  static Future<bool> hasPinSet() async {
+  Future<bool> hasPinSet() async {
     try {
-      final pinHash = await SecureStorageService.getConfigValue(_pinHashKey);
-      final salt = await SecureStorageService.getConfigValue(_pinSaltKey);
+      final pinHash = await _secureStorageService.getConfigValue(_pinHashKey);
+      final salt = await _secureStorageService.getConfigValue(_pinSaltKey);
 
       return pinHash != null &&
           pinHash.isNotEmpty &&
@@ -170,7 +179,7 @@ class SecurePinService {
   }
 
   /// Vérifie un PIN avec protection contre les attaques par force brute
-  static Future<PinVerificationResult> verifyPin(String pin) async {
+  Future<PinVerificationResult> verifyPin(String pin) async {
     try {
       // Vérifier si le compte est verrouillé
       if (await _isAccountLocked()) {
@@ -179,8 +188,8 @@ class SecurePinService {
       }
 
       // Récupérer le hash et le salt stockés
-      final storedHash = await SecureStorageService.getConfigValue(_pinHashKey);
-      final salt = await SecureStorageService.getConfigValue(_pinSaltKey);
+      final storedHash = await _secureStorageService.getConfigValue(_pinHashKey);
+      final salt = await _secureStorageService.getConfigValue(_pinSaltKey);
 
       if (storedHash == null || salt == null) {
         return PinVerificationResult.noPinSet();
@@ -212,7 +221,7 @@ class SecurePinService {
   }
 
   /// Comparaison sécurisée pour éviter les timing attacks
-  static bool _secureCompare(String a, String b) {
+  bool _secureCompare(String a, String b) {
     if (a.length != b.length) return false;
 
     int result = 0;
@@ -224,7 +233,7 @@ class SecurePinService {
   }
 
   /// Change le PIN (nécessite l'ancien PIN)
-  static Future<PinChangeResult> changePin(String oldPin, String newPin) async {
+  Future<PinChangeResult> changePin(String oldPin, String newPin) async {
     try {
       // Vérifier l'ancien PIN
       final verification = await verifyPin(oldPin);
@@ -245,10 +254,10 @@ class SecurePinService {
   }
 
   /// Réinitialise le PIN (supprime toutes les données)
-  static Future<void> resetPin() async {
+  Future<void> resetPin() async {
     try {
-      await SecureStorageService.deleteConfigValue(_pinHashKey);
-      await SecureStorageService.deleteConfigValue(_pinSaltKey);
+      await _secureStorageService.deleteConfigValue(_pinHashKey);
+      await _secureStorageService.deleteConfigValue(_pinSaltKey);
       await _resetFailedAttempts();
 
       if (kDebugMode) {
@@ -263,24 +272,24 @@ class SecurePinService {
 
   // === GESTION DES TENTATIVES ÉCHOUÉES ===
 
-  static Future<int> _getFailedAttempts() async {
+  Future<int> _getFailedAttempts() async {
     try {
       final attempts =
-          await SecureStorageService.getConfigValue(_failedAttemptsKey);
+          await _secureStorageService.getConfigValue(_failedAttemptsKey);
       return int.tryParse(attempts ?? '0') ?? 0;
     } catch (e) {
       return 0;
     }
   }
 
-  static Future<void> _incrementFailedAttempts() async {
+  Future<void> _incrementFailedAttempts() async {
     try {
       final attempts = await _getFailedAttempts();
-      await SecureStorageService.storeConfigValue(
+      await _secureStorageService.storeConfigValue(
         _failedAttemptsKey,
         (attempts + 1).toString(),
       );
-      await SecureStorageService.storeConfigValue(
+      await _secureStorageService.storeConfigValue(
         _lastAttemptTimeKey,
         DateTime.now().millisecondsSinceEpoch.toString(),
       );
@@ -289,31 +298,31 @@ class SecurePinService {
     }
   }
 
-  static Future<void> _resetFailedAttempts() async {
+  Future<void> _resetFailedAttempts() async {
     try {
-      await SecureStorageService.deleteConfigValue(_failedAttemptsKey);
-      await SecureStorageService.deleteConfigValue(_lastAttemptTimeKey);
-      await SecureStorageService.deleteConfigValue(_isLockedKey);
+      await _secureStorageService.deleteConfigValue(_failedAttemptsKey);
+      await _secureStorageService.deleteConfigValue(_lastAttemptTimeKey);
+      await _secureStorageService.deleteConfigValue(_isLockedKey);
     } catch (e) {
       // Ignorer les erreurs de suppression
     }
   }
 
-  static Future<void> _lockAccount() async {
+  Future<void> _lockAccount() async {
     try {
-      await SecureStorageService.storeConfigValue(_isLockedKey, 'true');
+      await _secureStorageService.storeConfigValue(_isLockedKey, 'true');
     } catch (e) {
       // Ignorer les erreurs de stockage
     }
   }
 
-  static Future<bool> _isAccountLocked() async {
+  Future<bool> _isAccountLocked() async {
     try {
-      final isLocked = await SecureStorageService.getConfigValue(_isLockedKey);
+      final isLocked = await _secureStorageService.getConfigValue(_isLockedKey);
       if (isLocked != 'true') return false;
 
       final lastAttemptTime =
-          await SecureStorageService.getConfigValue(_lastAttemptTimeKey);
+          await _secureStorageService.getConfigValue(_lastAttemptTimeKey);
       if (lastAttemptTime == null) return false;
 
       final lastAttempt = DateTime.fromMillisecondsSinceEpoch(
@@ -334,10 +343,10 @@ class SecurePinService {
     }
   }
 
-  static Future<int> _getRemainingLockoutTime() async {
+  Future<int> _getRemainingLockoutTime() async {
     try {
       final lastAttemptTime =
-          await SecureStorageService.getConfigValue(_lastAttemptTimeKey);
+          await _secureStorageService.getConfigValue(_lastAttemptTimeKey);
       if (lastAttemptTime == null) return 0;
 
       final lastAttempt = DateTime.fromMillisecondsSinceEpoch(

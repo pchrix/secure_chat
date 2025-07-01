@@ -130,7 +130,7 @@ class DebugService implements IDebugService {
 
       // État du service de clés
       diagnosis['room_key_service_initialized'] =
-          true; // RoomKeyService.instance existe
+          true; // RoomKeyService disponible via provider
 
       if (kDebugMode) {
         print('🔍 DIAGNOSTIC CHIFFREMENT:');

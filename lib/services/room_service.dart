@@ -4,14 +4,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/room.dart';
 import 'room_key_service.dart';
 
+/// Service de gestion des salons avec injection de dépendances
+/// Conforme aux meilleures pratiques Context7 Riverpod
 class RoomService {
   static const String _roomsKey = 'secure_rooms';
   static const String _currentRoomKey = 'current_room_id';
 
-  static RoomService? _instance;
-  static RoomService get instance => _instance ??= RoomService._();
+  /// Constructeur avec injection de dépendances
+  /// [roomKeyService] Service de gestion des clés de salon
+  RoomService({
+    required RoomKeyService roomKeyService,
+  }) : _roomKeyService = roomKeyService;
 
-  RoomService._();
+  /// Service de gestion des clés injecté
+  final RoomKeyService _roomKeyService;
 
   final StreamController<List<Room>> _roomsController =
       StreamController<List<Room>>.broadcast();
@@ -29,7 +35,7 @@ class RoomService {
   Room? get currentRoom => _currentRoom;
 
   Future<void> initialize() async {
-    await RoomKeyService.instance.initialize();
+    await _roomKeyService.initialize();
     await _loadRooms();
     await _loadCurrentRoom();
     _startExpirationTimer();
@@ -40,7 +46,7 @@ class RoomService {
     final room = Room.create(durationHours: durationHours);
 
     // Générer une clé de chiffrement pour ce salon
-    await RoomKeyService.instance.generateKeyForRoom(room.id);
+    await _roomKeyService.generateKeyForRoom(room.id);
 
     _rooms.add(room);
     await _saveRooms();
@@ -96,7 +102,7 @@ class RoomService {
     _rooms.removeWhere((r) => r.id == roomId);
 
     // Supprimer la clé associée
-    await RoomKeyService.instance.removeKeyForRoom(roomId);
+    await _roomKeyService.removeKeyForRoom(roomId);
 
     if (_currentRoom?.id == roomId) {
       await setCurrentRoom(null);
@@ -113,7 +119,7 @@ class RoomService {
     if (_rooms.length != initialCount) {
       // Nettoyer les clés des salons supprimés
       final activeRoomIds = _rooms.map((r) => r.id).toList();
-      await RoomKeyService.instance.cleanupExpiredRoomKeys(activeRoomIds);
+      await _roomKeyService.cleanupExpiredRoomKeys(activeRoomIds);
 
       // Si le salon actuel a expiré
       if (_currentRoom?.isExpired == true) {

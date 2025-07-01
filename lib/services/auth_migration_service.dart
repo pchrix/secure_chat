@@ -7,9 +7,18 @@ import 'secure_pin_service.dart';
 class AuthMigrationService {
   static const String _migrationCompleteKey = 'auth_migration_complete';
   static const String _oldPasswordHashKey = 'password_hash';
+
+  /// Constructeur avec injection de dépendances
+  /// [securePinService] Service PIN sécurisé
+  AuthMigrationService({
+    required SecurePinService securePinService,
+  }) : _securePinService = securePinService;
+
+  /// Service PIN sécurisé injecté
+  final SecurePinService _securePinService;
   
   /// Vérifie si la migration a déjà été effectuée
-  static Future<bool> isMigrationComplete() async {
+  Future<bool> isMigrationComplete() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getBool(_migrationCompleteKey) ?? false;
@@ -19,7 +28,7 @@ class AuthMigrationService {
   }
 
   /// Effectue la migration de l'ancien système vers le nouveau
-  static Future<MigrationResult> migrateToSecurePin() async {
+  Future<MigrationResult> migrateToSecurePin() async {
     try {
       // Vérifier si la migration a déjà été effectuée
       if (await isMigrationComplete()) {
@@ -77,7 +86,7 @@ class AuthMigrationService {
   }
 
   /// Nettoie les anciennes données d'authentification
-  static Future<void> _cleanupOldData() async {
+  Future<void> _cleanupOldData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       
@@ -98,7 +107,7 @@ class AuthMigrationService {
   }
 
   /// Marque la migration comme terminée
-  static Future<void> _markMigrationComplete() async {
+  Future<void> _markMigrationComplete() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_migrationCompleteKey, true);
@@ -110,7 +119,7 @@ class AuthMigrationService {
   }
 
   /// Effectue une migration complète avec nettoyage
-  static Future<MigrationResult> performFullMigration() async {
+  Future<MigrationResult> performFullMigration() async {
     try {
       // Effectuer la migration
       final migrationResult = await migrateToSecurePin();
@@ -119,7 +128,7 @@ class AuthMigrationService {
       await _cleanupOldData();
       
       // Initialiser le nouveau service PIN
-      await SecurePinService.initialize();
+      await _securePinService.initialize();
       
       if (kDebugMode) {
         print('✅ Migration complète vers SecurePinService terminée');
@@ -132,7 +141,7 @@ class AuthMigrationService {
   }
 
   /// Vérifie l'état de l'authentification après migration
-  static Future<AuthState> checkAuthState() async {
+  Future<AuthState> checkAuthState() async {
     try {
       // Vérifier si la migration est nécessaire
       if (!await isMigrationComplete()) {
@@ -140,7 +149,7 @@ class AuthMigrationService {
       }
 
       // Vérifier si un PIN sécurisé est défini
-      if (await SecurePinService.hasPinSet()) {
+      if (await _securePinService.hasPinSet()) {
         return AuthState.pinSet();
       }
 
@@ -151,7 +160,7 @@ class AuthMigrationService {
   }
 
   /// Réinitialise complètement l'authentification (pour les tests)
-  static Future<void> resetAll() async {
+  Future<void> resetAll() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       
@@ -160,7 +169,7 @@ class AuthMigrationService {
       await _cleanupOldData();
       
       // Réinitialiser le nouveau service PIN
-      await SecurePinService.resetPin();
+      await _securePinService.resetPin();
       
       if (kDebugMode) {
         print('🔄 Réinitialisation complète de l\'authentification');

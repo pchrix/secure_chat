@@ -4,27 +4,40 @@ import '../models/room.dart';
 import '../models/message.dart';
 import 'supabase_auth_service.dart';
 
-/// Service de gestion des salons avec Row Level Security
+/// Service de gestion des salons avec Row Level Security et injection de dépendances
 class SupabaseRoomService {
-  static SupabaseClient get _client => Supabase.instance.client;
+  /// Constructeur avec injection de dépendances
+  /// [supabaseClient] Client Supabase injecté
+  /// [authService] Service d'authentification injecté
+  SupabaseRoomService({
+    required SupabaseClient supabaseClient,
+    required SupabaseAuthService authService,
+  }) : _client = supabaseClient,
+       _authService = authService;
+
+  /// Client Supabase injecté
+  final SupabaseClient _client;
+
+  /// Service d'authentification injecté
+  final SupabaseAuthService _authService;
 
   // === GESTION DES SALONS ===
 
   /// Créer un nouveau salon sécurisé
-  static Future<Room> createRoom({
+  Future<Room> createRoom({
     String? name,
     String? description,
     int durationHours = 6,
     int maxParticipants = 2,
     bool isPrivate = false,
   }) async {
-    if (!SupabaseAuthService.isAuthenticated) {
+    if (!_authService.isAuthenticated) {
       throw Exception('Utilisateur non connecté');
     }
 
     try {
       final roomData = {
-        'created_by': SupabaseAuthService.currentUser!.id,
+        'created_by': _authService.currentUser!.id,
         'name': name,
         'description': description,
         'expires_at': DateTime.now()
@@ -63,8 +76,8 @@ class SupabaseRoomService {
   }
 
   /// Rejoindre un salon existant
-  static Future<Room?> joinRoom(String roomId) async {
-    if (!SupabaseAuthService.isAuthenticated) {
+  Future<Room?> joinRoom(String roomId) async {
+    if (!_authService.isAuthenticated) {
       throw Exception('Utilisateur non connecté');
     }
 
@@ -108,14 +121,14 @@ class SupabaseRoomService {
           .from('room_participants')
           .select()
           .eq('room_id', roomId)
-          .eq('user_id', SupabaseAuthService.currentUser!.id)
+          .eq('user_id', _authService.currentUser!.id)
           .maybeSingle();
 
       if (existingParticipant == null) {
         // Ajouter l'utilisateur comme participant
         await _client.from('room_participants').insert({
           'room_id': roomId,
-          'user_id': SupabaseAuthService.currentUser!.id,
+          'user_id': _authService.currentUser!.id,
           'role': 'participant',
         });
 
@@ -143,8 +156,8 @@ class SupabaseRoomService {
   }
 
   /// Quitter un salon
-  static Future<void> leaveRoom(String roomId) async {
-    if (!SupabaseAuthService.isAuthenticated) {
+  Future<void> leaveRoom(String roomId) async {
+    if (!_authService.isAuthenticated) {
       throw Exception('Utilisateur non connecté');
     }
 
@@ -154,7 +167,7 @@ class SupabaseRoomService {
           .from('room_participants')
           .update({'left_at': DateTime.now().toIso8601String()})
           .eq('room_id', roomId)
-          .eq('user_id', SupabaseAuthService.currentUser!.id);
+          .eq('user_id', _authService.currentUser!.id);
 
       // Si c'était le créateur, marquer le salon comme expiré
       final room = await _client
@@ -163,7 +176,7 @@ class SupabaseRoomService {
           .eq('id', roomId)
           .single();
 
-      if (room['created_by'] == SupabaseAuthService.currentUser!.id) {
+      if (room['created_by'] == _authService.currentUser!.id) {
         await _client
             .from('rooms')
             .update({'status': 'expired'}).eq('id', roomId);
@@ -174,8 +187,8 @@ class SupabaseRoomService {
   }
 
   /// Obtenir les salons de l'utilisateur
-  static Future<List<Room>> getUserRooms() async {
-    if (!SupabaseAuthService.isAuthenticated) {
+  Future<List<Room>> getUserRooms() async {
+    if (!_authService.isAuthenticated) {
       return [];
     }
 
@@ -186,7 +199,7 @@ class SupabaseRoomService {
             *,
             room_participants!inner(user_id, left_at)
           ''')
-          .eq('room_participants.user_id', SupabaseAuthService.currentUser!.id)
+          .eq('room_participants.user_id', _authService.currentUser!.id)
           .isFilter('room_participants.left_at', null)
           .order('created_at', ascending: false);
 
@@ -218,7 +231,7 @@ class SupabaseRoomService {
   }
 
   /// Obtenir un salon par ID
-  static Future<Room?> getRoom(String roomId) async {
+  Future<Room?> getRoom(String roomId) async {
     try {
       final response = await _client.from('rooms').select('''
             *,
@@ -257,20 +270,20 @@ class SupabaseRoomService {
   // === GESTION DES MESSAGES ===
 
   /// Envoyer un message chiffré
-  static Future<Message> sendMessage({
+  Future<Message> sendMessage({
     required String roomId,
     required String encryptedContent,
     MessageType type = MessageType.text,
     Map<String, dynamic>? metadata,
   }) async {
-    if (!SupabaseAuthService.isAuthenticated) {
+    if (!_authService.isAuthenticated) {
       throw Exception('Utilisateur non connecté');
     }
 
     try {
       final messageData = {
         'room_id': roomId,
-        'sender_id': SupabaseAuthService.currentUser!.id,
+        'sender_id': _authService.currentUser!.id,
         'encrypted_content': encryptedContent,
         'message_type': type.name,
         'metadata': metadata,
@@ -296,7 +309,7 @@ class SupabaseRoomService {
   }
 
   /// Obtenir les messages d'un salon
-  static Future<List<Message>> getRoomMessages(String roomId,
+  Future<List<Message>> getRoomMessages(String roomId,
       {int limit = 50}) async {
     try {
       final response = await _client
@@ -406,7 +419,7 @@ class SupabaseRoomService {
   }
 
   /// Se désabonner d'un canal
-  static Future<void> unsubscribe(RealtimeChannel channel) async {
+  Future<void> unsubscribe(RealtimeChannel channel) async {
     await _client.removeChannel(channel);
   }
 }

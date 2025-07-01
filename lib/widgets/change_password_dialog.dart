@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/unified_auth_service.dart';
+import '../core/providers/service_providers.dart';
 import '../theme.dart';
 
-class ChangePasswordDialog extends StatefulWidget {
+class ChangePasswordDialog extends ConsumerStatefulWidget {
   const ChangePasswordDialog({super.key});
 
   @override
-  State<ChangePasswordDialog> createState() => _ChangePasswordDialogState();
+  ConsumerState<ChangePasswordDialog> createState() => _ChangePasswordDialogState();
 }
 
-class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
+class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
   final TextEditingController _currentPasswordController =
       TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
@@ -45,7 +47,8 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
     });
 
     try {
-      final result = await UnifiedAuthService.verifyPassword(password);
+      final authService = ref.read(unifiedAuthServiceProvider);
+      final result = await authService.verifyPassword(password);
 
       if (result.isSuccess) {
         setState(() {
@@ -70,7 +73,9 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
   void _nextStep() {
     final password = _newPasswordController.text.trim();
 
-    if (!UnifiedAuthService.isValidPasswordFormat(password)) {
+    final authService = ref.read(unifiedAuthServiceProvider);
+    final validation = authService.validatePasswordStrength(password);
+    if (!validation.isValid) {
       setState(() {
         _errorMessage = 'Le mot de passe doit contenir entre 4 et 6 chiffres';
       });
@@ -100,7 +105,8 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
     });
 
     try {
-      final result = await UnifiedAuthService.setPassword(newPassword);
+      final authService = ref.read(unifiedAuthServiceProvider);
+      final result = await authService.setPassword(newPassword);
       final success = result.isSuccess;
 
       if (success) {

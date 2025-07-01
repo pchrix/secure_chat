@@ -5,11 +5,20 @@ import '../models/room.dart';
 import '../models/message.dart';
 import 'room_key_service.dart';
 
-/// Service de stockage local pour le MVP
+/// Service de stockage local pour le MVP avec injection de dépendances
 /// Permet de tester l'app sans configuration Supabase
 class LocalStorageService {
   static const String _roomsKey = 'local_rooms';
   static const String _messagesKey = 'local_messages';
+
+  /// Constructeur avec injection de dépendances
+  /// [roomKeyService] Service de gestion des clés de salon
+  LocalStorageService({
+    RoomKeyService? roomKeyService,
+  }) : _roomKeyService = roomKeyService;
+
+  /// Service de gestion des clés injecté (optionnel pour compatibilité)
+  final RoomKeyService? _roomKeyService;
 
   /// Sauvegarder un salon localement
   static Future<void> saveRoom(Room room) async {
@@ -150,7 +159,7 @@ class LocalStorageService {
   }
 
   /// Créer des données de démonstration pour tester l'app - SOLUTION CRITIQUE
-  static Future<void> createDemoData() async {
+  Future<void> createDemoData() async {
     // Vérifier si les données démo existent déjà
     final existingRooms = await getRooms();
     final demoExists = existingRooms.any((room) => room.id == 'demo-room');
@@ -172,14 +181,15 @@ class LocalStorageService {
     }
 
     // CORRECTION CRITIQUE : Toujours vérifier et générer la clé
-    final roomKeyService = RoomKeyService.instance;
-    final hasKey = await roomKeyService.hasKeyForRoom('demo-room');
-    if (!hasKey) {
-      final generatedKey = await roomKeyService.generateKeyForRoom('demo-room');
-      debugPrint(
-          '🔑 Clé de chiffrement générée pour salon démo: ${generatedKey.substring(0, 8)}...');
-    } else {
-      debugPrint('🔑 Clé de chiffrement déjà présente pour salon démo');
+    if (_roomKeyService != null) {
+      final hasKey = await _roomKeyService!.hasKeyForRoom('demo-room');
+      if (!hasKey) {
+        final generatedKey = await _roomKeyService!.generateKeyForRoom('demo-room');
+        debugPrint(
+            '🔑 Clé de chiffrement générée pour salon démo: ${generatedKey.substring(0, 8)}...');
+      } else {
+        debugPrint('🔑 Clé de chiffrement déjà présente pour salon démo');
+      }
     }
 
     // Ajouter quelques messages de démonstration

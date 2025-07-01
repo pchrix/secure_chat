@@ -3,19 +3,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'encryption_service.dart';
 import 'secure_storage_service.dart';
 
+/// Service de gestion des clés de salon avec injection de dépendances
+/// Conforme aux meilleures pratiques Context7 Riverpod
 class RoomKeyService {
   static const String _roomKeysKey = 'room_keys';
 
-  static RoomKeyService? _instance;
-  static RoomKeyService get instance => _instance ??= RoomKeyService._();
+  /// Constructeur avec injection de dépendances
+  /// [encryptionService] Service de chiffrement
+  /// [secureStorageService] Service de stockage sécurisé
+  RoomKeyService({
+    required EncryptionService encryptionService,
+    required SecureStorageService secureStorageService,
+  }) : _encryptionService = encryptionService,
+       _secureStorageService = secureStorageService;
 
-  RoomKeyService._();
+  /// Services injectés
+  final EncryptionService _encryptionService;
+  final SecureStorageService _secureStorageService;
 
   Map<String, String> _roomKeys = {};
 
   Future<void> initialize() async {
     // Initialiser le stockage sécurisé
-    await SecureStorageService.initialize();
+    await _secureStorageService.initialize();
 
     // Migrer les clés existantes depuis SharedPreferences vers le stockage sécurisé
     await _migrateFromSharedPreferences();
@@ -26,9 +36,9 @@ class RoomKeyService {
 
   /// Génère une nouvelle clé pour un salon
   Future<String> generateKeyForRoom(String roomId) async {
-    final key = await EncryptionService.generateRandomKey();
+    final key = await _encryptionService.generateRandomKey();
     _roomKeys[roomId] = key;
-    await SecureStorageService.storeRoomKey(roomId, key);
+    await _secureStorageService.storeRoomKey(roomId, key);
     return key;
   }
 
@@ -40,7 +50,7 @@ class RoomKeyService {
     }
 
     // Sinon, récupérer depuis le stockage sécurisé
-    final key = await SecureStorageService.getRoomKey(roomId);
+    final key = await _secureStorageService.getRoomKey(roomId);
     if (key != null) {
       _roomKeys[roomId] = key; // Mettre en cache
     }
@@ -50,13 +60,13 @@ class RoomKeyService {
   /// Définit une clé pour un salon (pour rejoindre un salon existant)
   Future<void> setKeyForRoom(String roomId, String key) async {
     _roomKeys[roomId] = key;
-    await SecureStorageService.storeRoomKey(roomId, key);
+    await _secureStorageService.storeRoomKey(roomId, key);
   }
 
   /// Supprime la clé d'un salon
   Future<void> removeKeyForRoom(String roomId) async {
     _roomKeys.remove(roomId);
-    await SecureStorageService.removeRoomKey(roomId);
+    await _secureStorageService.removeRoomKey(roomId);
   }
 
   /// Vérifie si un salon a une clé
@@ -67,7 +77,7 @@ class RoomKeyService {
     }
 
     // Sinon, vérifier dans le stockage sécurisé
-    return await SecureStorageService.hasRoomKey(roomId);
+    return await _secureStorageService.hasRoomKey(roomId);
   }
 
   /// Récupère toutes les clés de salons
@@ -87,7 +97,7 @@ class RoomKeyService {
 
     for (final roomId in keysToRemove) {
       _roomKeys.remove(roomId);
-      await SecureStorageService.removeRoomKey(roomId);
+      await _secureStorageService.removeRoomKey(roomId);
     }
   }
 
@@ -97,7 +107,7 @@ class RoomKeyService {
     if (key == null) return null;
 
     try {
-      return await EncryptionService.encryptMessage(message, key);
+      return await _encryptionService.encryptMessage(message, key);
     } catch (e) {
       return null;
     }
@@ -110,7 +120,7 @@ class RoomKeyService {
     if (key == null) return null;
 
     try {
-      return await EncryptionService.decryptMessage(encryptedMessage, key);
+      return await _encryptionService.decryptMessage(encryptedMessage, key);
     } catch (e) {
       return null;
     }
@@ -129,8 +139,8 @@ class RoomKeyService {
   Future<String?> exportKeys(String password) async {
     try {
       final keysJson = json.encode(_roomKeys);
-      final encryptionKey = EncryptionService.passphraseToKey(password);
-      return await EncryptionService.encryptMessage(keysJson, encryptionKey);
+      final encryptionKey = _encryptionService.passphraseToKey(password);
+      return await _encryptionService.encryptMessage(keysJson, encryptionKey);
     } catch (e) {
       return null;
     }
@@ -139,9 +149,9 @@ class RoomKeyService {
   /// Importe les clés depuis une sauvegarde
   Future<bool> importKeys(String encryptedKeys, String password) async {
     try {
-      final encryptionKey = EncryptionService.passphraseToKey(password);
+      final encryptionKey = _encryptionService.passphraseToKey(password);
       final keysJson =
-          await EncryptionService.decryptMessage(encryptedKeys, encryptionKey);
+          await _encryptionService.decryptMessage(encryptedKeys, encryptionKey);
       final Map<String, dynamic> importedKeys = json.decode(keysJson);
 
       // Valider que toutes les clés sont des strings
@@ -153,7 +163,7 @@ class RoomKeyService {
 
       // Stocker chaque clé importée dans le stockage sécurisé
       for (final entry in importedKeys.entries) {
-        await SecureStorageService.storeRoomKey(entry.key, entry.value);
+        await _secureStorageService.storeRoomKey(entry.key, entry.value);
         _roomKeys[entry.key] = entry.value;
       }
       return true;
@@ -165,7 +175,7 @@ class RoomKeyService {
   /// Efface toutes les clés (pour réinitialisation)
   Future<void> clearAllKeys() async {
     _roomKeys.clear();
-    await SecureStorageService.clearAllRoomKeys();
+    await _secureStorageService.clearAllRoomKeys();
   }
 
   /// Migre les clés existantes depuis SharedPreferences vers le stockage sécurisé
@@ -180,7 +190,7 @@ class RoomKeyService {
 
         // Migrer chaque clé vers le stockage sécurisé
         for (final entry in roomKeys.entries) {
-          await SecureStorageService.storeRoomKey(entry.key, entry.value);
+          await _secureStorageService.storeRoomKey(entry.key, entry.value);
         }
 
         // Supprimer les anciennes clés de SharedPreferences
@@ -198,7 +208,7 @@ class RoomKeyService {
   /// Charge les clés depuis le stockage sécurisé
   Future<void> _loadRoomKeys() async {
     try {
-      _roomKeys = await SecureStorageService.getAllRoomKeys();
+      _roomKeys = await _secureStorageService.getAllRoomKeys();
     } catch (e) {
       _roomKeys = {};
     }

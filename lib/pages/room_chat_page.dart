@@ -5,6 +5,7 @@ import '../models/room.dart';
 import '../providers/room_provider_riverpod.dart';
 import '../services/encryption_service.dart';
 import '../services/room_key_service.dart';
+import '../core/providers/service_providers.dart';
 import '../utils/security_utils.dart';
 import '../widgets/glass_components.dart';
 import '../widgets/animated_background.dart';
@@ -58,7 +59,7 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
 
   void _initializeKey() async {
     // Vérifier si une clé existe pour ce salon et la générer si nécessaire
-    final keyService = RoomKeyService.instance;
+    final keyService = ref.read(roomKeyServiceProvider);
     final hasKey = await keyService.hasKeyForRoom(widget.roomId);
     if (!hasKey) {
       try {
@@ -96,7 +97,8 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
     }
 
     // Utiliser directement le service de clés du salon
-    final encryptedText = await RoomKeyService.instance
+    final keyService = ref.read(roomKeyServiceProvider);
+    final encryptedText = await keyService
         .encryptMessageForRoom(widget.roomId, text);
 
     if (encryptedText == null) {
@@ -120,7 +122,8 @@ class _RoomChatPageState extends ConsumerState<RoomChatPage>
     }
 
     // Utiliser directement le service de clés du salon
-    final decryptedText = await RoomKeyService.instance
+    final keyService = ref.read(roomKeyServiceProvider);
+    final decryptedText = await keyService
         .decryptMessageForRoom(widget.roomId, text);
 
     if (decryptedText == null) {

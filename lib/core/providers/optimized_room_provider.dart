@@ -16,6 +16,7 @@ import '../../models/room.dart';
 import '../../models/message.dart';
 import '../../services/room_service.dart';
 import '../../services/local_storage_service.dart';
+import 'service_providers.dart';
 
 // ============================================================================
 // ÉTAT OPTIMISÉ AVEC FREEZED-LIKE PATTERN
@@ -148,9 +149,9 @@ class OptimizedRoomNotifier extends StateNotifier<OptimizedRoomState> {
   /// Créer un salon avec optimisation
   Future<Room?> createRoom({int durationHours = 2}) async {
     state = state.copyWith(isLoading: true);
-    
+
     try {
-      final roomService = RoomService.instance;
+      final roomService = ref.read(roomServiceProvider);
       final room = await roomService.createRoom(durationHours: durationHours);
       
       final updatedRooms = [...state.rooms, room];

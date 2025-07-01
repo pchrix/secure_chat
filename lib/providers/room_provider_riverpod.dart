@@ -8,6 +8,7 @@ import '../services/room_service.dart';
 import '../services/supabase_room_service.dart';
 import '../services/supabase_auth_service.dart';
 import '../services/local_storage_service.dart';
+import '../core/providers/service_providers.dart';
 
 // État des salons
 class RoomState {
@@ -77,15 +78,24 @@ class RoomState {
   }
 }
 
-// StateNotifier pour gérer l'état des salons
+// StateNotifier pour gérer l'état des salons avec injection de dépendances
 class RoomNotifier extends StateNotifier<RoomState> {
-  final RoomService _roomService = RoomService.instance;
+  final RoomService _roomService;
+  final SupabaseAuthService _supabaseAuthService;
+  final SupabaseRoomService _supabaseRoomService;
 
   RealtimeChannel? _messagesChannel;
   StreamSubscription<List<Room>>? _roomsSubscription;
   StreamSubscription<Room?>? _currentRoomSubscription;
 
-  RoomNotifier() : super(const RoomState()) {
+  RoomNotifier({
+    required RoomService roomService,
+    required SupabaseAuthService supabaseAuthService,
+    required SupabaseRoomService supabaseRoomService,
+  }) : _roomService = roomService,
+       _supabaseAuthService = supabaseAuthService,
+       _supabaseRoomService = supabaseRoomService,
+       super(const RoomState()) {
     _initialize();
   }
 
@@ -126,9 +136,9 @@ class RoomNotifier extends StateNotifier<RoomState> {
       Room? room;
 
       // Essayer d'abord avec Supabase si l'utilisateur est connecté
-      if (state.isSupabaseEnabled && SupabaseAuthService.isAuthenticated) {
+      if (state.isSupabaseEnabled && _supabaseAuthService.isAuthenticated) {
         try {
-          room = await SupabaseRoomService.createRoom(
+          room = await _supabaseRoomService.createRoom(
             durationHours: durationHours,
           );
           debugPrint('✅ Salon créé avec Supabase RLS: ${room.id}');
@@ -161,9 +171,9 @@ class RoomNotifier extends StateNotifier<RoomState> {
       Room? room;
 
       // Essayer d'abord avec Supabase si l'utilisateur est connecté
-      if (state.isSupabaseEnabled && SupabaseAuthService.isAuthenticated) {
+      if (state.isSupabaseEnabled && _supabaseAuthService.isAuthenticated) {
         try {
-          room = await SupabaseRoomService.joinRoom(roomId);
+          room = await _supabaseRoomService.joinRoom(roomId);
           if (room != null) {
             debugPrint('Salon rejoint avec Supabase RLS: ${room.id}');
             // S'abonner aux messages en temps réel
@@ -203,9 +213,9 @@ class RoomNotifier extends StateNotifier<RoomState> {
       Room? room;
 
       // Essayer d'abord avec Supabase si l'utilisateur est connecté
-      if (state.isSupabaseEnabled && SupabaseAuthService.isAuthenticated) {
+      if (state.isSupabaseEnabled && _supabaseAuthService.isAuthenticated) {
         try {
-          room = await SupabaseRoomService.createRoom(
+          room = await _supabaseRoomService.createRoom(
             durationHours: durationHours,
           );
           debugPrint('✅ Salon créé et rejoint avec Supabase RLS: ${room.id}');
@@ -305,8 +315,8 @@ class RoomNotifier extends StateNotifier<RoomState> {
   void _subscribeToMessages(String roomId) {
     _unsubscribeFromMessages(); // Se désabonner d'abord
 
-    if (SupabaseAuthService.isAuthenticated) {
-      _messagesChannel = SupabaseRoomService.subscribeToRoom(
+    if (_supabaseAuthService.isAuthenticated) {
+      _messagesChannel = _supabaseRoomService.subscribeToRoom(
         roomId,
         onNewMessage: (message) {
           final updatedMessages = [...state.messages, message];
@@ -319,7 +329,7 @@ class RoomNotifier extends StateNotifier<RoomState> {
   /// Se désabonner des messages
   void _unsubscribeFromMessages() {
     if (_messagesChannel != null) {
-      SupabaseRoomService.unsubscribe(_messagesChannel!);
+      _supabaseRoomService.unsubscribe(_messagesChannel!);
       _messagesChannel = null;
     }
   }
@@ -391,9 +401,17 @@ class RoomNotifier extends StateNotifier<RoomState> {
   }
 }
 
-// Provider global pour RoomState
+// Provider global pour RoomState avec injection de dépendances
 final roomProvider = StateNotifierProvider<RoomNotifier, RoomState>((ref) {
-  return RoomNotifier();
+  final roomService = ref.watch(roomServiceProvider);
+  final supabaseAuthService = ref.watch(supabaseAuthServiceProvider);
+  final supabaseRoomService = ref.watch(supabaseRoomServiceProvider);
+
+  return RoomNotifier(
+    roomService: roomService,
+    supabaseAuthService: supabaseAuthService,
+    supabaseRoomService: supabaseRoomService,
+  );
 });
 
 // Providers dérivés pour faciliter l'accès

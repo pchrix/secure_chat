@@ -6,21 +6,34 @@ import 'auth_migration_service.dart';
 export 'secure_pin_service.dart' show PinValidationResult;
 export 'auth_migration_service.dart' show AuthState, AuthStateType;
 
-/// Service d'authentification unifié utilisant SecurePinService
-/// Conforme aux meilleures pratiques Context7 de sécurité
+/// Service d'authentification unifié avec injection de dépendances
+/// Conforme aux meilleures pratiques Context7 de sécurité et Riverpod
 class UnifiedAuthService {
-  static bool _isInitialized = false;
+  bool _isInitialized = false;
+
+  /// Constructeur avec injection de dépendances
+  /// [securePinService] Service de gestion des PIN sécurisés
+  /// [authMigrationService] Service de migration d'authentification
+  UnifiedAuthService({
+    required SecurePinService securePinService,
+    required AuthMigrationService authMigrationService,
+  }) : _securePinService = securePinService,
+       _authMigrationService = authMigrationService;
+
+  /// Services injectés
+  final SecurePinService _securePinService;
+  final AuthMigrationService _authMigrationService;
 
   /// Initialise le service d'authentification unifié
-  static Future<void> initialize() async {
+  Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
       // Initialiser le service PIN sécurisé
-      await SecurePinService.initialize();
+      await _securePinService.initialize();
 
       // Effectuer la migration si nécessaire
-      final migrationResult = await AuthMigrationService.performFullMigration();
+      final migrationResult = await _authMigrationService.performFullMigration();
 
       if (kDebugMode) {
         print('🔐 UnifiedAuthService initialisé');
@@ -37,19 +50,19 @@ class UnifiedAuthService {
   }
 
   /// Vérifie si le service est initialisé
-  static bool get isInitialized => _isInitialized;
+  bool get isInitialized => _isInitialized;
 
   /// Vérifie si un PIN est défini
-  static Future<bool> hasPasswordSet() async {
+  Future<bool> hasPasswordSet() async {
     _ensureInitialized();
-    return await SecurePinService.hasPinSet();
+    return await _securePinService.hasPinSet();
   }
 
   /// Définit un nouveau PIN
-  static Future<AuthResult> setPassword(String pin) async {
+  Future<AuthResult> setPassword(String pin) async {
     _ensureInitialized();
 
-    final result = await SecurePinService.setPin(pin);
+    final result = await _securePinService.setPin(pin);
 
     if (result.isSuccess) {
       return AuthResult.success();
@@ -59,10 +72,10 @@ class UnifiedAuthService {
   }
 
   /// Vérifie un PIN
-  static Future<AuthResult> verifyPassword(String pin) async {
+  Future<AuthResult> verifyPassword(String pin) async {
     _ensureInitialized();
 
-    final result = await SecurePinService.verifyPin(pin);
+    final result = await _securePinService.verifyPin(pin);
 
     if (result.isSuccess) {
       return AuthResult.success();
@@ -74,10 +87,10 @@ class UnifiedAuthService {
   }
 
   /// Change le PIN
-  static Future<AuthResult> changePassword(String oldPin, String newPin) async {
+  Future<AuthResult> changePassword(String oldPin, String newPin) async {
     _ensureInitialized();
 
-    final result = await SecurePinService.changePin(oldPin, newPin);
+    final result = await _securePinService.changePin(oldPin, newPin);
 
     if (result.isSuccess) {
       return AuthResult.success();
@@ -87,31 +100,31 @@ class UnifiedAuthService {
   }
 
   /// Réinitialise le PIN
-  static Future<void> resetPassword() async {
+  Future<void> resetPassword() async {
     _ensureInitialized();
-    await SecurePinService.resetPin();
+    await _securePinService.resetPin();
   }
 
   /// Vérifie l'état de l'authentification
-  static Future<AuthState> checkAuthState() async {
+  Future<AuthState> checkAuthState() async {
     _ensureInitialized();
-    return await AuthMigrationService.checkAuthState();
+    return await _authMigrationService.checkAuthState();
   }
 
   /// Valide la force d'un PIN
-  static PinValidationResult validatePasswordStrength(String pin) {
+  PinValidationResult validatePasswordStrength(String pin) {
     _ensureInitialized();
-    return SecurePinService.validatePinStrength(pin);
+    return _securePinService.validatePinStrength(pin);
   }
 
   /// Réinitialise complètement l'authentification (pour les tests)
-  static Future<void> resetAll() async {
-    await AuthMigrationService.resetAll();
+  Future<void> resetAll() async {
+    await _authMigrationService.resetAll();
     _isInitialized = false;
   }
 
   /// S'assure que le service est initialisé
-  static void _ensureInitialized() {
+  void _ensureInitialized() {
     if (!_isInitialized) {
       throw Exception(
           'UnifiedAuthService non initialisé. Appelez initialize() d\'abord.');
@@ -121,24 +134,24 @@ class UnifiedAuthService {
   // === MÉTHODES DE COMPATIBILITÉ AVEC L'ANCIEN AuthService ===
 
   /// Vérifie si le compte est verrouillé (compatibilité)
-  static Future<bool> isAccountLocked() async {
+  Future<bool> isAccountLocked() async {
     _ensureInitialized();
 
     // Tenter une vérification avec un PIN vide pour vérifier le verrouillage
-    final result = await SecurePinService.verifyPin('');
+    final result = await _securePinService.verifyPin('');
     return result.isLocked;
   }
 
   /// Obtient le temps de verrouillage restant (compatibilité)
-  static Future<int> getRemainingLockoutTime() async {
+  Future<int> getRemainingLockoutTime() async {
     _ensureInitialized();
 
-    final result = await SecurePinService.verifyPin('');
+    final result = await _securePinService.verifyPin('');
     return result.isLocked ? result.lockoutMinutes : 0;
   }
 
   /// Obtient le nombre de tentatives échouées (estimation)
-  static Future<int> getFailedAttempts() async {
+  Future<int> getFailedAttempts() async {
     _ensureInitialized();
 
     // Cette information n'est pas directement accessible dans SecurePinService

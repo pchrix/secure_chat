@@ -4,24 +4,31 @@ import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import '../models/contact.dart';
 
-/// Service d'authentification Supabase avec sécurité renforcée
+/// Service d'authentification Supabase avec sécurité renforcée et injection de dépendances
 class SupabaseAuthService {
-  static SupabaseClient get _client => Supabase.instance.client;
+  /// Constructeur avec injection de dépendances
+  /// [supabaseClient] Client Supabase injecté
+  SupabaseAuthService({
+    required SupabaseClient supabaseClient,
+  }) : _client = supabaseClient;
+
+  /// Client Supabase injecté
+  final SupabaseClient _client;
 
   /// Obtenir l'utilisateur actuel
-  static User? get currentUser => _client.auth.currentUser;
+  User? get currentUser => _client.auth.currentUser;
 
   /// Vérifier si l'utilisateur est connecté
-  static bool get isAuthenticated => currentUser != null;
+  bool get isAuthenticated => currentUser != null;
 
   /// Stream des changements d'état d'authentification
-  static Stream<AuthState> get authStateChanges =>
+  Stream<AuthState> get authStateChanges =>
       _client.auth.onAuthStateChange;
 
   // === AUTHENTIFICATION ===
 
   /// Inscription avec email et mot de passe
-  static Future<AuthResponse> signUp({
+  Future<AuthResponse> signUp({
     required String email,
     required String password,
     String? username,
@@ -56,7 +63,7 @@ class SupabaseAuthService {
   }
 
   /// Connexion avec email et mot de passe
-  static Future<AuthResponse> signIn({
+  Future<AuthResponse> signIn({
     required String email,
     required String password,
   }) async {
@@ -80,7 +87,7 @@ class SupabaseAuthService {
   }
 
   /// Connexion avec lien magique
-  static Future<void> signInWithMagicLink({
+  Future<void> signInWithMagicLink({
     required String email,
   }) async {
     try {
@@ -96,7 +103,7 @@ class SupabaseAuthService {
   }
 
   /// Déconnexion
-  static Future<void> signOut() async {
+  Future<void> signOut() async {
     try {
       // Mettre à jour le statut hors ligne avant de se déconnecter
       await _updateOnlineStatus(false);
@@ -112,7 +119,7 @@ class SupabaseAuthService {
   }
 
   /// Réinitialiser le mot de passe
-  static Future<void> resetPassword({
+  Future<void> resetPassword({
     required String email,
   }) async {
     try {
@@ -130,7 +137,7 @@ class SupabaseAuthService {
   // === GESTION DU PROFIL ===
 
   /// Créer un profil utilisateur
-  static Future<void> _createUserProfile({
+  Future<void> _createUserProfile({
     required String userId,
     required String email,
     String? username,
@@ -155,7 +162,7 @@ class SupabaseAuthService {
   }
 
   /// Obtenir le profil utilisateur actuel
-  static Future<Map<String, dynamic>?> getCurrentUserProfile() async {
+  Future<Map<String, dynamic>?> getCurrentUserProfile() async {
     if (!isAuthenticated) return null;
 
     try {
@@ -175,7 +182,7 @@ class SupabaseAuthService {
   }
 
   /// Mettre à jour le profil utilisateur
-  static Future<void> updateUserProfile({
+  Future<void> updateUserProfile({
     String? username,
     String? displayName,
     String? avatarUrl,
@@ -198,7 +205,7 @@ class SupabaseAuthService {
   }
 
   /// Définir/Mettre à jour le PIN de sécurité
-  static Future<void> setPinHash(String pinHash) async {
+  Future<void> setPinHash(String pinHash) async {
     if (!isAuthenticated) throw Exception('Utilisateur non connecté');
 
     try {
@@ -212,7 +219,7 @@ class SupabaseAuthService {
   }
 
   /// Vérifier le PIN de sécurité
-  static Future<bool> verifyPin(String pin) async {
+  Future<bool> verifyPin(String pin) async {
     if (!isAuthenticated) return false;
 
     try {
@@ -234,7 +241,7 @@ class SupabaseAuthService {
   // === STATUT EN LIGNE ===
 
   /// Mettre à jour le statut en ligne
-  static Future<void> _updateOnlineStatus(bool isOnline) async {
+  Future<void> _updateOnlineStatus(bool isOnline) async {
     if (!isAuthenticated) return;
 
     try {
@@ -251,14 +258,14 @@ class SupabaseAuthService {
   }
 
   /// Marquer l'utilisateur comme actif
-  static Future<void> markAsActive() async {
+  Future<void> markAsActive() async {
     await _updateOnlineStatus(true);
   }
 
   // === CONTACTS ===
 
   /// Rechercher des utilisateurs par nom d'utilisateur
-  static Future<List<Contact>> searchUsers(String query) async {
+  Future<List<Contact>> searchUsers(String query) async {
     if (query.length < 2) return [];
 
     try {

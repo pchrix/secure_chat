@@ -16,6 +16,9 @@ import '../../services/room_key_service.dart';
 import '../../services/secure_storage_service.dart';
 import '../../services/local_storage_service.dart';
 import '../../services/supabase_room_service.dart';
+import '../../services/unified_auth_service.dart';
+import '../../services/secure_pin_service.dart';
+import '../../services/auth_migration_service.dart';
 
 // ============================================================================
 // PROVIDERS DE CONFIGURATION
@@ -36,8 +39,12 @@ final secureStorageServiceProvider = Provider<SecureStorageService>((ref) {
 });
 
 /// Provider pour le service de stockage local
+/// Avec injection de dépendances optionnelle
 final localStorageServiceProvider = Provider<LocalStorageService>((ref) {
-  return LocalStorageService();
+  final roomKeyService = ref.watch(roomKeyServiceProvider);
+  return LocalStorageService(
+    roomKeyService: roomKeyService,
+  );
 });
 
 // ============================================================================
@@ -56,8 +63,51 @@ final encryptionServiceProvider = Provider<EncryptionService>((ref) {
 });
 
 /// Provider pour le service de gestion des clés de salon
+/// Avec injection de dépendances pure
 final roomKeyServiceProvider = Provider<RoomKeyService>((ref) {
-  return RoomKeyService.instance;
+  final encryptionService = ref.watch(encryptionServiceProvider);
+  final secureStorageService = ref.watch(secureStorageServiceProvider);
+
+  return RoomKeyService(
+    encryptionService: encryptionService,
+    secureStorageService: secureStorageService,
+  );
+});
+
+// ============================================================================
+// PROVIDERS DE SERVICES D'AUTHENTIFICATION
+// ============================================================================
+
+/// Provider pour le service PIN sécurisé
+/// Avec injection de dépendances pure
+final securePinServiceProvider = Provider<SecurePinService>((ref) {
+  final secureStorageService = ref.watch(secureStorageServiceProvider);
+
+  return SecurePinService(
+    secureStorageService: secureStorageService,
+  );
+});
+
+/// Provider pour le service de migration d'authentification
+/// Avec injection de dépendances pure
+final authMigrationServiceProvider = Provider<AuthMigrationService>((ref) {
+  final securePinService = ref.watch(securePinServiceProvider);
+
+  return AuthMigrationService(
+    securePinService: securePinService,
+  );
+});
+
+/// Provider pour le service d'authentification unifié
+/// Avec injection de dépendances pure
+final unifiedAuthServiceProvider = Provider<UnifiedAuthService>((ref) {
+  final securePinService = ref.watch(securePinServiceProvider);
+  final authMigrationService = ref.watch(authMigrationServiceProvider);
+
+  return UnifiedAuthService(
+    securePinService: securePinService,
+    authMigrationService: authMigrationService,
+  );
 });
 
 // ============================================================================
@@ -70,13 +120,25 @@ final supabaseServiceProvider = Provider<SupabaseService>((ref) {
 });
 
 /// Provider pour le service d'authentification Supabase
+/// Avec injection de dépendances pure
 final supabaseAuthServiceProvider = Provider<SupabaseAuthService>((ref) {
-  return SupabaseAuthService();
+  final supabaseClient = Supabase.instance.client;
+
+  return SupabaseAuthService(
+    supabaseClient: supabaseClient,
+  );
 });
 
 /// Provider pour le service de gestion des salons Supabase
+/// Avec injection de dépendances pure
 final supabaseRoomServiceProvider = Provider<SupabaseRoomService>((ref) {
-  return SupabaseRoomService();
+  final supabaseClient = Supabase.instance.client;
+  final authService = ref.watch(supabaseAuthServiceProvider);
+
+  return SupabaseRoomService(
+    supabaseClient: supabaseClient,
+    authService: authService,
+  );
 });
 
 // ============================================================================
@@ -84,15 +146,13 @@ final supabaseRoomServiceProvider = Provider<SupabaseRoomService>((ref) {
 // ============================================================================
 
 /// Provider pour le service de gestion des salons
-/// Dépend des services de stockage et de chiffrement
+/// Avec injection de dépendances pure
 final roomServiceProvider = Provider<RoomService>((ref) {
-  // Injection des dépendances via ref
-  final secureStorage = ref.watch(secureStorageServiceProvider);
-  final localStorage = ref.watch(localStorageServiceProvider);
   final roomKeyService = ref.watch(roomKeyServiceProvider);
 
-  // Retourner l'instance singleton avec dépendances injectées
-  return RoomService.instance;
+  return RoomService(
+    roomKeyService: roomKeyService,
+  );
 });
 
 // ============================================================================
@@ -100,27 +160,31 @@ final roomServiceProvider = Provider<RoomService>((ref) {
 // ============================================================================
 
 /// Provider pour vérifier si Supabase est configuré
-final isSupabaseConfiguredProvider = Provider<bool>((ref) {
+/// Optimisé avec autoDispose car c'est une vérification ponctuelle
+final isSupabaseConfiguredProvider = Provider.autoDispose<bool>((ref) {
   final config = ref.watch(appConfigProvider);
   return AppConfig.isSupabaseConfigured;
 });
 
 /// Provider pour vérifier si Supabase est initialisé
-final isSupabaseInitializedProvider = Provider<bool>((ref) {
-  final supabaseService = ref.watch(supabaseServiceProvider);
+/// Optimisé avec autoDispose car c'est une vérification ponctuelle
+final isSupabaseInitializedProvider = Provider.autoDispose<bool>((ref) {
+  // SupabaseService utilise encore des méthodes statiques
   return SupabaseService.isInitialized;
 });
 
 /// Provider pour vérifier si l'utilisateur est authentifié
-final isAuthenticatedProvider = Provider<bool>((ref) {
+/// Optimisé avec autoDispose car l'état peut changer fréquemment
+final isAuthenticatedProvider = Provider.autoDispose<bool>((ref) {
   final authService = ref.watch(supabaseAuthServiceProvider);
-  return SupabaseAuthService.isAuthenticated;
+  return authService.isAuthenticated;
 });
 
 /// Provider pour obtenir l'utilisateur actuel
-final currentUserProvider = Provider<dynamic>((ref) {
+/// Optimisé avec autoDispose car l'utilisateur peut changer
+final currentUserProvider = Provider.autoDispose<dynamic>((ref) {
   final authService = ref.watch(supabaseAuthServiceProvider);
-  return SupabaseAuthService.currentUser;
+  return authService.currentUser;
 });
 
 // ============================================================================
@@ -141,8 +205,8 @@ final supabaseDiagnosticProvider =
     'config_available': AppConfig.isSupabaseConfigured,
     'service_initialized': SupabaseService.isInitialized,
     'service_online': SupabaseService.isOnlineMode,
-    'auth_available': SupabaseAuthService.isAuthenticated,
-    'current_user': SupabaseAuthService.currentUser?.id,
+    'auth_available': authService.isAuthenticated,
+    'current_user': authService.currentUser?.id,
   };
 
   // Conserver le résultat si le diagnostic est réussi
@@ -217,10 +281,10 @@ final userDataProvider = FutureProvider.autoDispose
   if (userId.isEmpty) return null;
 
   // Vérifier que le service d'auth est disponible
-  ref.watch(supabaseAuthServiceProvider);
+  final authService = ref.watch(supabaseAuthServiceProvider);
 
   // Si c'est l'utilisateur actuel, conserver en cache
-  if (SupabaseAuthService.currentUser?.id == userId) {
+  if (authService.currentUser?.id == userId) {
     ref.keepAlive();
   }
 

@@ -17,14 +17,25 @@ import '../models/auth_state_model.dart';
 import 'auth_remote_datasource.dart';
 
 /// Adaptateur qui fait le pont entre les anciens services et la nouvelle architecture
+/// Avec injection de dépendances
 class LegacyAuthDataSourceAdapter implements AuthRemoteDataSource {
+  /// Constructeur avec injection de dépendances
+  LegacyAuthDataSourceAdapter({
+    required UnifiedAuthService unifiedAuthService,
+    required SupabaseAuthService supabaseAuthService,
+  }) : _unifiedAuthService = unifiedAuthService,
+       _supabaseAuthService = supabaseAuthService;
+
+  /// Services injectés
+  final UnifiedAuthService _unifiedAuthService;
+  final SupabaseAuthService _supabaseAuthService;
   @override
   Future<UserModel> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      final response = await SupabaseAuthService.signIn(
+      final response = await _supabaseAuthService.signIn(
         email: email,
         password: password,
       );
@@ -49,7 +60,7 @@ class LegacyAuthDataSourceAdapter implements AuthRemoteDataSource {
     String? displayName,
   }) async {
     try {
-      final response = await SupabaseAuthService.signUp(
+      final response = await _supabaseAuthService.signUp(
         email: email,
         password: password,
         username: username,
@@ -72,7 +83,7 @@ class LegacyAuthDataSourceAdapter implements AuthRemoteDataSource {
   @override
   Future<void> signOut() async {
     try {
-      await SupabaseAuthService.signOut();
+      await _supabaseAuthService.signOut();
     } catch (e) {
       throw AuthException(message: e.toString(), code: 'SIGNOUT_ERROR');
     }
@@ -81,7 +92,7 @@ class LegacyAuthDataSourceAdapter implements AuthRemoteDataSource {
   @override
   Future<UserModel?> getCurrentUser() async {
     try {
-      final user = SupabaseAuthService.currentUser;
+      final user = _supabaseAuthService.currentUser;
       if (user == null) return null;
 
       return _mapSupabaseUserToUserModel(user);
@@ -93,7 +104,7 @@ class LegacyAuthDataSourceAdapter implements AuthRemoteDataSource {
   @override
   Future<bool> isSignedIn() async {
     try {
-      return SupabaseAuthService.isAuthenticated;
+      return _supabaseAuthService.isAuthenticated;
     } catch (e) {
       return false;
     }
@@ -103,7 +114,7 @@ class LegacyAuthDataSourceAdapter implements AuthRemoteDataSource {
   Future<bool> isTokenValid() async {
     try {
       // Vérifier si l'utilisateur Supabase est connecté et si le token est valide
-      final user = SupabaseAuthService.currentUser;
+      final user = _supabaseAuthService.currentUser;
       if (user == null) return false;
 
       // Vérifier l'expiration du token
@@ -128,7 +139,7 @@ class LegacyAuthDataSourceAdapter implements AuthRemoteDataSource {
       bool isPinVerified = false;
       if (isSupabaseAuthenticated) {
         // Vérifier si le PIN est configuré et prêt
-        final pinState = await UnifiedAuthService.checkAuthState();
+        final pinState = await _unifiedAuthService.checkAuthState();
         isPinVerified = pinState.isReady && pinState.type.name == 'pinSet';
       }
 
@@ -162,8 +173,8 @@ class LegacyAuthDataSourceAdapter implements AuthRemoteDataSource {
   @override
   Future<bool> verifyPin({required String pin}) async {
     try {
-      await UnifiedAuthService.initialize();
-      final result = await UnifiedAuthService.verifyPassword(pin);
+      await _unifiedAuthService.initialize();
+      final result = await _unifiedAuthService.verifyPassword(pin);
       return result.isSuccess;
     } catch (e) {
       return false;
@@ -173,8 +184,8 @@ class LegacyAuthDataSourceAdapter implements AuthRemoteDataSource {
   @override
   Future<void> setupPin({required String pin}) async {
     try {
-      await UnifiedAuthService.initialize();
-      final result = await UnifiedAuthService.setPassword(pin);
+      await _unifiedAuthService.initialize();
+      final result = await _unifiedAuthService.setPassword(pin);
       if (!result.isSuccess) {
         throw AuthException.invalidPin();
       }
@@ -189,9 +200,9 @@ class LegacyAuthDataSourceAdapter implements AuthRemoteDataSource {
     required String newPin,
   }) async {
     try {
-      await UnifiedAuthService.initialize();
+      await _unifiedAuthService.initialize();
       final result =
-          await UnifiedAuthService.changePassword(currentPin, newPin);
+          await _unifiedAuthService.changePassword(currentPin, newPin);
       if (!result.isSuccess) {
         throw AuthException.invalidPin();
       }
@@ -203,7 +214,7 @@ class LegacyAuthDataSourceAdapter implements AuthRemoteDataSource {
   @override
   Future<void> invalidateAllSessions() async {
     try {
-      await SupabaseAuthService.signOut();
+      await _supabaseAuthService.signOut();
       // Note: Supabase gère automatiquement l'invalidation des sessions
     } catch (e) {
       throw AuthException(
@@ -224,7 +235,7 @@ class LegacyAuthDataSourceAdapter implements AuthRemoteDataSource {
 
   @override
   Stream<AuthStateModel> get authStateChanges {
-    return SupabaseAuthService.authStateChanges
+    return _supabaseAuthService.authStateChanges
         .asyncMap((supabaseAuthState) async {
       return await getAuthState();
     });

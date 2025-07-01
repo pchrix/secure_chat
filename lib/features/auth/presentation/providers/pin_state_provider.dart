@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../services/unified_auth_service.dart';
+import '../../../../core/providers/service_providers.dart';
 
 /// État de l'interface PIN
 class PinState {
@@ -56,19 +57,22 @@ enum PinMode {
   change, // Changement de PIN existant
 }
 
-/// Notifier pour la gestion de l'état PIN
+/// Notifier pour la gestion de l'état PIN avec injection de dépendances
 class PinStateNotifier extends StateNotifier<PinState> {
-  PinStateNotifier() : super(const PinState()) {
+  PinStateNotifier(this._authService) : super(const PinState()) {
     _checkPasswordStatus();
   }
+
+  /// Service d'authentification injecté
+  final UnifiedAuthService _authService;
 
   /// Vérifie le statut du mot de passe au démarrage
   Future<void> _checkPasswordStatus() async {
     state = state.copyWith(isCheckingPassword: true);
 
     try {
-      await UnifiedAuthService.initialize();
-      final hasPassword = await UnifiedAuthService.hasPasswordSet();
+      await _authService.initialize();
+      final hasPassword = await _authService.hasPasswordSet();
 
       if (!hasPassword) {
         // Aucun PIN configuré, passer en mode création
@@ -117,7 +121,7 @@ class PinStateNotifier extends StateNotifier<PinState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final result = await UnifiedAuthService.verifyPassword(pin);
+      final result = await _authService.verifyPassword(pin);
 
       if (result.isSuccess) {
         state = state.copyWith(isLoading: false);
@@ -153,7 +157,7 @@ class PinStateNotifier extends StateNotifier<PinState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final result = await UnifiedAuthService.setPassword(pin);
+      final result = await _authService.setPassword(pin);
 
       if (result.isSuccess) {
         state = state.copyWith(
@@ -224,20 +228,23 @@ class PinStateNotifier extends StateNotifier<PinState> {
   }
 }
 
-/// Provider pour l'état PIN
+/// Provider pour l'état PIN avec injection de dépendances
 final pinStateProvider =
     StateNotifierProvider<PinStateNotifier, PinState>((ref) {
-  return PinStateNotifier();
+  final authService = ref.watch(unifiedAuthServiceProvider);
+  return PinStateNotifier(authService);
 });
 
 /// Provider pour vérifier si un PIN est configuré
 final hasPinConfiguredProvider = FutureProvider<bool>((ref) async {
-  await UnifiedAuthService.initialize();
-  return await UnifiedAuthService.hasPasswordSet();
+  final authService = ref.watch(unifiedAuthServiceProvider);
+  await authService.initialize();
+  return await authService.hasPasswordSet();
 });
 
 /// Provider pour l'état d'authentification
 final authStatusProvider = FutureProvider<AuthState>((ref) async {
-  await UnifiedAuthService.initialize();
-  return await UnifiedAuthService.checkAuthState();
+  final authService = ref.watch(unifiedAuthServiceProvider);
+  await authService.initialize();
+  return await authService.checkAuthState();
 });
