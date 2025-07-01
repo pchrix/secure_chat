@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/room.dart';
 import '../providers/room_provider_riverpod.dart';
+import '../core/providers/performance_optimized_providers.dart';
 import '../widgets/glass_components.dart';
 import '../widgets/enhanced_room_card.dart';
 import '../widgets/animated_background.dart';
@@ -64,10 +65,14 @@ class _HomePageState extends ConsumerState<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    final roomState = ref.watch(roomProvider);
-    final rooms = roomState.rooms;
-    final isLoading = roomState.isLoading;
-    final error = roomState.error;
+    // OPTIMISÉ : Utilisation de providers spécialisés avec select() pour éviter les rebuilds inutiles
+    final activeRooms = ref.watch(activeRoomsProvider);
+    final waitingRooms = ref.watch(waitingRoomsProvider);
+    final isLoading = ref.watch(roomsLoadingStateProvider);
+    final error = ref.watch(roomsErrorStateProvider);
+
+    // Combinaison optimisée des salons pour l'affichage
+    final rooms = [...activeRooms, ...waitingRooms];
 
     return Scaffold(
       resizeToAvoidBottomInset: true, // ✅ AJOUTÉ pour keyboard avoidance
@@ -315,8 +320,8 @@ class _HomePageState extends ConsumerState<HomePage>
               final room = rooms[index];
               return SlideInAnimation(
                 delay: Duration(milliseconds: index * 100),
-                child: EnhancedRoomCard(
-                  room: room,
+                child: _OptimizedRoomCard(
+                  roomId: room.id,
                   onTap: () => _navigateToRoom(room),
                   onDelete: () => _deleteRoom(room),
                 ),
@@ -331,8 +336,8 @@ class _HomePageState extends ConsumerState<HomePage>
               final room = rooms[index];
               return SlideInAnimation(
                 delay: Duration(milliseconds: index * 100),
-                child: EnhancedRoomCard(
-                  room: room,
+                child: _OptimizedRoomCard(
+                  roomId: room.id,
                   onTap: () => _navigateToRoom(room),
                   onDelete: () => _deleteRoom(room),
                 ),
@@ -472,6 +477,36 @@ class _HomePageState extends ConsumerState<HomePage>
   void _navigateToJoinRoom() {
     Navigator.of(context).pushSlideFromRight(
       const JoinRoomPage(),
+    );
+  }
+}
+
+/// Widget Consumer optimisé pour les cartes de salon
+/// Utilise des providers spécialisés pour éviter les rebuilds inutiles
+class _OptimizedRoomCard extends ConsumerWidget {
+  final String roomId;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  const _OptimizedRoomCard({
+    required this.roomId,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // OPTIMISÉ : Utilisation de providers family pour écouter seulement ce salon spécifique
+    final room = ref.watch(roomByIdProvider(roomId));
+
+    if (room == null) {
+      return const SizedBox.shrink();
+    }
+
+    return EnhancedRoomCard(
+      room: room,
+      onTap: onTap,
+      onDelete: onDelete,
     );
   }
 }

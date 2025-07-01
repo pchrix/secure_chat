@@ -401,32 +401,89 @@ class RoomNotifier extends StateNotifier<RoomState> {
   }
 }
 
-// Provider global pour RoomState avec injection de dépendances
-final roomProvider = StateNotifierProvider<RoomNotifier, RoomState>((ref) {
+// Provider global pour RoomState avec injection de dépendances - OPTIMISÉ
+final roomProvider = StateNotifierProvider.autoDispose<RoomNotifier, RoomState>((ref) {
   final roomService = ref.watch(roomServiceProvider);
   final supabaseAuthService = ref.watch(supabaseAuthServiceProvider);
   final supabaseRoomService = ref.watch(supabaseRoomServiceProvider);
 
-  return RoomNotifier(
+  final notifier = RoomNotifier(
     roomService: roomService,
     supabaseAuthService: supabaseAuthService,
     supabaseRoomService: supabaseRoomService,
   );
+
+  // Garder en vie si des salons sont actifs pour éviter la perte de données critiques
+  ref.listen(roomProvider.select((state) => state.activeRooms.isNotEmpty), (previous, next) {
+    if (next) {
+      ref.keepAlive();
+    }
+  });
+
+  return notifier;
 });
 
-// Providers dérivés pour faciliter l'accès
-final activeRoomsProvider = Provider<List<Room>>((ref) {
-  return ref.watch(roomProvider).activeRooms;
+// Providers dérivés OPTIMISÉS avec select() pour éviter les rebuilds inutiles
+final activeRoomsProvider = Provider.autoDispose<List<Room>>((ref) {
+  return ref.watch(roomProvider.select((state) => state.activeRooms));
 });
 
-final waitingRoomsProvider = Provider<List<Room>>((ref) {
-  return ref.watch(roomProvider).waitingRooms;
+final waitingRoomsProvider = Provider.autoDispose<List<Room>>((ref) {
+  return ref.watch(roomProvider.select((state) => state.waitingRooms));
 });
 
-final currentRoomProvider = Provider<Room?>((ref) {
-  return ref.watch(roomProvider).currentRoom;
+final currentRoomProvider = Provider.autoDispose<Room?>((ref) {
+  return ref.watch(roomProvider.select((state) => state.currentRoom));
 });
 
-final hasActiveRoomProvider = Provider<bool>((ref) {
-  return ref.watch(roomProvider).hasActiveRoom;
+final hasActiveRoomProvider = Provider.autoDispose<bool>((ref) {
+  return ref.watch(roomProvider.select((state) => state.hasActiveRoom));
+});
+
+// Providers dérivés OPTIMISÉS supplémentaires avec select()
+final expiredRoomsProvider = Provider.autoDispose<List<Room>>((ref) {
+  return ref.watch(roomProvider.select((state) => state.expiredRooms));
+});
+
+final roomsLoadingProvider = Provider.autoDispose<bool>((ref) {
+  return ref.watch(roomProvider.select((state) => state.isLoading));
+});
+
+final roomsErrorProvider = Provider.autoDispose<String?>((ref) {
+  return ref.watch(roomProvider.select((state) => state.error));
+});
+
+final messagesProvider = Provider.autoDispose<List<Message>>((ref) {
+  return ref.watch(roomProvider.select((state) => state.messages));
+});
+
+final totalActiveRoomsProvider = Provider.autoDispose<int>((ref) {
+  return ref.watch(roomProvider.select((state) => state.totalActiveRooms));
+});
+
+final totalWaitingRoomsProvider = Provider.autoDispose<int>((ref) {
+  return ref.watch(roomProvider.select((state) => state.totalWaitingRooms));
+});
+
+final totalExpiredRoomsProvider = Provider.autoDispose<int>((ref) {
+  return ref.watch(roomProvider.select((state) => state.totalExpiredRooms));
+});
+
+// Providers FAMILY pour des cas d'usage spécifiques
+final roomByIdProvider = Provider.autoDispose.family<Room?, String>((ref, roomId) {
+  final rooms = ref.watch(roomProvider.select((state) => state.rooms));
+  return rooms.cast<Room?>().firstWhere(
+    (room) => room?.id == roomId,
+    orElse: () => null,
+  );
+});
+
+final roomMessagesCountProvider = Provider.autoDispose.family<int, String>((ref, roomId) {
+  final room = ref.watch(roomByIdProvider(roomId));
+  return room?.messageCount ?? 0;
+});
+
+final isRoomActiveProvider = Provider.autoDispose.family<bool, String>((ref, roomId) {
+  final room = ref.watch(roomByIdProvider(roomId));
+  return room?.status == RoomStatus.active && !(room?.isExpired ?? true);
 });
