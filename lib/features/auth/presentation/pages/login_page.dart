@@ -335,7 +335,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   /// Gère le mot de passe oublié
   void _handleForgotPassword() {
-    // TODO: Implémenter la récupération de mot de passe
+    // Fonctionnalité de récupération de mot de passe non implémentée dans le MVP
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Fonctionnalité à venir'),
@@ -350,7 +350,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   /// Obtient le message d'erreur approprié
   String _getErrorMessage(dynamic error) {
-    // TODO: Mapper les erreurs spécifiques
+    // Mapping d'erreurs basique pour le MVP
     return 'Erreur de connexion. Vérifiez vos identifiants.';
   }
 }

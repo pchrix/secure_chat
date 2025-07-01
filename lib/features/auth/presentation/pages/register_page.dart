@@ -418,7 +418,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   /// Obtient le message d'erreur approprié
   String _getErrorMessage(dynamic error) {
-    // TODO: Mapper les erreurs spécifiques
+    // Mapping d'erreurs basique pour le MVP
     return 'Erreur lors de l\'inscription. Veuillez réessayer.';
   }
 }
